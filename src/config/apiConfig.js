@@ -1,4 +1,3 @@
-// src/config/apiConfig.js
 const API_BASE_URL = 'http://localhost:5001/api'; //DEV
 // const API_BASE_URL = 'http://192.168.12.58:5001/api'; //PROD
 

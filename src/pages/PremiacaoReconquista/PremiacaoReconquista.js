@@ -131,6 +131,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
     }
   };
 
+
   const columns = [
     { field: 'descricao', headerName: 'Descricao', width: 150 },
     { field: 'time', headerName: 'Time', width: 150 },
@@ -273,7 +274,15 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
           <Alert severity="error" sx={{ mt: 3 }}>{error}</Alert>
         ) : (
           <div style={{ height: 400, width: '100%', marginTop: 16 }}>
-            <DataGrid rows={filteredData} columns={columns} pageSize={5} />
+            <DataGrid
+              rows={filteredData}
+              columns={columns}
+              pageSize={5}
+              components={{
+                NoRowsOverlay: () => <div style={{ textAlign: 'center' }}>Sem dados</div>,
+              }}
+            />
+
           </div>
         )}
         {successMessage && <Alert severity="success" sx={{ mt: 3 }}>{successMessage}</Alert>}

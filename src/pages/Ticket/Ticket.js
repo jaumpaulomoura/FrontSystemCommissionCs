@@ -59,24 +59,18 @@ const Ticket = ({ toggleTheme }) => {
   const applyFilters = useCallback(
     debounce(() => {
       let filtered = data;
-      console.log("Status Filter Atual:", statusFilter); // Log para verificar o valor do filtro de status
-      console.log("Data Inicial:", data); // Log p
-      if (data.length > 0) {
-        console.log("Chaves do Primeiro Item:", Object.keys(data[0]));
-      }
 
-      // Filtragem por Status
+
+
       if (statusFilter.includes("Todos") || statusFilter.length === 0) {
         filtered = [...data];
       } else {
         filtered = filtered.filter((ticket) => {
-          const ticketStatus = ticket.status; // Ajuste o nome conforme necessário
+          const ticketStatus = ticket.status;
           const statusMatch = statusFilter.includes(ticketStatus);
-          console.log(`Status do Ticket: ${ticketStatus}, Status Match: ${statusMatch}`);
           return statusMatch;
         });
       }
-      // Filtragem por outros critérios
       if (filterId) {
         filtered = filtered.filter(ticket =>
           String(ticket.id).toLowerCase().includes(filterId.toLowerCase())
@@ -112,7 +106,7 @@ const Ticket = ({ toggleTheme }) => {
         );
       }
       setFilteredData(filtered);
-    }, 300), // Ajuste o atraso do debounce conforme necessário
+    }, 300),
     [filterId, filterOrderid, filterReason, filterOctadeskid, statusFilter, filterCupom, filterDateCreated, data]
   );
 
@@ -130,21 +124,17 @@ const Ticket = ({ toggleTheme }) => {
 
   const handleTicketAction = async (id, status) => {
     try {
-      // Update the ticket status
       await updateTicket(id, {
         status,
         dateupdated: new Date()
       });
 
-      // Find the updated ticket
       const updatedTicket = data.find(ticket => ticket.id === id);
 
-      // If the status is 'Autorizado', update the cupom
       if (status === 'Autorizado' && updatedTicket) {
         await updateTicketCupom(updatedTicket.orderId, updatedTicket.cupomvendedora);
       }
 
-      // Update the state with the new status
       setData(prevData =>
         prevData.map(ticket =>
           ticket.id === id ? { ...ticket, status } : ticket
@@ -182,16 +172,12 @@ const Ticket = ({ toggleTheme }) => {
       field: 'dateCreated', headerName: 'Data de Criação', width: 150,
       valueFormatter: (params) => {
 
-
-        // Acesso direto ao valor
         const dateValue = params;
 
         if (!dateValue) return 'Data não disponível';
 
         try {
-          // Desconstrua a data no formato YYYY-MM-DD
           const [year, month, day] = dateValue.split('-');
-          // Formate a data para DD/MM/YYYY
           const formattedDate = `${day}/${month}/${year}`;
           return formattedDate;
         } catch (e) {
@@ -211,21 +197,21 @@ const Ticket = ({ toggleTheme }) => {
           <Button
             variant="contained"
             sx={{
-              backgroundColor: '#9e9e9e', // Cinza claro
+              backgroundColor: '#9e9e9e',
               color: '#fff',
-              padding: '2px 4px', // Menor padding
-              fontSize: '0.75rem', // Menor fontSize
-              height: '24px', // Menor height
-              minWidth: '40px', // Largura mínima
+              padding: '2px 4px',
+              fontSize: '0.75rem',
+              height: '24px',
+              minWidth: '40px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 1,
-              '&:hover': { backgroundColor: '#757575' } // Cinza escuro para o hover
+              '&:hover': { backgroundColor: '#757575' }
             }}
             onClick={() => handleOpenModal(params.row.notes)}
           >
-            <NotesIcon /> {/* Ajustar o tamanho do ícone se necessário */}
+            <NotesIcon />
           </Button>
         </div>
       ),
@@ -237,7 +223,6 @@ const Ticket = ({ toggleTheme }) => {
       renderCell: (params) => {
         const user = JSON.parse(localStorage.getItem('user'));
 
-        // Show button only if the status is 'Aberto'
         if (params.row.status === 'Aberto' && user && user.funcao !== 'consultora') {
           return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>

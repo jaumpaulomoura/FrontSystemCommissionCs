@@ -1,14 +1,14 @@
 module.exports = {
   apps: [
     {
-      name: "APP_Comissao",       // Nome da aplicação no PM2
-      script: "node_modules/.bin/react-scripts", // Caminho para o script do React
-      args: "start",             // Argumentos para o script
+      name: "APP_Comissao",       
+      script: "node_modules/.bin/react-scripts",
+      args: "start", 
       env: {
-        PORT: 3001,              // Variável de ambiente PORT
-        BROWSER: "none",         // Variável de ambiente BROWSER
+        PORT: 3001, 
+        BROWSER: "none",
       },
-      cwd: "./",                 // Diretório de trabalho (ajuste se necessário)
+      cwd: "./",
     },
   ],
 };

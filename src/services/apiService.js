@@ -17,7 +17,6 @@ export const getColaboradorData = async () => {
 export const createColaborador = async (data) => {
   try {
     const response = await axios.post(API_ENDPOINTS.COLABORADOR, data);
-    console.log('Resposta da API:', response);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar colaborador:', error);
@@ -66,14 +65,11 @@ export const getFilteredMetaData = async () => {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
     const response = await axios.get(`${API_ENDPOINTS.META}?${params.toString()}`);
@@ -88,7 +84,6 @@ export const getFilteredMetaData = async () => {
 export const createMeta = async (data) => {
   try {
     const response = await axios.post(API_ENDPOINTS.META, data);
-    console.log('Resposta da API:', response);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar meta:', error);
@@ -133,17 +128,14 @@ export const getPremiacaoMetaData = async () => {
 
 export const getFilteredPremiacaoMetaData = async () => {
   try {
-    // Obter o valor do time do usuário do localStorage
     const user = JSON.parse(localStorage.getItem('user'));
     const userTime = user ? user.time : '';
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
     if (userTime) {
       params.append('time', userTime);
     }
 
-    // Enviar a solicitação com parâmetros de consulta
     const response = await axios.get(`${API_ENDPOINTS.PREMIACAO_META}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -158,7 +150,6 @@ export const getFilteredPremiacaoMetaData = async () => {
 export const createPremiacaoMeta = async (data) => {
   try {
     const response = await axios.post(API_ENDPOINTS.PREMIACAO_META, data);
-    console.log('Resposta da API:', response);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar PremiacaoMeta:', error);
@@ -213,17 +204,14 @@ export const getPremiacaoReconquistaData = async () => {
 
 export const getFilteredPremiacaoReconquistaData = async () => {
   try {
-    // Obter o valor do time do usuário do localStorage
     const user = JSON.parse(localStorage.getItem('user'));
     const userTime = user ? user.time : '';
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
     if (userTime) {
       params.append('time', userTime);
     }
 
-    // Enviar a solicitação com parâmetros de consulta
     const response = await axios.get(`${API_ENDPOINTS.PREMIACAO_RECONQUISTA}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -238,7 +226,6 @@ export const getFilteredPremiacaoReconquistaData = async () => {
 export const createPremiacaoReconquista = async (data) => {
   try {
     const response = await axios.post(API_ENDPOINTS.PREMIACAO_RECONQUISTA, data);
-    console.log('Resposta da API:', response);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar PremiacaoReconquista:', error);
@@ -273,19 +260,6 @@ export const updatePremiacaoReconquista = async (descricao, data) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const getPedidosDiaData = async (cupomVendedora, year, month, day) => {
   try {
     if (!cupomVendedora || !year || !month || !day) {
@@ -302,29 +276,23 @@ export const getPedidosDiaData = async (cupomVendedora, year, month, day) => {
 
 export const getFilteredPedidosDiaData = async (year, month, day) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupom_vendedora se a função for CONSULTORA
       params.append('cupom_vendedora', user.cupom);
     } else {
-      // Filtrar por team se a função não for CONSULTORA
       params.append('team_name', user.time);
     }
 
-    // Adicionar ano, mês e dia aos parâmetros
     params.append('year', year);
     params.append('month', month);
     params.append('day', day);
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.PEDIDOS_DIARIO}`, {
       params
     });
@@ -335,29 +303,6 @@ export const getFilteredPedidosDiaData = async (year, month, day) => {
     throw error;
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -377,28 +322,22 @@ export const getPedidosMensalData = async (cupomVendedora, year, month) => {
 
 export const getFilteredPedidosmensalData = async (year, month) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupom_vendedora se a função for CONSULTORA
       params.append('cupom_vendedora', user.cupom);
     } else {
-      // Filtrar por team se a função não for CONSULTORA
       params.append('team_name', user.time);
     }
 
-    // Adicionar ano e mês aos parâmetros
     params.append('year', year);
     params.append('month', month);
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.PEDIDOS_MENSAL}`, { params });
     return response.data;
   } catch (error) {
@@ -409,22 +348,6 @@ export const getFilteredPedidosmensalData = async (year, month) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Função para obter dados de ticket
 export const getTicketData = async () => {
   try {
     const response = await axios.get(API_ENDPOINTS.TICKET);
@@ -439,24 +362,19 @@ export const getTicketData = async () => {
 // Função para obter dados de ticket filtrados pelo cupomvendedora do usuário logado
 export const getFilteredTicketData = async () => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.TICKET}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -470,7 +388,6 @@ export const getFilteredTicketData = async () => {
 export const createTicket = async (data) => {
   try {
     const response = await axios.post(API_ENDPOINTS.TICKET, data);
-    console.log('Resposta da API:', response);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar ticket:', error);
@@ -481,7 +398,6 @@ export const createTicket = async (data) => {
 // Função para excluir um ticket
 export const deleteTicket = async ({ id }) => {
   try {
-    // Construindo a URL com o parâmetro de consulta ID
     const response = await axios.delete(`${API_ENDPOINTS.TICKET}?id=${id}`);
     return response.data;
   } catch (error) {
@@ -539,24 +455,19 @@ export const getOrderData = async () => {
 
 export const getFilteredOrderData = async (startDate, endDate) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Adicionar filtros de data
     if (startDate) {
       params.append('startDate', startDate);
     }
@@ -564,7 +475,6 @@ export const getFilteredOrderData = async (startDate, endDate) => {
       params.append('endDate', endDate);
     }
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.ORDER}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -580,35 +490,28 @@ export const getFilteredOrderData = async (startDate, endDate) => {
 
 export const getFilteredClosingData = async (startDate, endDate) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
-    // Adicionar filtros baseados na função do usuário
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Adicionar filtros de data no formato mes_ano (ex: '2023-08')
     if (startDate) {
-      const startMesAno = startDate.slice(0, 7); // Extrai ano-mês de startDate
+      const startMesAno = startDate.slice(0, 7);
       params.append('mes_ano', startMesAno);
     }
     if (endDate) {
-      const endMesAno = endDate.slice(0, 7); // Extrai ano-mês de endDate
+      const endMesAno = endDate.slice(0, 7);
       params.append('mes_ano', endMesAno);
     }
 
-    // Obter os tickets filtrados com os parâmetros construídos
     const response = await axios.get(`${API_ENDPOINTS.CLOSING}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -618,24 +521,19 @@ export const getFilteredClosingData = async (startDate, endDate) => {
 };
 export const getFilteredReconquestData = async (startDate, endDate) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Adicionar filtros de data
     if (startDate) {
       params.append('startDate', startDate);
     }
@@ -643,7 +541,6 @@ export const getFilteredReconquestData = async (startDate, endDate) => {
       params.append('endDate', endDate);
     }
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.RECONQUEST}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -656,19 +553,15 @@ export const getFilteredReconquestData = async (startDate, endDate) => {
 
 export const getFilteredClosingGroupData = async () => {
   try {
-    // Cria a URL com o endpoint da API
     const url = new URL(API_ENDPOINTS.CLOSINGGROUP);
-    
-    // Obtém o usuário do localStorage e extrai o parâmetro time
+
     const user = JSON.parse(localStorage.getItem('user'));
     const time = user ? user.time : '';
 
-    // Adiciona o parâmetro de tempo à URL, se disponível
     if (time) {
       url.searchParams.append('time', time);
     }
 
-    // Faz a requisição GET para a API
     const response = await axios.get(url.toString());
     return response.data;
   } catch (error) {
@@ -679,24 +572,19 @@ export const getFilteredClosingGroupData = async () => {
 
 export const getFilteredOClosingOrderData = async (startDate, endDate) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Adicionar filtros de data
     if (startDate) {
       params.append('startDate', startDate);
     }
@@ -704,7 +592,6 @@ export const getFilteredOClosingOrderData = async (startDate, endDate) => {
       params.append('endDate', endDate);
     }
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.CLOSINGORDER}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -717,24 +604,19 @@ export const getFilteredOClosingOrderData = async (startDate, endDate) => {
 
 export const getFilteredReconquestGroupData = async (startDate, endDate) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
       params.append('cupomvendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Adicionar filtros de data
     if (startDate) {
       params.append('startDate', startDate);
     }
@@ -742,7 +624,6 @@ export const getFilteredReconquestGroupData = async (startDate, endDate) => {
       params.append('endDate', endDate);
     }
 
-    // Obter os tickets filtrados
     const response = await axios.get(`${API_ENDPOINTS.RECONQUESTGROUP}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -754,29 +635,23 @@ export const getFilteredReconquestGroupData = async (startDate, endDate) => {
 
 export const getFilteredClosingsData = async (mesAno) => {
   try {
-    // Obter o valor do usuário logado
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
       throw new Error('Usuário não encontrado no localStorage');
     }
 
-    // Construir os parâmetros de consulta
     const params = new URLSearchParams();
 
     if (user.funcao === 'consultora') {
-      // Filtrar por cupomvendedora se a função for CONSULTORA
-      params.append('cupom_vendedora', user.cupom); // Corrigido de 'cupomvendedora' para 'cupom_vendedora'
+      params.append('cupom_vendedora', user.cupom);
     } else {
-      // Filtrar por time se a função não for CONSULTORA
       params.append('time', user.time);
     }
 
-    // Adicionar filtro por mes_ano
     if (mesAno) {
       params.append('mes_ano', mesAno);
     }
 
-    // Obter os dados filtrados
     const response = await axios.get(`${API_ENDPOINTS.CLOSING}?${params.toString()}`);
     return response.data;
   } catch (error) {
@@ -784,11 +659,11 @@ export const getFilteredClosingsData = async (mesAno) => {
     throw error;
   }
 };
+
 // Função para criar um ticket
 export const createClosing = async (data) => {
   try {
     const response = await axios.post(API_ENDPOINTS.CLOSING, data);
-    console.log('Resposta da API:', response);
     return response.data;
   } catch (error) {
     console.error('Erro ao criar fechamento:', error);

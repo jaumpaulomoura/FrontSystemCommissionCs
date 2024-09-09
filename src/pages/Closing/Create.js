@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate, useParams } from 'react-router-dom';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
-import { getFilteredOClosingOrderData, getFilteredReconquestGroupData, getPremiacaoReconquistaData, getFilteredClosingsData, getColaboradorData,createClosing } from '../../services/apiService';
+import { getFilteredOClosingOrderData, getFilteredReconquestGroupData, getPremiacaoReconquistaData, getFilteredClosingsData, getColaboradorData, createClosing } from '../../services/apiService';
 
 const CreateClosing = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -67,55 +67,49 @@ const CreateClosing = ({ toggleTheme }) => {
           getFilteredOClosingOrderData(filterStartDate, filterEndDate),
           getColaboradorData(),
         ]);
-  
-        // Criando um mapa de cupom_vendedora para nomes
+
         const colaboradoresMap = colaboradores.reduce((acc, colaborador) => {
-          acc[colaborador.cupom] = colaborador.nome; // Supondo que o objeto tem cupom e nome
+          acc[colaborador.cupom] = colaborador.nome;
           return acc;
         }, {});
-  
-        // Dados específicos de Reconquista só são buscados se o userTime for 'Reconquista'
+
         let reconquestData = [];
         let premiacaoData = [];
         let reconquestAnteriorMap = {};
-  
+
         if (userTime === 'Reconquista') {
           [reconquestData, premiacaoData] = await Promise.all([
             getFilteredReconquestGroupData(filterStartDate, filterEndDate),
             getPremiacaoReconquistaData(),
           ]);
-  
+
           const [currentYear, currentMonth] = filterStartDate.split('-').map(Number);
           const { month, year } = getPreviousMonthYear(currentMonth, currentYear);
           const mesAno = `${year}-${month.toString().padStart(2, '0')}`;
           const vlrReconquestAnterior = await getFilteredClosingsData(mesAno);
-  
-          // Criar mapas com os dados
+
           reconquestAnteriorMap = vlrReconquestAnterior.reduce((acc, item) => {
             acc[item.cupom_vendedora] = item;
             return acc;
           }, {});
         }
-  
+
         const reconquestMap = reconquestData.reduce((acc, item) => {
           acc[item.cupom_vendedora] = item;
           return acc;
         }, {});
-  
-        // Process current data
+
         const resultWithIds = result.map(closing => {
           const nomeColaborador = colaboradoresMap[closing.cupom_vendedora] || 'N/A';
-  
-          // Valores padrão
+
           let qtd_reconquista = 0;
           let qtd_repagar = 0;
           let premiacao = null;
           let valor_repagar = 0;
           let valorTotalRepagar = 0;
-          let Valor_comisao = parseFloat(closing.Valor_comisao) || 0; // Default para todos os times
+          let Valor_comisao = parseFloat(closing.Valor_comisao) || 0;
           let valorTotal = parseFloat(closing.Valor_comisao || 0) + parseFloat(closing.premiacao_meta || 0);
-  
-          // Cálculos específicos para Reconquista
+
           if (userTime === 'Reconquista') {
             const reconquest = reconquestMap[closing.cupom_vendedora] || {};
             qtd_reconquista = reconquest.Reconquista || 0;
@@ -124,11 +118,10 @@ const CreateClosing = ({ toggleTheme }) => {
             const reconquestAnterior = reconquestAnteriorMap[closing.cupom_vendedora] || {};
             valor_repagar = parseFloat(reconquestAnterior.vlr_reconquista) || 0;
             valorTotalRepagar = qtd_repagar * valor_repagar;
-  
-            // Atualiza valorTotal com dados de Reconquista
+
             valorTotal += (premiacao ? premiacao.valor * qtd_reconquista : 0) + valorTotalRepagar;
-          } 
-  
+          }
+
           return {
             id: `${closing.cupom_vendedora}`,
             ano: closing.ano || '',
@@ -151,8 +144,7 @@ const CreateClosing = ({ toggleTheme }) => {
             valorTotal: valorTotal,
           };
         });
-  
-        console.log(resultWithIds);
+
         setData(resultWithIds);
         setFilteredData(resultWithIds);
       } catch (error) {
@@ -162,14 +154,13 @@ const CreateClosing = ({ toggleTheme }) => {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, [filterStartDate, filterEndDate]);
-  
+
 
   const applyFilters = useCallback(() => {
     let filtered = data;
-    // Add filter logic here if needed
     setFilteredData(filtered);
   }, [data]);
 
@@ -180,11 +171,6 @@ const CreateClosing = ({ toggleTheme }) => {
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
-
-  // const handleInsert = () => {
-  //   // Logic for insertion
-  //   console.log('Inserir novo Fechamento');
-  // };
 
   const columns = [
     { field: 'ano', headerName: 'Ano', width: 80 },
@@ -256,11 +242,9 @@ const CreateClosing = ({ toggleTheme }) => {
   const handleInsert = async (e) => {
     e.preventDefault();
 
-  
-    // Supondo que você tenha uma função para obter o "now"
+
     const now = new Date().toISOString();
-  
-    // Atualizando o formData com os dados filtrados
+
     const formData = filteredData.map((item) => ({
       mes: item.mes || '',
       ano: item.ano || '',
@@ -278,16 +262,13 @@ const CreateClosing = ({ toggleTheme }) => {
       vlr_total_reco: item.total_valor_premiacao || 0,
       qtd_repagar: item.qtd_repagar || 0,
       vlr_recon_mes_ant: item.valor_repagar || 0,
-      vlr_total_recon_mes_ant: 0, // Definido como 0, você pode alterar conforme necessário
+      vlr_total_recon_mes_ant: 0,
       premiacao_reconquista: item.valorTotalRepagar || 0,
       total_receber: item.valorTotal || 0
     }));
-  
+
     try {
       const response = await createClosing(formData);
-      console.log('Resposta da API:', response);
-  
-      // Defina a mensagem de sucesso conforme necessário
       setSuccessMessage('Fechamento criado com sucesso!');
       navigate('/closing');
     } catch (error) {
@@ -295,7 +276,7 @@ const CreateClosing = ({ toggleTheme }) => {
       setError('Erro ao criar fechamento. Verifique o console para mais detalhes.');
     }
   };
-  
+
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />

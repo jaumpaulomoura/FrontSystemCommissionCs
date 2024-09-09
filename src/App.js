@@ -1,8 +1,7 @@
-// App.js
 import React, { useState } from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import createMyTheme from './theme'; // Verifique o caminho correto
+import createMyTheme from './theme';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Colaborador from './pages/Colaborador/Colaborador';

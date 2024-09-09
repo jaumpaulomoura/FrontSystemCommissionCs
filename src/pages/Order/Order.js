@@ -23,7 +23,6 @@ const Order = ({ toggleTheme }) => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const userFuncao = user ? user.funcao : '';
-  // Função para buscar dados de pedidos
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -41,7 +40,6 @@ const Order = ({ toggleTheme }) => {
     }
   };
 
-  // Função para aplicar filtros
   const applyFilters = () => {
     let filtered = data;
 
@@ -62,7 +60,7 @@ const Order = ({ toggleTheme }) => {
         new Date(order.data_submissao) <= new Date(filterEndDate)
       );
     }
-if (filterCupom) {
+    if (filterCupom) {
       filtered = filtered.filter((item) =>
         item.cupom_vendedora &&
         item.cupom_vendedora.toLowerCase().includes(filterCupom.toLowerCase())
@@ -71,22 +69,18 @@ if (filterCupom) {
     setFilteredData(filtered);
   };
 
-  // useEffect para aplicar filtros sempre que `data` ou filtros mudarem
   useEffect(() => {
     applyFilters();
-  }, [data, filterOrderid, filterIdProfile, filterStartDate,filterCupom, filterEndDate]);
+  }, [data, filterOrderid, filterIdProfile, filterStartDate, filterCupom, filterEndDate]);
 
-  // Função para lidar com o clique no botão "Buscar"
   const handleSearch = () => {
     fetchData();
   };
 
-  // Função para alternar o menu lateral
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Função para navegar para a página de inserção
   const handleInsert = () => {
     navigate('/order/create');
   };
@@ -101,7 +95,6 @@ if (filterCupom) {
 
   const valorBrutoTotal = filteredData.reduce((acc, order) => {
     const valorBrutoValue = parseFloat(order.valor_bruto.replace(',', '.')) || 0;
-    // console.log(`Pedido: ${order.pedido}, Valor Bruto: ${order.valor_bruto}, Valor Convertido: ${valorBrutoValue}`);
     return acc + valorBrutoValue;
   }, 0).toFixed(2);
   const valorDescontoTotal = filteredData.reduce((acc, order) => {
@@ -130,17 +123,12 @@ if (filterCupom) {
       headerName: 'Data de Submissão',
       width: 180,
       valueFormatter: (params) => {
-
-
-        // Acesso direto ao valor
         const dateValue = params;
 
         if (!dateValue) return 'Data não disponível';
 
         try {
-          // Desconstrua a data no formato YYYY-MM-DD
           const [year, month, day] = dateValue.split('-');
-          // Formate a data para DD/MM/YYYY
           const formattedDate = `${day}/${month}/${year}`;
           return formattedDate;
         } catch (e) {
@@ -154,12 +142,11 @@ if (filterCupom) {
       headerName: 'Hora de Submissão',
       width: 180,
       valueFormatter: (params) => {
-        // Verifica se params.value está disponível e é uma string
         if (params) {
           const timeValue = params;
           if (typeof timeValue === 'string') {
             const [hours, minutes, seconds] = timeValue.split(':');
-            const secondsValue = parseFloat(seconds.split('.')[0]); // Remove milissegundos
+            const secondsValue = parseFloat(seconds.split('.')[0]);
             const formattedSeconds = secondsValue.toFixed(0).padStart(2, '0');
             return `${hours}:${minutes}:${formattedSeconds}`;
           }
@@ -247,17 +234,17 @@ if (filterCupom) {
                 />
               </Grid>
               {userFuncao !== 'consultora' && (
-              <Grid item xs={12} sm={2} md={1.2}>
-                <TextField
-                  label="Filtrar por Cupom Vendedora"
-                  variant="filled"
-                  value={filterCupom}
-                  onChange={(e) => setFilterCupom(e.target.value)}
-                  fullWidth
-                  size="small"
-                />
-              </Grid>
-            )}
+                <Grid item xs={12} sm={2} md={1.2}>
+                  <TextField
+                    label="Filtrar por Cupom Vendedora"
+                    variant="filled"
+                    value={filterCupom}
+                    onChange={(e) => setFilterCupom(e.target.value)}
+                    fullWidth
+                    size="small"
+                  />
+                </Grid>
+              )}
 
               <Grid item xs={12} sm={2} md={1}>
                 <Button
@@ -284,18 +271,6 @@ if (filterCupom) {
                   <Typography variant="h5">{totalItens}</Typography>
                 </Paper>
               </Grid>
-              {/* <Grid item xs={12} sm={1}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
-                  <Typography variant="h6">Valor Bruto Total</Typography>
-                  <Typography variant="h5">R$ {valorBrutoTotal}</Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} sm={1}>
-                <Paper sx={{ p: 1, textAlign: 'center' }}>
-                  <Typography variant="h6">Valor Desconto Total</Typography>
-                  <Typography variant="h5">R$ {valorDescontoTotal}</Typography>
-                </Paper>
-              </Grid> */}
               <Grid item xs={12} sm={1}>
                 <Paper sx={{ p: 1, textAlign: 'center' }}>
                   <Typography variant="h6">Valor Pago Total</Typography>

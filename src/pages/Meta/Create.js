@@ -8,7 +8,6 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import 'dayjs/locale/pt-br';
 import dayjs from 'dayjs';
-import { width } from '@mui/system';
 dayjs.locale('pt-br');
 const metaDataInitial = [
   { meta: 'Não atingiu a meta', porcentagem: '0.005', valor: '0' },
@@ -24,7 +23,7 @@ const CreateMeta = ({ toggleTheme }) => {
     cupom: '',
   });
   const [metaData, setMetaData] = useState(metaDataInitial);
-  const [selectedDate, setSelectedDate] = useState(null); // Estado para o DatePicker
+  const [selectedDate, setSelectedDate] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -64,7 +63,7 @@ const CreateMeta = ({ toggleTheme }) => {
       setSuccess('Meta criada com sucesso!');
       setFormData({ cupom: '' });
       setMetaData(metaData.map(item => ({ ...item, valor: '0' })));
-      setSelectedDate(null); // Resetar a data
+      setSelectedDate(null);
       setTimeout(() => navigate('/meta'), 2000);
     } catch (error) {
       console.error('Erro ao criar meta:', error);
@@ -97,7 +96,7 @@ const CreateMeta = ({ toggleTheme }) => {
                     fullWidth
                     margin="normal"
                     variant="filled"
-                    style={{  height: '56px', borderRadius: '8px' }}
+                    style={{ height: '56px', borderRadius: '8px' }}
                   />
                 </Grid>
                 <Grid item xs={2.05} sx={{ mt: 2 }}>
@@ -112,7 +111,7 @@ const CreateMeta = ({ toggleTheme }) => {
                           {...params}
                           fullWidth
                           style={{
-                            marginTop:'1px',
+                            marginTop: '1px',
                             maxWidth: '200px',
                             height: '56px',
                             fontSize: '13px',

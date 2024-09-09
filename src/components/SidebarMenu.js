@@ -71,75 +71,74 @@ const SidebarMenu = ({ open, onClose }) => {
           )}
           <Divider />
           <List>
-  <ListItem button onClick={() => handleNavigation('/home')}>
-    <ListItemIcon>
-      <Assessment />
-    </ListItemIcon>
-    <ListItemText primary="Dashboard" />
-  </ListItem>
-  <Divider />
-  {user && user.funcao !== 'consultora' && (
-    <>
-      <ListItem button onClick={() => handleNavigation('/colaborador')}>
-        <ListItemIcon>
-          <GroupIcon />
-        </ListItemIcon>
-        <ListItemText primary="Colaborador" />
-      </ListItem>
-      <ListItem button onClick={() => handleNavigation('/premiacaoMeta')}>
-        <ListItemIcon>
-          <StarIcon />
-        </ListItemIcon>
-        <ListItemText primary="Premiação Meta" />
-      </ListItem>
-      <ListItem button onClick={() => handleNavigation('/premiacaoReconquista')}>
-        <ListItemIcon>
-          <StarIcon />
-        </ListItemIcon>
-        <ListItemText primary="Premiação Reconquista" />
-      </ListItem>
-   
-      {/* Moved 'Fechamento' to the end */}
-    
-    </>
-  )}
-     <ListItem button onClick={() => handleNavigation('/meta')}>
-        <ListItemIcon>
-          <TrendingUpIcon />
-        </ListItemIcon>
-        <ListItemText primary="Meta" />
-      </ListItem>
-  <ListItem button onClick={() => handleNavigation('/Ticket')}>
-    <ListItemIcon>
-      <ConfirmationNumberIcon />
-    </ListItemIcon>
-    <ListItemText primary="Ticket" />
-  </ListItem>
-  <ListItem button onClick={() => handleNavigation('/Order')}>
-    <ListItemIcon>
-      <ShoppingCartIcon />
-    </ListItemIcon>
-    <ListItemText primary="Pedidos" />
-  </ListItem>
-  {user && user.time == 'Reconquista' && (
-  <ListItem button onClick={() => handleNavigation('/reconquest')}>
-    <ListItemIcon>
-      <RefreshIcon />
-    </ListItemIcon>
-    <ListItemText primary="Reconquista" />
-  </ListItem>
-  )}
-  {user && user.funcao !== 'consultora' && (
-  <ListItem button onClick={() => handleNavigation('/Closing')}>
-        <ListItemIcon>
-          <CheckCircleIcon />
-        </ListItemIcon>
-        <ListItemText primary="Fechamento" />
-      </ListItem>
-  )}
+            <ListItem button onClick={() => handleNavigation('/home')}>
+              <ListItemIcon>
+                <Assessment />
+              </ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+            <Divider />
+            {user && user.funcao !== 'consultora' && (
+              <>
+                <ListItem button onClick={() => handleNavigation('/colaborador')}>
+                  <ListItemIcon>
+                    <GroupIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Colaborador" />
+                </ListItem>
+                <ListItem button onClick={() => handleNavigation('/premiacaoMeta')}>
+                  <ListItemIcon>
+                    <StarIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Premiação Meta" />
+                </ListItem>
+                <ListItem button onClick={() => handleNavigation('/premiacaoReconquista')}>
+                  <ListItemIcon>
+                    <StarIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Premiação Reconquista" />
+                </ListItem>
 
 
-</List>
+              </>
+            )}
+            <ListItem button onClick={() => handleNavigation('/meta')}>
+              <ListItemIcon>
+                <TrendingUpIcon />
+              </ListItemIcon>
+              <ListItemText primary="Meta" />
+            </ListItem>
+            <ListItem button onClick={() => handleNavigation('/Ticket')}>
+              <ListItemIcon>
+                <ConfirmationNumberIcon />
+              </ListItemIcon>
+              <ListItemText primary="Ticket" />
+            </ListItem>
+            <ListItem button onClick={() => handleNavigation('/Order')}>
+              <ListItemIcon>
+                <ShoppingCartIcon />
+              </ListItemIcon>
+              <ListItemText primary="Pedidos" />
+            </ListItem>
+            {user && user.time == 'Reconquista' && (
+              <ListItem button onClick={() => handleNavigation('/reconquest')}>
+                <ListItemIcon>
+                  <RefreshIcon />
+                </ListItemIcon>
+                <ListItemText primary="Reconquista" />
+              </ListItem>
+            )}
+            {user && user.funcao !== 'consultora' && (
+              <ListItem button onClick={() => handleNavigation('/Closing')}>
+                <ListItemIcon>
+                  <CheckCircleIcon />
+                </ListItemIcon>
+                <ListItemText primary="Fechamento" />
+              </ListItem>
+            )}
+
+
+          </List>
 
         </Box>
         <Box>

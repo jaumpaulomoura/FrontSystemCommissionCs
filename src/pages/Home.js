@@ -7,7 +7,6 @@ import ProgressBar from '../components/ProgressBar';
 import { getFilteredPedidosDiaData, getFilteredPedidosmensalData, getFilteredMetaData } from '../services/apiService';
 
 const Home = ({ onLogout, toggleTheme }) => {
-    console.log('toggleTheme in Home:', toggleTheme);
     const [dailySales, setDailySales] = useState(0);
     const [monthlySales, setMonthlySales] = useState(0);
     const [goals, setGoals] = useState([]);
@@ -86,55 +85,55 @@ const Home = ({ onLogout, toggleTheme }) => {
 
 
                 <Grid container spacing={2} sx={{ display: 'flex', flexWrap: 'wrap', mt: 1 }}>
-    {userRole === 'consultora' ? (
-        <>
-            
-            <Grid item xs={12} sm={6} md={2.4}>
-                <Paper sx={{ p: 2 }}>
-                    <Typography variant="h6">Vendas Diárias</Typography>
-                    <Typography variant="h4">
-                        {dailySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </Typography>
-                </Paper>
-            </Grid>
-            <Grid item xs={12} sm={6} md={2.4}>
-                <Paper sx={{ p: 2 }}>
-                    <Typography variant="h6">Vendas Mensais</Typography>
-                    <Typography variant="h4">
-                        {monthlySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </Typography>
-                </Paper>
-            </Grid>
-            <Grid item xs={12} sm={12} md={7.2}>
-                <Paper sx={{ p: 2 }}>
-                    <ProgressBar
-                        current={monthlySales}
-                        goals={goals}
-                    />
-                </Paper>
-            </Grid>
-        </>
-    ) : (
-        <>
-            <Grid item  xs={12} sm={6} >
-                <Paper sx={{ p: 2 }}>
-                    <Typography variant="h6">Vendas Diárias</Typography>
-                    <Typography variant="h4">
-                        {dailySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </Typography>
-                </Paper>
-            </Grid>
-            <Grid item  xs={12} sm={6} >
-                <Paper sx={{ p: 2 }}>
-                    <Typography variant="h6">Vendas Mensais</Typography>
-                    <Typography variant="h4">
-                        {monthlySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </Typography>
-                </Paper>
-            </Grid>
-        </>
-    )}
-</Grid>
+                    {userRole === 'consultora' ? (
+                        <>
+
+                            <Grid item xs={12} sm={6} md={2.4}>
+                                <Paper sx={{ p: 2 }}>
+                                    <Typography variant="h6">Vendas Diárias</Typography>
+                                    <Typography variant="h4">
+                                        {dailySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={2.4}>
+                                <Paper sx={{ p: 2 }}>
+                                    <Typography variant="h6">Vendas Mensais</Typography>
+                                    <Typography variant="h4">
+                                        {monthlySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={7.2}>
+                                <Paper sx={{ p: 2 }}>
+                                    <ProgressBar
+                                        current={monthlySales}
+                                        goals={goals}
+                                    />
+                                </Paper>
+                            </Grid>
+                        </>
+                    ) : (
+                        <>
+                            <Grid item xs={12} sm={6} >
+                                <Paper sx={{ p: 2 }}>
+                                    <Typography variant="h6">Vendas Diárias</Typography>
+                                    <Typography variant="h4">
+                                        {dailySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                            <Grid item xs={12} sm={6} >
+                                <Paper sx={{ p: 2 }}>
+                                    <Typography variant="h6">Vendas Mensais</Typography>
+                                    <Typography variant="h4">
+                                        {monthlySales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </Typography>
+                                </Paper>
+                            </Grid>
+                        </>
+                    )}
+                </Grid>
 
 
                 <Grid container spacing={3} sx={{ mt: 1 }}>

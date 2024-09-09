@@ -35,8 +35,7 @@ const CreateTicket = ({ toggleTheme }) => {
                     year: 'numeric',
                 });
                 const user = JSON.parse(localStorage.getItem('user'));
-                const cupomvendedora = user ? user.cupom : 'Nome Padrão'; // Defina um valor padrão
-                console.log(cupomvendedora)
+                const cupomvendedora = user ? user.cupom : 'Nome Padrão';
                 setFormData((prevData) => ({
                     ...prevData,
                     id: nextId,
@@ -88,12 +87,8 @@ const CreateTicket = ({ toggleTheme }) => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        // Verifique o valor de cupomvendedora
-        console.log('Cupom da vendedora:', formData.cupomvendedora);
-
         try {
             const response = await createTicket(formData);
-            console.log('Resposta da API:', response);
 
             setFormData({
                 id: '',
@@ -202,6 +197,8 @@ const CreateTicket = ({ toggleTheme }) => {
                                 <MenuItem value="Troca">Troca</MenuItem>
                                 <MenuItem value="Chance">Chance</MenuItem>
                                 <MenuItem value="Reconquista">Reconquista</MenuItem>
+                                <MenuItem value="Status para Aprovado">Status para Aprovado</MenuItem>
+                                <MenuItem value="Status para Cancelado">Status para Cancelado</MenuItem>
                             </Select>
                         </FormControl>
 

@@ -14,9 +14,6 @@ const Meta = ({ toggleTheme }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterCupom, setFilterCupom] = useState('');
-  // const [filterMetaName, setFilterMetaName] = useState('');
-  // const [filterPorcentagem, setFilterPorcentagem] = useState('');
-  // const [filterValor, setFilterValor] = useState('');
   const [filterMesAno, setFilterMesAno] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -27,7 +24,7 @@ const Meta = ({ toggleTheme }) => {
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
-  
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,10 +32,8 @@ const Meta = ({ toggleTheme }) => {
       try {
         const result = await getFilteredMetaData();
 
-        // Armazene todos os dados recebidos
         setData(result);
 
-        // Remova duplicados com base em cupom e mes_ano para exibição única
         const uniqueData = result.filter(
           (value, index, self) =>
             index === self.findIndex((t) => t.cupom === value.cupom && t.mes_ano === value.mes_ano)
@@ -74,7 +69,6 @@ const Meta = ({ toggleTheme }) => {
       );
     }
 
-    // Atualize filteredData com dados únicos filtrados
     const uniqueFilteredData = filtered.filter(
       (value, index, self) =>
         index === self.findIndex((t) => t.cupom === value.cupom && t.mes_ano === value.mes_ano)
@@ -175,27 +169,27 @@ const Meta = ({ toggleTheme }) => {
       width: 140,
       renderCell: (params) => (
         <Button
-        variant="outlined"
-        onClick={() => handleOpen(params)}
-        sx={{
-          backgroundColor: 'gray',
-          color: 'white',
-          borderColor: 'gray', // Define a cor da borda
-          '&:hover': {
-            backgroundColor: 'darkgray',
-          },
-          '&:active': {
-            backgroundColor: 'firebrick',
-          },
-          '&:focus': {
-            outline: 'none', // Remove o contorno padrão de foco
-            borderColor: 'gray', // Mantém a cor da borda consistente com o restante do estilo
-          }
-        }}
-      >
-        <ExpandCircleDownOutlinedIcon sx={{ mr: 1 }} />
-        Metas
-      </Button>
+          variant="outlined"
+          onClick={() => handleOpen(params)}
+          sx={{
+            backgroundColor: 'gray',
+            color: 'white',
+            borderColor: 'gray',
+            '&:hover': {
+              backgroundColor: 'darkgray',
+            },
+            '&:active': {
+              backgroundColor: 'firebrick',
+            },
+            '&:focus': {
+              outline: 'none',
+              borderColor: 'gray',
+            }
+          }}
+        >
+          <ExpandCircleDownOutlinedIcon sx={{ mr: 1 }} />
+          Metas
+        </Button>
       ),
     },
   ];
@@ -205,7 +199,6 @@ const Meta = ({ toggleTheme }) => {
 
 
   const handleOpen = (params) => {
-    // Filtrar todas as metas associadas ao cupom e mes_ano selecionados
     const selectedMeta = data.filter(
       (meta) => meta.cupom === params.row.cupom && meta.mes_ano === params.row.mes_ano
     );
@@ -267,36 +260,6 @@ const Meta = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-            {/* <Grid item xs={12} sm={6} md={4}>
-              <TextField
-                label="Filtrar por Meta"
-                variant="filled"
-                value={filterMetaName}
-                onChange={(e) => setFilterMetaName(e.target.value)}
-                fullWidth
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField
-                label="Filtrar por Porcentagem"
-                variant="filled"
-                value={filterPorcentagem}
-                onChange={(e) => setFilterPorcentagem(e.target.value)}
-                fullWidth
-                size="small"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField
-                label="Filtrar por Valor"
-                variant="filled"
-                value={filterValor}
-                onChange={(e) => setFilterValor(e.target.value)}
-                fullWidth
-                size="small"
-              />
-            </Grid> */}
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 label="Filtrar por Mês-Ano"
@@ -401,89 +364,89 @@ const Meta = ({ toggleTheme }) => {
         </Dialog>
       </Box>
       <Modal open={open} onClose={handleClose}>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 600, // Ajuste conforme necessário
-          bgcolor: 'background.paper',
-          p: 3, // Ajuste conforme necessário
-          boxShadow: 24,
-          borderRadius: 1
-        }}
-      >
-        <Typography variant="h6" sx={{ mb: 2 }}>Meta Detalhes</Typography>
-        {metaInfo.length > 0 ? (
-          metaInfo.map((meta, index) => (
-            <Box key={index} sx={{ mb: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <TextField
-                    label="Meta"
-                    value={meta.meta}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <TextField
-                    label="Porcentagem"
-                    value={meta.porcentagem}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    variant="outlined"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <TextField
-                    label="Valor"
-                    value={meta.valor}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    variant="outlined"
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          ))
-        ) : (
-          <Typography>Sem informações de meta disponíveis.</Typography>
-        )}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleClose}
+        <Box
           sx={{
-            mt: 2,
-            backgroundColor: 'red',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: 'darkred',
-            },
-            '&:active': {
-              backgroundColor: 'firebrick',
-            }
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 600,
+            bgcolor: 'background.paper',
+            p: 3,
+            boxShadow: 24,
+            borderRadius: 1
           }}
         >
-          Fechar
-        </Button>
-      </Box>
-    </Modal>
+          <Typography variant="h6" sx={{ mb: 2 }}>Meta Detalhes</Typography>
+          {metaInfo.length > 0 ? (
+            metaInfo.map((meta, index) => (
+              <Box key={index} sx={{ mb: 2 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <TextField
+                      label="Meta"
+                      value={meta.meta}
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      label="Porcentagem"
+                      value={meta.porcentagem}
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField
+                      label="Valor"
+                      value={meta.valor}
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      InputProps={{
+                        readOnly: true,
+                      }}
+                      variant="outlined"
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            ))
+          ) : (
+            <Typography>Sem informações de meta disponíveis.</Typography>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleClose}
+            sx={{
+              mt: 2,
+              backgroundColor: 'red',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'darkred',
+              },
+              '&:active': {
+                backgroundColor: 'firebrick',
+              }
+            }}
+          >
+            Fechar
+          </Button>
+        </Box>
+      </Modal>
 
     </Box>
   );

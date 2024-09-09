@@ -6,7 +6,7 @@ import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { useNavigate } from 'react-router-dom';
 import { getFilteredReconquestData } from '../../services/apiService';
 
-const Reconquest = ({toggleTheme}) => {
+const Reconquest = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -26,7 +26,6 @@ const Reconquest = ({toggleTheme}) => {
     try {
 
       const result = await getFilteredReconquestData(filterStartDate, filterEndDate);
-      console.log('Dados retornados pela API:', result);
       const resultWithIds = result.map(reconquest => ({
         id: reconquest.id_cliente,
         ...reconquest,
@@ -40,12 +39,10 @@ const Reconquest = ({toggleTheme}) => {
     }
   };
   const applyFilters = () => {
-    console.log('Dados originais:', data);
     let filtered = [...data];
 
-    // Filtragem por Status
     if (statusFilter.includes("Todos") || statusFilter.length === 0) {
-      
+
       filtered = [...data];
     } else {
       filtered = filtered.filter((reconquest) =>
@@ -58,20 +55,15 @@ const Reconquest = ({toggleTheme}) => {
         item.id_cliente.toLowerCase().includes(filterProfileId.toLowerCase())
       );
     }
-    
 
-    console.log('Dados após aplicação dos filtros:', filtered);
     setFilteredData(filtered);
   };
 
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, [filterStartDate, filterEndDate]);
 
   useEffect(() => {
     applyFilters();
-  }, [data, filterReconquestid, filterStartDate, filterEndDate, statusFilter,filterProfileId]);
+  }, [data, filterReconquestid, filterStartDate, filterEndDate, statusFilter, filterProfileId]);
 
   const handleSearch = () => {
     setLoading(true);
@@ -81,18 +73,14 @@ const Reconquest = ({toggleTheme}) => {
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  // Função para manipular as mudanças de Status
   const handleStatusChange = (event) => {
     const value = event.target.value;
 
-    // Se "Todos" está selecionado e o usuário seleciona algo diferente, desmarcamos "Todos"
     if (statusFilter.includes("Todos") && value.length > 1) {
       setStatusFilter(value.filter((status) => status !== "Todos"));
     } else if (value.includes("Todos")) {
-      // Se "Todos" for selecionado, desmarca todos os outros e mantém apenas "Todos"
       setStatusFilter(["Todos"]);
     } else {
-      // Atualiza o estado normalmente sem "Todos"
       setStatusFilter(value);
     }
   };
@@ -179,9 +167,9 @@ const Reconquest = ({toggleTheme}) => {
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
       <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}>
-      <Box position="absolute" top={16} right={16}>
-                    <ThemeToggleButton toggleTheme={toggleTheme} />
-                </Box>
+        <Box position="absolute" top={16} right={16}>
+          <ThemeToggleButton toggleTheme={toggleTheme} />
+        </Box>
         <Typography variant="h4">Reconquista</Typography>
 
         <Paper sx={{ mt: 2, p: 2 }}>
@@ -211,7 +199,7 @@ const Reconquest = ({toggleTheme}) => {
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
-              <Grid item  md={2}>
+              <Grid item md={2}>
                 <FormControl fullWidth variant="filled">
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -227,16 +215,16 @@ const Reconquest = ({toggleTheme}) => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                label="Filtrar por Cliente"
-                variant="filled"
-                value={filterProfileId}
-                onChange={(e) => setFilterProfileId(e.target.value)}
-                fullWidth
-                size="small"
-              />
-            </Grid>
-           
+                <TextField
+                  label="Filtrar por Cliente"
+                  variant="filled"
+                  value={filterProfileId}
+                  onChange={(e) => setFilterProfileId(e.target.value)}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+
               <Grid item xs={12} sm={12} md={1}>
                 <Button
                   variant="contained"
@@ -260,7 +248,6 @@ const Reconquest = ({toggleTheme}) => {
             {successMessage && <Alert severity="success">{successMessage}</Alert>}
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
             <div style={{ width: 'max-content' }}>
-              {console.log('Dados filtrados no DataGrid:', filteredData)}
               <DataGrid
                 rows={filteredData}
                 columns={columns}
@@ -270,7 +257,7 @@ const Reconquest = ({toggleTheme}) => {
                 sortModel={[
                   {
                     field: 'min_data',
-                    sort: 'asc', // ou 'desc' para ordem decrescente
+                    sort: 'asc',
                   },
                 ]}
                 sx={{

@@ -75,9 +75,8 @@ const Closing = ({ toggleTheme }) => {
     try {
       const result = await getFilteredClosingData(mes_ano, mes_ano);
 
-      // Corrigir a criação de IDs concatenando `mes_ano` e `cupom_vendedora`
       const resultsWithIds = result.map(closing => ({
-        id: `${closing.mes_ano}-${closing.cupom_vendedora}`, // Concatenação para criar um ID único
+        id: `${closing.mes_ano}-${closing.cupom_vendedora}`,
         ...closing,
       }));
 
@@ -89,7 +88,6 @@ const Closing = ({ toggleTheme }) => {
       setLoadingModalData(false);
     }
   };
-  console.log('modalData', modalData)
 
 
   const handleCloseModal = () => {
@@ -284,41 +282,35 @@ const Closing = ({ toggleTheme }) => {
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ];
 
-    // Obtém o mês e o ano para o título
     const mesAno = modalData.length > 0
       ? `${monthNames[parseInt(modalData[0].mes, 10) - 1]} ${modalData[0].ano}`
       : 'N/A';
 
-    // Formata a data e hora atual
     const now = new Date();
     const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
     const formattedTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 
-    // Adiciona o título e informações ao cabeçalho
     doc.setFontSize(14);
     doc.setFont("Helvetica", "bold");
     doc.text(`Relatório de Comissão - ${mesAno}`, 14, 10);
 
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
-      doc.setFontSize(8); // Menor tamanho de fonte para data e hora
+      doc.setFontSize(8);
       doc.setFont("Helvetica", "normal");
       doc.text(`Data: ${formattedDate}`, doc.internal.pageSize.width - 10, 7, { align: 'right' });
       doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
 
-      // Time (user.time) embaixo da data e hora, um pouco maior
-      doc.setFontSize(14); // Tamanho de fonte maior para o time
+      doc.setFontSize(14);
       doc.setFont("Helvetica", "bold");
       doc.text(`Time: ${user.time || 'Desconhecido'}`, 14, 20);
     }
 
-    // Calcula o total comissional
     const totalValue = modalData.reduce((sum, row) => sum + parseFloat(row.total_receber || '0'), 0);
     const numberFormatter = new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2, // Define 2 casas decimais
+      minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
-    // Configurações da tabela
     autoTable(doc, {
       startY: 25,
       head: [['Nome', 'Total Comissional', 'Meta', 'Porcentagem', 'Valor Comissão', 'Premiação Meta', 'Premiação Reconquista', 'Valor Total']],
@@ -336,9 +328,9 @@ const Closing = ({ toggleTheme }) => {
         numberFormatter.format(parseFloat(row.total_receber || '0')),
       ]),
       headStyles: {
-        fillColor: [41, 128, 186], // Cor de fundo azul
-        textColor: [255, 255, 255], // Cor do texto branca
-        fontStyle: 'bold', // Texto em negrito
+        fillColor: [41, 128, 186],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
       },
       styles: {
         fontSize: 10,
@@ -347,22 +339,19 @@ const Closing = ({ toggleTheme }) => {
         halign: 'center',
       },
       didDrawPage: (data) => {
-        // Adiciona o rodapé apenas na última página
+
         const totalPages = doc.internal.getNumberOfPages();
         if (data.pageNumber === totalPages) {
           const text = `Total Comissional: ${numberFormatter.format(totalValue)}`;
           const textWidth = doc.getTextWidth(text);
-          const x = doc.internal.pageSize.width - textWidth - 14; // Margem da borda direita
-
+          const x = doc.internal.pageSize.width - textWidth - 14;
           doc.setFontSize(12);
           doc.setFont("Helvetica", "bold");
-          // doc.setTextColor(0, 102, 204); // Cor do texto azul
-          doc.text(text, x, doc.internal.pageSize.height - 10); // Posição no canto inferior direito
+          doc.text(text, x, doc.internal.pageSize.height - 10);
         }
       },
     });
 
-    // Salva o documento
     doc.save(`relatorio-Comissão-${mesAno}.pdf`);
   };
 
@@ -404,7 +393,6 @@ const Closing = ({ toggleTheme }) => {
           </div>
         )}
 
-        {/* Modal para exibir as informações do fechamento como DataGrid */}
         <Modal open={modalOpen} onClose={handleCloseModal}>
           <Box
             sx={{
@@ -416,7 +404,7 @@ const Closing = ({ toggleTheme }) => {
               boxShadow: 24,
               p: 4,
               width: '90%',
-              height: '80%', // Altura total do modal
+              height: '80%',
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
@@ -431,28 +419,28 @@ const Closing = ({ toggleTheme }) => {
                   <Typography variant="h6" sx={{ mb: 2 }}>
                     Detalhes do Fechamento
                   </Typography>
-                
-                <Button
-                  onClick={generatePDF}
-                  sx={{
-                    mb: 5,
-                    backgroundColor: 'green',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'darkgreen',
-                    },
-                    height: '50%',
-                    width: '15%'
-                  }}
-                >
-                  Exportar PDF
-                </Button>
+
+                  <Button
+                    onClick={generatePDF}
+                    sx={{
+                      mb: 5,
+                      backgroundColor: 'green',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'darkgreen',
+                      },
+                      height: '50%',
+                      width: '15%'
+                    }}
+                  >
+                    Exportar PDF
+                  </Button>
                 </div>
                 <div
                   style={{
                     flex: 1,
                     overflowY: 'auto',
-                    height: '50%', // Altura do DataGrid
+                    height: '50%',
                   }}
                 >
                   <DataGrid
@@ -467,7 +455,7 @@ const Closing = ({ toggleTheme }) => {
                       '& .MuiDataGrid-root': {
                         border: 'none',
                       },
-                      height: '100%', // Garante que o DataGrid ocupa toda a altura disponível
+                      height: '100%',
                     }}
                   />
                 </div>
@@ -484,8 +472,8 @@ const Closing = ({ toggleTheme }) => {
                       backgroundColor: 'firebrick',
                     },
                     height: '5%',
-                    width: '5%', // Altura do botão Fechar
-                    alignSelf: 'flex-end', // Posiciona o botão à direita
+                    width: '5%',
+                    alignSelf: 'flex-end',
                     marginTop: 'auto',
                   }}
                 >

@@ -42,15 +42,13 @@ const CreatePremiacaoMeta = ({ toggleTheme }) => {
     if (!validateForm()) return;
 
     try {
-      console.log('Enviando dados:', formData); // Log dos dados enviados
-      const response = await createPremiacaoMeta(formData); // Alterado para createPremiacaoMeta
-      console.log('Resposta recebida:', response); // Log da resposta do servidor
+      const response = await createPremiacaoMeta(formData);
       setFormData({
         descricao: '',
         time: '',
         valor: '',
       });
-      navigate('/premiacaoMeta'); // Navega de volta para a lista
+      navigate('/premiacaoMeta');
     } catch (error) {
       console.error('Erro ao criar time:', error);
       setError('Meta ja existente.');

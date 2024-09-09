@@ -31,19 +31,16 @@ const CreateColaborador = ({ toggleTheme }) => {
     }
 
     try {
-      console.log('Enviando dados:', formData); // Log dos dados enviados
       const response = await createColaborador(formData);
-      console.log('Resposta recebida:', response); // Log da resposta do servidor
       setFormData({
         cupom: '',
         nome: '',
         funcao: '',
         time: '',
       });
-      navigate('/colaborador'); // Assuming you want to go back to the list page
+      navigate('/colaborador');
     } catch (error) {
       console.error('Erro ao criar colaborador:', error);
-      //   alert('Erro ao criar colaborador. Verifique o console para mais detalhes.');
     }
   };
 

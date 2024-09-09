@@ -1,4 +1,3 @@
-// AuthContext.js
 import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
@@ -6,7 +5,6 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Funções para login e logout
   const login = (userData) => setUser(userData);
   const logout = () => setUser(null);
 

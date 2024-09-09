@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggleButton from '../components/ThemeToggleButton';
-import { getColaboradorData } from '../services/apiService'; // Importe a função
+import { getColaboradorData } from '../services/apiService';
 
 const Login = ({ toggleTheme }) => {
   const [username, setUsername] = useState('');
@@ -13,13 +13,11 @@ const Login = ({ toggleTheme }) => {
 
   const handleLogin = async () => {
     try {
-      const colaboradores = await getColaboradorData(); // Obtém os dados dos colaboradores
+      const colaboradores = await getColaboradorData();
 
-      // Verifica se o username existe na lista de colaboradores
       const colaborador = colaboradores.find(colaborador => colaborador.cupom === username);
 
       if (colaborador) {
-        // Armazenar informações do colaborador no localStorage
         localStorage.setItem('user', JSON.stringify({
           cupom: colaborador.cupom,
           nome: colaborador.nome,
@@ -27,16 +25,13 @@ const Login = ({ toggleTheme }) => {
           time: colaborador.time,
         }));
 
-        // Simular autenticação e obter informações do usuário
         const simulatedUser = {
-          name: colaborador.nome, // Nome do usuário a partir do colaborador
-          avatar: 'https://example.com/avatar.jpg', // URL fictícia para o avatar
+          name: colaborador.nome,
+          avatar: 'https://example.com/avatar.jpg',
         };
 
-        // Armazenar informações do usuário no localStorage
         localStorage.setItem('simulatedUser', JSON.stringify(simulatedUser));
 
-        // Navegar para a página inicial após o login
         navigate('/home');
       } else {
         setError('Usuário não encontrado');
@@ -101,7 +96,7 @@ const Login = ({ toggleTheme }) => {
         sx={{
           backdropFilter: 'blur(5px)',
           backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? 'rgba(230, 230, 230, 0.5)' : 'rgba(245, 245, 245, 0.5)', // Mais transparente
+            theme.palette.mode === 'dark' ? 'rgba(230, 230, 230, 0.5)' : 'rgba(245, 245, 245, 0.5)',
           borderRadius: 1,
           boxShadow: 3,
           padding: 3,
@@ -117,7 +112,7 @@ const Login = ({ toggleTheme }) => {
           component="img"
           src="/csLogo.png"
           alt="Company Logo"
-          sx={{ marginTop:'30px',maxWidth: '400px', width: '100%', height: 'auto' }}
+          sx={{ marginTop: '30px', maxWidth: '400px', width: '100%', height: 'auto' }}
         />
         <Typography variant="h4" gutterBottom>
           Carmen Steffens
