@@ -4,6 +4,7 @@ import {
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import CheckIcon from '@mui/icons-material/Check';
+import PrintIcon from '@mui/icons-material/Print';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import InputOutlinedIcon from '@mui/icons-material/InputOutlined';
 import SidebarMenu from '../../components/SidebarMenu';
@@ -59,7 +60,7 @@ const Closing = ({ toggleTheme }) => {
     let filtered = data;
     if (filterMesAno) {
       filtered = filtered.filter((item) =>
-        item.mes_ano && item.mes_ano.toLowerCase().includes(filterMesAno.toLowerCase())
+        item.mes_ano.toLowerCase().includes(filterMesAno.toLowerCase()) && item.mes_ano
       );
     }
     setFilteredData(filtered);
@@ -110,15 +111,15 @@ const Closing = ({ toggleTheme }) => {
 
         return (
           <>
-            <IconButton onClick={() => handleOpenModal(params.row.mes_ano)}>
-              <InputOutlinedIcon sx={{ color: 'blue', fontSize: 24 }} />
-            </IconButton>
             <IconButton onClick={handleClick} disabled={hasDate}>
               {hasDate ? (
                 <CheckIcon sx={{ color: 'green', fontSize: 24 }} />
               ) : (
                 <InputOutlinedIcon sx={{ color: 'gray', fontSize: 24 }} />
               )}
+            </IconButton>
+            <IconButton onClick={() => handleOpenModal(params.row.mes_ano)}>
+              <PrintIcon sx={{ color: 'gray', fontSize: 24 }} />
             </IconButton>
           </>
         );
@@ -240,7 +241,7 @@ const Closing = ({ toggleTheme }) => {
     });
 
     if (mostRecentItem && mostRecentItem.mes_ano) {
-      const [year, month] = mostRecentItem.mes_ano.split('-');
+      const [month, year] = mostRecentItem.mes_ano.split('-');
       let nextMonth = parseInt(month, 10) + 1;
       let nextYear = parseInt(year, 10);
 
@@ -250,7 +251,7 @@ const Closing = ({ toggleTheme }) => {
       }
 
       const nextMonthStr = String(nextMonth).padStart(2, '0');
-      const nextMonthYear = `${nextYear}-${nextMonthStr}`;
+      const nextMonthYear = `${nextMonthStr}-${nextYear}`;
 
       const newItem = {
         id: nextMonthYear,
@@ -306,27 +307,44 @@ const Closing = ({ toggleTheme }) => {
       doc.text(`Time: ${user.time || 'Desconhecido'}`, 14, 20);
     }
 
-    const totalValue = modalData.reduce((sum, row) => sum + parseFloat(row.total_receber || '0'), 0);
+    const sortedModalData = [...modalData].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+    const totalValue = sortedModalData.reduce((sum, row) => sum + parseFloat(row.total_receber || '0'), 0);
     const numberFormatter = new Intl.NumberFormat('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+
     autoTable(doc, {
       startY: 25,
-      head: [['Nome', 'Total Comissional', 'Meta', 'Porcentagem', 'Valor Comissão', 'Premiação Meta', 'Premiação Reconquista', 'Valor Total']],
-      body: modalData.map((row) => [
-        row.nome || '',
-        numberFormatter.format(parseFloat(row.total_comissional || '0')),
-        row.meta_atingida || '',
-        `${numberFormatter.format(parseFloat(row.porcentagem_meta || '0') * 100)}%`,
-        numberFormatter.format(parseFloat(row.valor_comissao || '0')),
-        numberFormatter.format(parseFloat(row.premiacao_meta || '0')),
-        numberFormatter.format(
-          parseFloat(row.vlr_total_recon_mes_ant || '0') +
-          parseFloat(row.vlr_total_reco || '0')
-        ),
-        numberFormatter.format(parseFloat(row.total_receber || '0')),
-      ]),
+      head: [
+        ['Nome', 'Total Comissional', 'Meta', 'Porcentagem', 'Valor Comissão', 'Premiação Meta']
+          .concat(user?.time === "Reconquista" ? ['Premiação Reconquista'] : [])
+          .concat(['Valor Total']),
+      ],
+      body: sortedModalData.map((row) => {
+        // Cálculo da Premiação Reconquista (caso aplicável)
+        const premiacaoReconquista = parseFloat(row.vlr_total_recon_mes_ant || '0') +
+          parseFloat(row.vlr_total_reco || '0');
+
+        // Cálculo do Valor Total incluindo ou não a Premiação Reconquista
+        const valorTotal = parseFloat(row.total_comissional || '0') +
+          parseFloat(row.valor_comissao || '0') +
+          parseFloat(row.premiacao_meta || '0') +
+          (user?.time === "Reconquista" ? premiacaoReconquista : 0);
+
+        return [
+          row.nome || '',
+          numberFormatter.format(parseFloat(row.total_comissional || '0')),
+          row.meta_atingida || '',
+          `${numberFormatter.format(parseFloat(row.porcentagem_meta || '0') * 100)}%`,
+          numberFormatter.format(parseFloat(row.valor_comissao || '0')),
+          numberFormatter.format(parseFloat(row.premiacao_meta || '0')),
+          ...(user?.time === "Reconquista"
+            ? [numberFormatter.format(premiacaoReconquista)]
+            : []),
+          numberFormatter.format(row.total_receber),  // Valor Total atualizado corretamente
+        ];
+      }),
       headStyles: {
         fillColor: [41, 128, 186],
         textColor: [255, 255, 255],
@@ -339,7 +357,6 @@ const Closing = ({ toggleTheme }) => {
         halign: 'center',
       },
       didDrawPage: (data) => {
-
         const totalPages = doc.internal.getNumberOfPages();
         if (data.pageNumber === totalPages) {
           const text = `Total Comissional: ${numberFormatter.format(totalValue)}`;
@@ -354,6 +371,7 @@ const Closing = ({ toggleTheme }) => {
 
     doc.save(`relatorio-Comissão-${mesAno}.pdf`);
   };
+
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -492,3 +510,27 @@ const Closing = ({ toggleTheme }) => {
 };
 
 export default Closing;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

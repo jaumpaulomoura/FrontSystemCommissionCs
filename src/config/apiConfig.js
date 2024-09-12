@@ -11,12 +11,14 @@ export const API_ENDPOINTS = {
   PEDIDOS_DIARIO: `${API_BASE_URL}/ordersByDay`,
   PEDIDOS_MENSAL: `${API_BASE_URL}/ordersByMonth`,
   TICKET: `${API_BASE_URL}/ticket`,
-  TICKETCUPOM: `${API_BASE_URL}/ticket/update-coupon`,
+  TICKETCUPOM: `${API_BASE_URL}/ticket/update-cupom`,
+  TICKETSTATUS: `${API_BASE_URL}/ticket/update-status`,
   CLOSING:`${API_BASE_URL}/closing`,
   CLOSINGGROUP:`${API_BASE_URL}/closingGroup`,
   CLOSINGORDER:`${API_BASE_URL}/closingOrder`,
   RECONQUEST:`${API_BASE_URL}/reconquest`,
   RECONQUESTGROUP:`${API_BASE_URL}/reconquestGroup`,
+
 
 
 };

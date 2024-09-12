@@ -57,7 +57,7 @@ const App = () => {
             <Route path="/order" element={<Order toggleTheme={toggleTheme} />} />
             <Route path="/closing" element={<Closing toggleTheme={toggleTheme} />} />
             <Route path="/closing/create" element={<CreateClosing toggleTheme={toggleTheme} />} />
-            <Route path="/closing/create/:mes_ano" element={<CreateClosing toggleTheme={toggleTheme} />} /> {/* Rota para consumir mes_ano */}
+            <Route path="/closing/create/:mes_ano" element={<CreateClosing toggleTheme={toggleTheme} />} /> 
             <Route path="/reconquest" element={<Reconquest toggleTheme={toggleTheme} />} />
           </Routes>
         </Router>

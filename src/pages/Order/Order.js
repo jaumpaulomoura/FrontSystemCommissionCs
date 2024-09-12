@@ -27,11 +27,14 @@ const Order = ({ toggleTheme }) => {
     setLoading(true);
     try {
       const result = await getFilteredOrderData(filterStartDate, filterEndDate);
+      console.log('filterStartDate',filterStartDate)
+      console.log('filterEndDate',filterEndDate)
       const resultWithIds = result.map(order => ({
         id: order.pedido,
         ...order,
       }));
       setData(resultWithIds);
+      console.log('Dados recebidos:', resultWithIds);
     } catch (error) {
       setError('Erro ao buscar dados de pedidos.');
       console.error('Erro ao buscar dados de pedidos:', error);
@@ -40,38 +43,48 @@ const Order = ({ toggleTheme }) => {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = data;
+// Função para aplicar filtros aos dados
+const applyFilters = () => {
+  let filtered = data;
 
-    if (filterOrderid) {
-      filtered = filtered.filter(order =>
-        String(order.pedido).toLowerCase().includes(filterOrderid.toLowerCase())
-      );
-    }
-    if (filterIdProfile) {
-      filtered = filtered.filter(order =>
-        String(order.id_cliente).toLowerCase().includes(filterIdProfile.toLowerCase())
-      );
-    }
+  // Aplicar filtro de Order ID
+  if (filterOrderid) {
+    filtered = filtered.filter(order =>
+      String(order.pedido).toLowerCase().includes(filterOrderid.toLowerCase())
+    );
+  }
 
-    if (filterStartDate && filterEndDate) {
-      filtered = filtered.filter(order =>
-        new Date(order.data_submissao) >= new Date(filterStartDate) &&
-        new Date(order.data_submissao) <= new Date(filterEndDate)
-      );
-    }
-    if (filterCupom) {
-      filtered = filtered.filter((item) =>
-        item.cupom_vendedora &&
-        item.cupom_vendedora.toLowerCase().includes(filterCupom.toLowerCase())
-      );
-    }
-    setFilteredData(filtered);
-  };
+  // Aplicar filtro de Profile ID
+  if (filterIdProfile) {
+    filtered = filtered.filter(order =>
+      String(order.id_cliente).toLowerCase().includes(filterIdProfile.toLowerCase())
+    );
+  }
 
-  useEffect(() => {
-    applyFilters();
-  }, [data, filterOrderid, filterIdProfile, filterStartDate, filterCupom, filterEndDate]);
+  // Aplicar filtro de data
+  // if (filterStartDate && filterEndDate) {
+  //   filtered = filtered.filter(order =>
+  //     new Date(order.data_submissao) >= new Date(filterStartDate) &&
+  //     new Date(order.data_submissao) <= new Date(filterEndDate)
+  //   );
+  // }
+
+  // Aplicar filtro de cupom
+  if (filterCupom) {
+    filtered = filtered.filter(order =>
+      order.cupom_vendedora &&
+      order.cupom_vendedora.toLowerCase().includes(filterCupom.toLowerCase())
+    );
+  }
+
+  setFilteredData(filtered);
+  console.log('filteredData após filtros:', filtered);
+};
+
+useEffect(() => {
+  applyFilters();
+}, [data, filterOrderid, filterIdProfile,  filterCupom]);
+
 
   const handleSearch = () => {
     fetchData();

@@ -6,7 +6,7 @@ import NotesIcon from '@mui/icons-material/Notes';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
-import { getFilteredTicketData, updateTicket, updateTicketCupom } from '../../services/apiService';
+import { getFilteredTicketData, updateTicket, updateTicketCupom,updateTicketStatus } from '../../services/apiService';
 import { debounce } from 'lodash';
 
 const Ticket = ({ toggleTheme }) => {
@@ -128,24 +128,33 @@ const Ticket = ({ toggleTheme }) => {
         status,
         dateupdated: new Date()
       });
-
+  
       const updatedTicket = data.find(ticket => ticket.id === id);
-
-      if (status === 'Autorizado' && updatedTicket) {
-        await updateTicketCupom(updatedTicket.orderId, updatedTicket.cupomvendedora);
+  
+      if (updatedTicket) {
+        if (status === 'Autorizado') {
+          if (updatedTicket.reason === 'Status para Aprovado') {
+            await updateTicketStatus(updatedTicket.orderId, 'APPROVED');
+          } else if (updatedTicket.reason === 'Status para Cancelado') {
+            await updateTicketStatus(updatedTicket.orderId, 'REMOVED');
+          } else {
+            await updateTicketCupom(updatedTicket.orderId, updatedTicket.cupomvendedora);
+          }
+        }
+  
+        setData(prevData =>
+          prevData.map(ticket =>
+            ticket.id === id ? { ...ticket, status } : ticket
+          )
+        );
+  
+        setSuccessMessage(`Ticket ${status === 'Autorizado' ? 'autorizado' : 'não autorizado'} com sucesso!`);
       }
-
-      setData(prevData =>
-        prevData.map(ticket =>
-          ticket.id === id ? { ...ticket, status } : ticket
-        )
-      );
-
-      setSuccessMessage(`Ticket ${status === 'Autorizado' ? 'autorizado' : 'não autorizado'} com sucesso!`);
     } catch (error) {
       setErrorMessage(`Erro ao ${status === 'Autorizado' ? 'autorizar' : 'não autorizar'} o ticket.`);
     }
   };
+  
   const handleStatusChange = (event) => {
     const value = event.target.value;
 

@@ -5,6 +5,8 @@ import SidebarMenu from '../../components/SidebarMenu';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { useNavigate } from 'react-router-dom';
 import { getFilteredReconquestData } from '../../services/apiService';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Reconquest = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -21,7 +23,14 @@ const Reconquest = ({ toggleTheme }) => {
   const [filterProfileId, setFilterProfileId] = useState('');
 
   const navigate = useNavigate();
-
+  const formatDate = (dateString) => {
+    try {
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}/${year}`;
+    } catch {
+      return 'Data inválida';
+    }
+  };
   const fetchData = async () => {
     try {
 
@@ -31,6 +40,7 @@ const Reconquest = ({ toggleTheme }) => {
         ...reconquest,
       }));
       setData(resultWithIds);
+      console.log('resultWithIds', resultWithIds)
     } catch (error) {
       setError('Erro ao buscar dados de pedidos.');
       console.error('Erro ao buscar dados de pedidos:', error);
@@ -63,7 +73,7 @@ const Reconquest = ({ toggleTheme }) => {
 
   useEffect(() => {
     applyFilters();
-  }, [data, filterReconquestid, filterStartDate, filterEndDate, statusFilter, filterProfileId]);
+  }, [data, filterReconquestid,  statusFilter, filterProfileId]);
 
   const handleSearch = () => {
     setLoading(true);
@@ -163,6 +173,70 @@ const Reconquest = ({ toggleTheme }) => {
 
 
 
+
+
+  const generatePDF = (data) => {
+    const doc = new jsPDF('landscape');
+    doc.setFont("Helvetica", "normal");
+
+    const now = new Date();
+    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const formattedTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+    doc.setFontSize(8);
+    doc.text(`Data: ${formattedDate}`, doc.internal.pageSize.width - 10, 7, { align: 'right' });
+    doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
+    doc.text('Relatório de Reconquista', 14, 22);
+    // Define as colunas e os dados
+    const columns = [
+      { header: 'Cliente', dataKey: 'cupom_vendedora' },
+      { header: 'ID Cliente', dataKey: 'id_cliente' },
+      { header: 'Primeira Compra do Mês', dataKey: 'min_data' },
+      { header: 'Última Compra', dataKey: 'last_order' },
+      { header: 'Dias', dataKey: 'dias' },
+      { header: 'Status', dataKey: 'Status' },
+      { header: 'Última Compra do Mês Anterior', dataKey: 'min_data_mes_anterior' },
+      { header: 'Última Compra Antes do Mês Anterior', dataKey: 'last_order_mes_anterior' },
+      { header: 'Dias Até o Mês Anterior', dataKey: 'dias_mes_anterior' },
+    ];
+
+    const rows = data.map(row => ({
+      cupom_vendedora: row.cupom_vendedora,
+      id_cliente: row.id_cliente,
+      min_data: row.min_data ? formatDate(row.min_data) : 'Data não disponível',
+      last_order: row.last_order ? formatDate(row.last_order) : 'Data não disponível',
+      dias: row.dias,
+      Status: row.Status,
+      min_data_mes_anterior: row.min_data_mes_anterior ? formatDate(row.min_data_mes_anterior) : '',
+      last_order_mes_anterior: row.last_order_mes_anterior ? formatDate(row.last_order_mes_anterior) : '',
+      dias_mes_anterior: row.dias_mes_anterior,
+    }));
+
+    // Adiciona a tabela ao PDF
+    autoTable(doc, {
+      columns: columns,
+      body: rows,
+      startY: 30,
+      headStyles: {
+        fillColor: [41, 128, 186],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        valign: 'middle',
+        halign: 'center',
+      },
+    });
+
+    // Salva o PDF
+    doc.save('relatorio_reconquista.pdf');
+  };
+
+
+
+
+
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -236,6 +310,22 @@ const Reconquest = ({ toggleTheme }) => {
                   Buscar
                 </Button>
               </Grid>
+              <Button
+                onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+                sx={{
+                  mb: 5,
+                  backgroundColor: 'green',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'darkgreen',
+                  },
+                  height: '50%',
+                  width: '15%'
+                }}
+              >
+                Exportar PDF
+              </Button>
+
             </Grid>
           </Grid>
         </Paper>

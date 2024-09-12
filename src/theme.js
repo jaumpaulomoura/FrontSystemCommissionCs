@@ -60,18 +60,18 @@ const createMyTheme = (mode) => createTheme({
         root: {
           '& .MuiOutlinedInput-root': {
             '& fieldset': {
-              borderColor: mode === 'light' ? grey[500] : grey[600], // Border color
+              borderColor: mode === 'light' ? grey[500] : grey[600], 
             },
             '&:hover fieldset': {
-              borderColor: mode === 'light' ? '#fff' : '#bbb', // Border color on hover
+              borderColor: mode === 'light' ? '#fff' : '#bbb', 
             },
             '&.Mui-focused fieldset': {
-              borderColor: mode === 'light' ? '#fff' : '#bbb', // Border color when focused
+              borderColor: mode === 'light' ? '#fff' : '#bbb',
             },
           },
           '& .MuiInputBase-input': {
-            backgroundColor: mode === 'light' ? '#fff' : '#424242', // Background color of input field
-            color: mode === 'light' ? grey[900] : '#fff', // Text color of input field
+            backgroundColor: mode === 'light' ? '#fff' : '#424242', 
+            color: mode === 'light' ? grey[900] : '#fff',
           },
         },
       },

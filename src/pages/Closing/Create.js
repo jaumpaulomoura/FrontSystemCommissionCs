@@ -26,7 +26,7 @@ const CreateClosing = ({ toggleTheme }) => {
 
   const getStartDate = () => {
     if (mes_ano) {
-      const [year, month] = mes_ano.split('-');
+      const [ month, year] = mes_ano.split('-');
       return new Date(`${year}-${month}-01`).toISOString().split('T')[0];
     }
     return '';
@@ -34,28 +34,31 @@ const CreateClosing = ({ toggleTheme }) => {
 
   const getEndDate = () => {
     if (mes_ano) {
-      const [year, month] = mes_ano.split('-');
+      const [month, year] = mes_ano.split('-');
       const lastDay = new Date(year, month, 0).getDate();
       return new Date(year, month - 1, lastDay).toISOString().split('T')[0];
     }
     return '';
   };
-
   const filterStartDate = getStartDate();
   const filterEndDate = getEndDate();
 
   const getPreviousMonthYear = (currentMonth, currentYear) => {
+    if (currentMonth < 1 || currentMonth > 12 || currentYear < 0) {
+      throw new Error('Invalid month or year provided');
+    }
+  
     let month = currentMonth - 1;
     let year = currentYear;
-
+  
     if (month < 1) {
       month = 12;
       year -= 1;
     }
-
+  
     return { month, year };
   };
-
+  
 
 
 
@@ -85,7 +88,7 @@ const CreateClosing = ({ toggleTheme }) => {
 
           const [currentYear, currentMonth] = filterStartDate.split('-').map(Number);
           const { month, year } = getPreviousMonthYear(currentMonth, currentYear);
-          const mesAno = `${year}-${month.toString().padStart(2, '0')}`;
+          const mesAno = `${month.toString().padStart(2, '0')}-${year}`;
           const vlrReconquestAnterior = await getFilteredClosingsData(mesAno);
 
           reconquestAnteriorMap = vlrReconquestAnterior.reduce((acc, item) => {
@@ -244,11 +247,14 @@ const CreateClosing = ({ toggleTheme }) => {
 
 
     const now = new Date().toISOString();
-
+    const formatMesAno = (mes, ano) => {
+      const formattedMes = mes.toString().padStart(2, '0'); // Garante que o mês tenha dois dígitos
+      return `${formattedMes}-${ano}`;
+    };
     const formData = filteredData.map((item) => ({
       mes: item.mes || '',
       ano: item.ano || '',
-      mes_ano: `${item.ano}-${item.mes}`,
+      mes_ano: formatMesAno(item.mes, item.ano),
       cupom_vendedora: item.cupom_vendedora || '',
       total_pago: item.total_valor_pago || 0,
       total_frete: item.total_valor_frete || 0,
@@ -262,7 +268,7 @@ const CreateClosing = ({ toggleTheme }) => {
       vlr_total_reco: item.total_valor_premiacao || 0,
       qtd_repagar: item.qtd_repagar || 0,
       vlr_recon_mes_ant: item.valor_repagar || 0,
-      vlr_total_recon_mes_ant: 0,
+      vlr_total_recon_mes_ant: item.valorTotalRepagar|| 0,
       premiacao_reconquista: item.valorTotalRepagar || 0,
       total_receber: item.valorTotal || 0
     }));

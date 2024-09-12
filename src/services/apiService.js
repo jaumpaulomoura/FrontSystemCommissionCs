@@ -436,7 +436,17 @@ export const updateTicketCupom = async (orderId, novoCupom) => {
 
 
 
-
+// Função para atualizar um ticket
+export const updateTicketStatus = async (orderId, novoStatus) => {
+  try {
+    const data = { order_id: orderId, novo_status: novoStatus };
+    const response = await axios.put(`${API_ENDPOINTS.TICKETSTATUS}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao atualizar ticket:', error);
+    throw error;
+  }
+};
 
 // Função para obter dados de ticket
 export const getOrderData = async () => {
@@ -462,19 +472,22 @@ export const getFilteredOrderData = async (startDate, endDate) => {
 
     const params = new URLSearchParams();
 
-    if (user.funcao === 'consultora') {
-      params.append('cupomvendedora', user.cupom);
-    } else {
-      params.append('time', user.time);
-    }
-
+   
     if (startDate) {
       params.append('startDate', startDate);
     }
     if (endDate) {
       params.append('endDate', endDate);
     }
+    if (user.funcao === 'consultora') {
+      params.append('cupomvendedora', user.cupom);
+    } else {
+      params.append('time', user.time);
+    }
 
+  console.log('startDate',startDate)
+  console.log('endDate',endDate)
+  console.log('params', params.toString());
     const response = await axios.get(`${API_ENDPOINTS.ORDER}?${params.toString()}`);
     return response.data;
   } catch (error) {
