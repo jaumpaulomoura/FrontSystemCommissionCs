@@ -246,7 +246,7 @@ useEffect(() => {
                   sx={{ minWidth: 120 }}
                 />
               </Grid>
-              {userFuncao !== 'consultora' && (
+              {userFuncao !== 'Consultora' && (
                 <Grid item xs={12} sm={2} md={1.2}>
                   <TextField
                     label="Filtrar por Cupom Vendedora"

@@ -4,6 +4,10 @@ import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
 import { createColaborador } from '../../services/apiService';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 const CreateColaborador = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -11,8 +15,11 @@ const CreateColaborador = ({ toggleTheme }) => {
   const [formData, setFormData] = useState({
     cupom: '',
     nome: '',
+    sobrenome: '',  
     funcao: '',
     time: '',
+    email: '',
+    password: ''
   });
 
   const handleInputChange = (e) => {
@@ -25,7 +32,7 @@ const CreateColaborador = ({ toggleTheme }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.cupom || !formData.nome || !formData.funcao || !formData.time) {
+    if (!formData.cupom || !formData.nome || !formData.sobrenome || !formData.funcao || !formData.time || !formData.email || !formData.password) {  // Corrigido para validar todos os campos
       alert('Todos os campos são obrigatórios!');
       return;
     }
@@ -35,8 +42,11 @@ const CreateColaborador = ({ toggleTheme }) => {
       setFormData({
         cupom: '',
         nome: '',
+        sobrenome: '',  
         funcao: '',
         time: '',
+        email: '',
+        password: ''
       });
       navigate('/colaborador');
     } catch (error) {
@@ -48,6 +58,16 @@ const CreateColaborador = ({ toggleTheme }) => {
     setSidebarOpen(!sidebarOpen);
   };
 
+
+  const [showPassword, setShowPassword] = useState(false);
+
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+
+  // Função para evitar que a tecla Enter seja pressionada
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -76,6 +96,20 @@ const CreateColaborador = ({ toggleTheme }) => {
               label="Nome"
               name="nome"
               value={formData.nome}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+              variant="filled"
+              sx={{
+                width: '400px',
+                height: '56px',
+                borderRadius: '8px',
+              }}
+            />
+            <TextField
+              label="Sobrenome"
+              name="sobrenome"
+              value={formData.sobrenome}
               onChange={handleInputChange}
               fullWidth
               margin="normal"
@@ -124,7 +158,51 @@ const CreateColaborador = ({ toggleTheme }) => {
               <MenuItem value="Reconquista">Reconquista</MenuItem>
               <MenuItem value="Todos">Todos</MenuItem>
             </TextField>
-
+            <TextField
+              label="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+              variant="filled"
+              placeholder="Digite seu email"
+              sx={{
+                width: '400px',
+                height: '56px',
+                borderRadius: '8px',
+              }}
+            />
+            <TextField
+              label="Password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              value={formData.password}
+              onChange={handleInputChange}
+              fullWidth
+              margin="normal"
+              variant="filled"
+              placeholder="Digite sua senha"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                width: '400px',
+                height: '56px',
+                borderRadius: '8px',
+              }}
+            />
             <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
               <Button type="submit" variant="contained" color="primary" sx={{ borderRadius: '8px' }}>
                 Salvar

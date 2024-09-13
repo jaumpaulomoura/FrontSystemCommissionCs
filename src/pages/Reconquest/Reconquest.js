@@ -73,7 +73,7 @@ const Reconquest = ({ toggleTheme }) => {
 
   useEffect(() => {
     applyFilters();
-  }, [data, filterReconquestid,  statusFilter, filterProfileId]);
+  }, [data, filterReconquestid, statusFilter, filterProfileId]);
 
   const handleSearch = () => {
     setLoading(true);
@@ -101,6 +101,7 @@ const Reconquest = ({ toggleTheme }) => {
   };
 
   const columns = [
+    { field: 'nome', headerName: 'Nome', width: 150 },
     { field: 'cupom_vendedora', headerName: 'Cliente', width: 150 },
     { field: 'id_cliente', headerName: 'Cliente', width: 150 },
     {
@@ -109,7 +110,7 @@ const Reconquest = ({ toggleTheme }) => {
       width: 180,
       valueFormatter: (params) => {
         const dateValue = params;
-        if (!dateValue) return 'Data não disponível';
+        if (!dateValue) return '';
         try {
           const [year, month, day] = dateValue.split('-');
           const formattedDate = `${day}/${month}/${year}`;
@@ -126,7 +127,7 @@ const Reconquest = ({ toggleTheme }) => {
       width: 180,
       valueFormatter: (params) => {
         const dateValue = params;
-        if (!dateValue) return 'Data não disponível';
+        if (!dateValue) return '';
         try {
           const [year, month, day] = dateValue.split('-');
           const formattedDate = `${day}/${month}/${year}`;
@@ -188,7 +189,8 @@ const Reconquest = ({ toggleTheme }) => {
     doc.text('Relatório de Reconquista', 14, 22);
     // Define as colunas e os dados
     const columns = [
-      { header: 'Cliente', dataKey: 'cupom_vendedora' },
+      { header: 'Nome', dataKey: 'nome' },
+      { header: 'Cupom', dataKey: 'cupom_vendedora' },
       { header: 'ID Cliente', dataKey: 'id_cliente' },
       { header: 'Primeira Compra do Mês', dataKey: 'min_data' },
       { header: 'Última Compra', dataKey: 'last_order' },
@@ -198,12 +200,15 @@ const Reconquest = ({ toggleTheme }) => {
       { header: 'Última Compra Antes do Mês Anterior', dataKey: 'last_order_mes_anterior' },
       { header: 'Dias Até o Mês Anterior', dataKey: 'dias_mes_anterior' },
     ];
-
+    const columnStyles = {
+      nome: { cellWidth: 40 }
+    }
     const rows = data.map(row => ({
+      nome: row.nome,
       cupom_vendedora: row.cupom_vendedora,
       id_cliente: row.id_cliente,
-      min_data: row.min_data ? formatDate(row.min_data) : 'Data não disponível',
-      last_order: row.last_order ? formatDate(row.last_order) : 'Data não disponível',
+      min_data: row.min_data ? formatDate(row.min_data) : '',
+      last_order: row.last_order ? formatDate(row.last_order) : '',
       dias: row.dias,
       Status: row.Status,
       min_data_mes_anterior: row.min_data_mes_anterior ? formatDate(row.min_data_mes_anterior) : '',
@@ -215,6 +220,7 @@ const Reconquest = ({ toggleTheme }) => {
     autoTable(doc, {
       columns: columns,
       body: rows,
+      columnStyles: columnStyles,
       startY: 30,
       headStyles: {
         fillColor: [41, 128, 186],
@@ -259,6 +265,7 @@ const Reconquest = ({ toggleTheme }) => {
                   fullWidth
                   size="small"
                   InputLabelProps={{ shrink: true }}
+                  sx={{ mt: 1.5,ml:1.5 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={2}>
@@ -271,6 +278,7 @@ const Reconquest = ({ toggleTheme }) => {
                   fullWidth
                   size="small"
                   InputLabelProps={{ shrink: true }}
+                  sx={{ mt: 1.5,ml:1.5  }}
                 />
               </Grid>
               <Grid item md={2}>
@@ -281,6 +289,7 @@ const Reconquest = ({ toggleTheme }) => {
                     value={statusFilter}
                     onChange={handleStatusChange}
                     renderValue={(selected) => selected.join(', ')}
+                    sx={{ mt: 1.5, height:'47px',ml:1.5  }}
                   >
                     <MenuItem value="Todos">Todos</MenuItem>
                     <MenuItem value="Reconquista">Reconquista</MenuItem>
@@ -296,6 +305,7 @@ const Reconquest = ({ toggleTheme }) => {
                   onChange={(e) => setFilterProfileId(e.target.value)}
                   fullWidth
                   size="small"
+                  sx={{ mt: 1.5,ml:1.5  }}
                 />
               </Grid>
 
@@ -303,29 +313,31 @@ const Reconquest = ({ toggleTheme }) => {
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ mt: 1.5 }}
+                  sx={{ mt: 1.5,ml:1.5  }}
                   onClick={handleSearch}
                   fullWidth
                 >
                   Buscar
                 </Button>
               </Grid>
-              <Button
-                onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
-                sx={{
-                  mb: 5,
-                  backgroundColor: 'green',
-                  color: 'white',
-                  '&:hover': {
-                    backgroundColor: 'darkgreen',
-                  },
-                  height: '50%',
-                  width: '15%'
-                }}
-              >
-                Exportar PDF
-              </Button>
-
+              <Grid item xs={12} sm={12} md={2}>
+                <Button
+                  onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+                  sx={{
+                    mt: 1.5,
+                    ml:1.5, 
+                    backgroundColor: 'green',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'darkgreen',
+                    },
+                    height: '36px',
+                    width: '70%'
+                  }}
+                >
+                  Exportar PDF
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
         </Paper>
@@ -368,3 +380,19 @@ const Reconquest = ({ toggleTheme }) => {
 };
 
 export default Reconquest;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

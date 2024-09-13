@@ -237,7 +237,7 @@ const Meta = ({ toggleTheme }) => {
           <ThemeToggleButton toggleTheme={toggleTheme} />
         </Box>
         <Typography variant="h4">Meta</Typography>
-        {user && user.funcao !== 'consultora' && (
+        {user && user.funcao !== 'Consultora' && (
           <Button variant="contained" color="primary" sx={{
             mt: 2,
             backgroundColor: '#45a049',

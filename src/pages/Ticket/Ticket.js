@@ -232,7 +232,7 @@ const Ticket = ({ toggleTheme }) => {
       renderCell: (params) => {
         const user = JSON.parse(localStorage.getItem('user'));
 
-        if (params.row.status === 'Aberto' && user && user.funcao !== 'consultora') {
+        if (params.row.status === 'Aberto' && user && user.funcao !== 'Consultora') {
           return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
               <Button
@@ -269,7 +269,7 @@ const Ticket = ({ toggleTheme }) => {
         const user = JSON.parse(localStorage.getItem('user'));
 
 
-        if (params.row.status === 'Aberto' && user && user.funcao !== 'consultora') {
+        if (params.row.status === 'Aberto' && user && user.funcao !== 'Consultora') {
           return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
               <Button
@@ -371,7 +371,7 @@ const Ticket = ({ toggleTheme }) => {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            {userFuncao !== 'consultora' && (
+            {userFuncao !== 'Consultora' && (
               <Grid item xs={12} sm={2} md={1.9}>
                 <TextField
                   label="Filtrar por Cupom Vendedora"

@@ -325,6 +325,7 @@ const Closing = ({ toggleTheme }) => {
         // Cálculo da Premiação Reconquista (caso aplicável)
         const premiacaoReconquista = parseFloat(row.vlr_total_recon_mes_ant || '0') +
           parseFloat(row.vlr_total_reco || '0');
+       
 
         // Cálculo do Valor Total incluindo ou não a Premiação Reconquista
         const valorTotal = parseFloat(row.total_comissional || '0') +
@@ -342,7 +343,7 @@ const Closing = ({ toggleTheme }) => {
           ...(user?.time === "Reconquista"
             ? [numberFormatter.format(premiacaoReconquista)]
             : []),
-          numberFormatter.format(row.total_receber),  // Valor Total atualizado corretamente
+          numberFormatter.format(row.total_receber),  
         ];
       }),
       headStyles: {

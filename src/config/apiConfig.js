@@ -3,6 +3,7 @@ const API_BASE_URL = 'http://localhost:5001/api'; //DEV
 
 
 export const API_ENDPOINTS = {
+  LOGIN: `${API_BASE_URL}/login`,
   COLABORADOR: `${API_BASE_URL}/colaborador`,
   PREMIACAO_META: `${API_BASE_URL}/premiacaoMeta`,
   PREMIACAO_RECONQUISTA: `${API_BASE_URL}/premiacaoReconquista`,

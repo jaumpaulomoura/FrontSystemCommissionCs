@@ -3,22 +3,37 @@ import { Box, Typography, TextField, Button, CircularProgress } from '@mui/mater
 import { useNavigate } from 'react-router-dom';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import { getColaboradorData } from '../services/apiService';
+import { getLogin } from '../services/apiService';
+import { useAuth } from '../context/AuthContext';
 
 const Login = ({ toggleTheme }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setLoading(true);
+    setError('');  // Limpa o erro anterior
     try {
+      // 1. Realiza o login e obtém o token
+      const token = await getLogin(email, password);
+  
+      console.log(token);  // Verifique se o token está correto
+  
+      // 2. Armazena o token no localStorage
+      localStorage.setItem('token', token);
+  
+      // 3. Usa o token para obter os dados do colaborador
       const colaboradores = await getColaboradorData();
-
-      const colaborador = colaboradores.find(colaborador => colaborador.cupom === username);
-
+  
+      // 4. Busca o colaborador pelo email
+      const colaborador = colaboradores.find(colaborador => colaborador.email === email);
       if (colaborador) {
         localStorage.setItem('user', JSON.stringify({
+          email: colaborador.email,
           cupom: colaborador.cupom,
           nome: colaborador.nome,
           funcao: colaborador.funcao,
@@ -32,6 +47,7 @@ const Login = ({ toggleTheme }) => {
 
         localStorage.setItem('simulatedUser', JSON.stringify(simulatedUser));
 
+        login(email);
         navigate('/home');
       } else {
         setError('Usuário não encontrado');
@@ -118,12 +134,12 @@ const Login = ({ toggleTheme }) => {
           Carmen Steffens
         </Typography>
         <TextField
-          label="Usuário"
+          label="Email"
           variant="filled"
           margin="normal"
           fullWidth
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           aria-label="Usuário"
           sx={{ width: '50%' }}
         />

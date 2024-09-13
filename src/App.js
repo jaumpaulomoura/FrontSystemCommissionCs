@@ -20,6 +20,7 @@ import CreateClosing from './pages/Closing/Create';
 import Reconquest from './pages/Reconquest/Reconquest';
 import SidebarMenu from './components/SidebarMenu';
 import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute'; 
 
 const App = () => {
   const [mode, setMode] = useState('dark');
@@ -33,7 +34,7 @@ const App = () => {
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -42,23 +43,22 @@ const App = () => {
           <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
           <Routes>
             <Route path="/" element={<Login toggleTheme={toggleTheme} />} />
-            <Route path="/home" element={<Home toggleTheme={toggleTheme} />} />
-
-            <Route path="/colaborador" element={<Colaborador toggleTheme={toggleTheme} />} />
-            <Route path="/colaborador/create" element={<CreateColaborador toggleTheme={toggleTheme} />} />
-            <Route path="/premiacaoMeta" element={<PremiacaoMeta toggleTheme={toggleTheme} />} />
-            <Route path="/premiacaoMeta/create" element={<CreatePremiacaoMeta toggleTheme={toggleTheme} />} />
-            <Route path="/premiacaoReconquista" element={<PremiacaoReconquista toggleTheme={toggleTheme} />} />
-            <Route path="/premiacaoReconquista/create" element={<CreatePremiacaoReconquista toggleTheme={toggleTheme} />} />
-            <Route path="/meta" element={<Meta toggleTheme={toggleTheme} />} />
-            <Route path="/meta/create" element={<CreateMeta toggleTheme={toggleTheme} />} />
-            <Route path="/ticket" element={<Ticket toggleTheme={toggleTheme} />} />
-            <Route path="/ticket/create" element={<CreateTicket toggleTheme={toggleTheme} />} />
-            <Route path="/order" element={<Order toggleTheme={toggleTheme} />} />
-            <Route path="/closing" element={<Closing toggleTheme={toggleTheme} />} />
-            <Route path="/closing/create" element={<CreateClosing toggleTheme={toggleTheme} />} />
-            <Route path="/closing/create/:mes_ano" element={<CreateClosing toggleTheme={toggleTheme} />} /> 
-            <Route path="/reconquest" element={<Reconquest toggleTheme={toggleTheme} />} />
+            <Route path="/home" element={<PrivateRoute element={<Home toggleTheme={toggleTheme} />} />} />
+            <Route path="/colaborador" element={<PrivateRoute element={<Colaborador toggleTheme={toggleTheme} />} />} />
+            <Route path="/colaborador/create" element={<PrivateRoute element={<CreateColaborador toggleTheme={toggleTheme} />} />} />
+            <Route path="/premiacaoMeta" element={<PrivateRoute element={<PremiacaoMeta toggleTheme={toggleTheme} />} />} />
+            <Route path="/premiacaoMeta/create" element={<PrivateRoute element={<CreatePremiacaoMeta toggleTheme={toggleTheme} />} />} />
+            <Route path="/premiacaoReconquista" element={<PrivateRoute element={<PremiacaoReconquista toggleTheme={toggleTheme} />} />} />
+            <Route path="/premiacaoReconquista/create" element={<PrivateRoute element={<CreatePremiacaoReconquista toggleTheme={toggleTheme} />} />} />
+            <Route path="/meta" element={<PrivateRoute element={<Meta toggleTheme={toggleTheme} />} />} />
+            <Route path="/meta/create" element={<PrivateRoute element={<CreateMeta toggleTheme={toggleTheme} />} />} />
+            <Route path="/ticket" element={<PrivateRoute element={<Ticket toggleTheme={toggleTheme} />} />} />
+            <Route path="/ticket/create" element={<PrivateRoute element={<CreateTicket toggleTheme={toggleTheme} />} />} />
+            <Route path="/order" element={<PrivateRoute element={<Order toggleTheme={toggleTheme} />} />} />
+            <Route path="/closing" element={<PrivateRoute element={<Closing toggleTheme={toggleTheme} />} />} />
+            <Route path="/closing/create" element={<PrivateRoute element={<CreateClosing toggleTheme={toggleTheme} />} />} />
+            <Route path="/closing/create/:mes_ano" element={<PrivateRoute element={<CreateClosing toggleTheme={toggleTheme} />} />} />
+            <Route path="/reconquest" element={<PrivateRoute element={<Reconquest toggleTheme={toggleTheme} />} />} />
           </Routes>
         </Router>
       </AuthProvider>

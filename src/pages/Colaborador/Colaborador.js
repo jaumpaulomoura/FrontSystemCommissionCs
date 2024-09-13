@@ -93,8 +93,11 @@ const Colaborador = ({ toggleTheme }) => {
       try {
         const updatedData = {
           nome: editingColaborador.nome,
+          sobrenome: editingColaborador.sobrenome,
           funcao: editingColaborador.funcao,
           time: editingColaborador.time,
+          email: editingColaborador.email,
+          password: editingColaborador.password,
         };
 
         await updateColaborador(editingColaborador.cupom, updatedData);
@@ -136,8 +139,11 @@ const Colaborador = ({ toggleTheme }) => {
   const columns = [
     { field: 'cupom', headerName: 'Cupom', width: 150 },
     { field: 'nome', headerName: 'Nome', width: 150 },
+    { field: 'sobrenome', headerName: 'Sobrenome', width: 150 },
+    
     { field: 'funcao', headerName: 'Função', width: 200 },
     { field: 'time', headerName: 'Time', width: 150 },
+    { field: 'email', headerName: 'Email', width: 150 },    
     {
       field: 'actions',
       headerName: '',
@@ -322,6 +328,13 @@ const Colaborador = ({ toggleTheme }) => {
                 fullWidth
               />
               <TextField
+                label="SobreNome"
+                variant="outlined"
+                value={editingColaborador.sobrenome}
+                onChange={(e) => setEditingColaborador({ ...editingColaborador, sobrenome: e.target.value })}
+                fullWidth
+              />
+              <TextField
                 label="Função"
                 variant="outlined"
                 value={editingColaborador.funcao}
@@ -333,6 +346,13 @@ const Colaborador = ({ toggleTheme }) => {
                 variant="outlined"
                 value={editingColaborador.time}
                 onChange={(e) => setEditingColaborador({ ...editingColaborador, time: e.target.value })}
+                fullWidth
+              />
+              <TextField
+                label="Email"
+                variant="outlined"
+                value={editingColaborador.email}
+                onChange={(e) => setEditingColaborador({ ...editingColaborador, email: e.target.value })}
                 fullWidth
               />
             </Box>

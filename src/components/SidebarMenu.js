@@ -12,10 +12,12 @@ const SidebarMenu = ({ open, onClose }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user'); 
     navigate('/');
   };
-
+  
+  
   const openLogoutDialog = () => {
     setLogoutDialogOpen(true);
   };
@@ -78,7 +80,7 @@ const SidebarMenu = ({ open, onClose }) => {
               <ListItemText primary="Dashboard" />
             </ListItem>
             <Divider />
-            {user && user.funcao !== 'consultora' && (
+            {user && user.funcao !== 'Consultora' && (
               <>
                 <ListItem button onClick={() => handleNavigation('/colaborador')}>
                   <ListItemIcon>
@@ -128,7 +130,7 @@ const SidebarMenu = ({ open, onClose }) => {
                 <ListItemText primary="Reconquista" />
               </ListItem>
             )}
-            {user && user.funcao !== 'consultora' && (
+            {user && user.funcao !== 'Consultora' && (
               <ListItem button onClick={() => handleNavigation('/Closing')}>
                 <ListItemIcon>
                   <CheckCircleIcon />

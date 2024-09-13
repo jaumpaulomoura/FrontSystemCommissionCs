@@ -31,8 +31,8 @@ const Home = ({ onLogout, toggleTheme }) => {
 
                 let dailySalesData, monthlySalesData, metaData, rankingData;
 
-                dailySalesData = await getFilteredPedidosDiaData(year, month, day, funcao === 'consultora' ? cupomVendedora : '');
-                monthlySalesData = await getFilteredPedidosmensalData(year, month, funcao === 'consultora' ? cupomVendedora : '');
+                dailySalesData = await getFilteredPedidosDiaData(year, month, day, funcao === 'Consultora' ? cupomVendedora : '');
+                monthlySalesData = await getFilteredPedidosmensalData(year, month, funcao === 'Consultora' ? cupomVendedora : '');
                 metaData = await getFilteredMetaData();
 
                 const todaySalesData = dailySalesData.filter(item => item.day_month_year === today);
@@ -51,7 +51,7 @@ const Home = ({ onLogout, toggleTheme }) => {
                 }));
                 setDailyData(dailyChartData);
 
-                if (funcao !== 'consultora') {
+                if (funcao !== 'Consultora') {
                     rankingData = monthlySalesData.reduce((acc, item) => {
                         const cupom = item.cupom_vendedora;
                         if (!acc[cupom]) acc[cupom] = 0;
@@ -85,7 +85,7 @@ const Home = ({ onLogout, toggleTheme }) => {
 
 
                 <Grid container spacing={2} sx={{ display: 'flex', flexWrap: 'wrap', mt: 1 }}>
-                    {userRole === 'consultora' ? (
+                    {userRole === 'Consultora' ? (
                         <>
 
                             <Grid item xs={12} sm={6} md={2.4}>
@@ -141,7 +141,7 @@ const Home = ({ onLogout, toggleTheme }) => {
                         <SalesChart
                             dailyData={dailyData}
                             rankingData={rankingData}
-                            isConsultant={userRole === 'consultora'}
+                            isConsultant={userRole === 'Consultora'}
                         />
                     </Grid>
                 </Grid>
