@@ -5,7 +5,7 @@ import ThemeToggleButton from '../components/ThemeToggleButton';
 import SalesChart from '../components/SalesChart';
 import ProgressBar from '../components/ProgressBar';
 import { getFilteredPedidosDiaData, getFilteredPedidosmensalData, getFilteredMetaData } from '../services/apiService';
-
+import Cookies from 'js-cookie'; 
 const Home = ({ onLogout, toggleTheme }) => {
     const [dailySales, setDailySales] = useState(0);
     const [monthlySales, setMonthlySales] = useState(0);
@@ -24,7 +24,7 @@ const Home = ({ onLogout, toggleTheme }) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const user = JSON.parse(localStorage.getItem('user'));
+                const user = JSON.parse(Cookies.get('user'));
                 const cupomVendedora = user ? user.cupom : '';
                 const funcao = user ? user.funcao : '';
                 setUserRole(funcao);
@@ -54,16 +54,31 @@ const Home = ({ onLogout, toggleTheme }) => {
                 if (funcao !== 'Consultora') {
                     rankingData = monthlySalesData.reduce((acc, item) => {
                         const cupom = item.cupom_vendedora;
-                        if (!acc[cupom]) acc[cupom] = 0;
-                        acc[cupom] += parseFloat(item.valor_bruto);
+                        
+                        // Initialize the cupom entry if it doesn't exist yet
+                        if (!acc[cupom]) {
+                            acc[cupom] = {
+                                nome: item.nome,  // Store the name for the cupom
+                                total: 0          // Start the total at 0
+                            };
+                        }
+                        
+                        // Accumulate the valor_bruto for this cupom
+                        acc[cupom].total += parseFloat(item.valor_bruto);
+                        
                         return acc;
                     }, {});
+                
+                    // Convert the rankingData to an array of objects
                     const rankingChartData = Object.keys(rankingData).map(cupom => ({
                         cupom_vendedora: cupom,
-                        valor_bruto: Number(rankingData[cupom].toFixed(2))
+                        nome: rankingData[cupom].nome,  // Use the stored nome
+                        valor_bruto: Number(rankingData[cupom].total.toFixed(2))
                     }));
+                
                     setRankingData(rankingChartData);
                 }
+                
 
             } catch (error) {
                 console.error('Erro ao buscar dados:', error);

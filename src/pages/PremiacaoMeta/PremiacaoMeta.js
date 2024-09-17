@@ -6,6 +6,8 @@ import SidebarMenu from '../../components/SidebarMenu';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { useNavigate } from 'react-router-dom';
 import { getFilteredPremiacaoMetaData, deletePremiacaoMeta, updatePremiacaoMeta } from '../../services/apiService';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const PremiacaoMeta = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -132,7 +134,8 @@ const PremiacaoMeta = ({ toggleTheme }) => {
   const columns = [
     { field: 'descricao', headerName: 'Descricao', width: 150 },
     { field: 'time', headerName: 'Time', width: 150 },
-    { field: 'valor', headerName: 'Valor', width: 200 },
+    { field: 'valor', headerName: 'Valor', width: 200,
+      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}` },
     {
       field: 'actions',
       headerName: 'Ações',
@@ -204,7 +207,66 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       ),
     },
   ];
+  const generatePDF = (data) => {
+    const doc = new jsPDF('portrait');
+    doc.setFont("Helvetica", "normal");
 
+    const now = new Date();
+    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const formattedTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+    doc.setFontSize(8);
+    doc.text(`Data: ${formattedDate}`, doc.internal.pageSize.width - 10, 7, { align: 'right' });
+    doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
+    doc.setFontSize(12);
+    doc.text('Relatório de Premiação Metas', 18, 24);
+    // Define as colunas e os dados
+    const columns = [
+      { header: 'Descrição', dataKey: 'descricao' },
+      { header: 'Time', dataKey: 'time' },
+      { header: 'Valor', dataKey: 'valor' },
+ 
+    ];
+    const columnStyles = {
+      nome: { cellWidth: 40 }
+    }
+    const rows = data.map(row => ({
+      descricao: row.descricao,
+      time: row.time,
+      valor: row.valor,
+     
+    }));
+    const numberFormatter = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    // Adiciona a tabela ao PDF
+    const formattedRows = rows.map((row) => ({
+      ...row,
+      valor: numberFormatter.format(row.valor), // Format 'valor' field
+    }));
+    
+    autoTable(doc, {
+      columns: columns,
+      body: formattedRows, // Use formatted rows here
+      columnStyles: columnStyles,
+      startY: 30,
+      headStyles: {
+        fillColor: [41, 128, 186],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        valign: 'middle',
+        halign: 'center',
+      },
+    });
+
+    // Salva o PDF
+    doc.save('relatorio_colaborador.pdf');
+  };
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -225,7 +287,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         </Button>
         <Paper sx={{ mt: 2, p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Filtrar por Descricao"
                 variant="filled"
@@ -235,7 +297,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Filtrar por Time"
                 variant="filled"
@@ -245,7 +307,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Filtrar por Valor"
                 variant="filled"
@@ -255,9 +317,26 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-
+        
           </Grid>
         </Paper>
+        <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            sx={{
+              mt: 1.5,
+              backgroundColor: '#45a049',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'darkgreen',
+              },
+              height: '36px',
+              width: '10%', // Diminuir a largura do botão
+            }}
+          >
+            Exportar PDF
+          </Button>
+        </Grid>
         {loading ? (
           <CircularProgress sx={{ mt: 3 }} />
         ) : error ? (
@@ -317,6 +396,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 onChange={(e) => setEditingPremiacaoMeta({ ...editingPremiacaoMeta, valor: e.target.value })}
                 fullWidth
               />
+              
             </Box>
           )}
         </DialogContent>

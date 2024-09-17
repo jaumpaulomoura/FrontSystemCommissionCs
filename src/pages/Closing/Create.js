@@ -5,6 +5,7 @@ import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate, useParams } from 'react-router-dom';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { getFilteredOClosingOrderData, getFilteredReconquestGroupData, getPremiacaoReconquistaData, getFilteredClosingsData, getColaboradorData, createClosing } from '../../services/apiService';
+import Cookies from 'js-cookie'; 
 
 const CreateClosing = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -21,7 +22,7 @@ const CreateClosing = ({ toggleTheme }) => {
 
 
 
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(Cookies.get('user'));
   const userTime = user ? user.time : '';
 
   const getStartDate = () => {

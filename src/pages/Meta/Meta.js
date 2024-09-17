@@ -6,6 +6,7 @@ import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
 import { getFilteredMetaData, deleteMeta, updateMeta } from '../../services/apiService';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
+import Cookies from 'js-cookie'; 
 
 const Meta = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -23,7 +24,7 @@ const Meta = ({ toggleTheme }) => {
   const [metaInfo, setMetaInfo] = useState({});
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(Cookies.get('user'));
 
 
   useEffect(() => {
@@ -208,12 +209,6 @@ const Meta = ({ toggleTheme }) => {
   };
 
   const handleClose = () => setOpen(false);
-
-
-
-
-
-
 
 
 

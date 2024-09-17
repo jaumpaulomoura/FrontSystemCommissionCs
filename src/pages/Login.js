@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggleButton from '../components/ThemeToggleButton';
-import { getColaboradorData } from '../services/apiService';
-import { getLogin } from '../services/apiService';
+import { getColaboradorData, getLogin } from '../services/apiService';
 import { useAuth } from '../context/AuthContext';
+import Cookies from 'js-cookie';
 
 const Login = ({ toggleTheme }) => {
   const [email, setEmail] = useState('');
@@ -16,38 +16,44 @@ const Login = ({ toggleTheme }) => {
 
   const handleLogin = async () => {
     setLoading(true);
-    setError('');  // Limpa o erro anterior
+    setError('');
     try {
-      // 1. Realiza o login e obtém o token
+     
       const token = await getLogin(email, password);
   
-      console.log(token);  // Verifique se o token está correto
+      if (!token) {
+        throw new Error('Token não recebido');
+      }
   
-      // 2. Armazena o token no localStorage
-      localStorage.setItem('token', token);
+      // console.log(token);  // Verifique se o token está correto
   
-      // 3. Usa o token para obter os dados do colaborador
+     
+      Cookies.set('token', token, { expires: 7 });
+      Cookies.set('email', email, { expires: 7 });
+  
+     
       const colaboradores = await getColaboradorData();
-  
-      // 4. Busca o colaborador pelo email
+      
+     
       const colaborador = colaboradores.find(colaborador => colaborador.email === email);
       if (colaborador) {
-        localStorage.setItem('user', JSON.stringify({
+        
+        Cookies.set('user', JSON.stringify({
           email: colaborador.email,
           cupom: colaborador.cupom,
           nome: colaborador.nome,
           funcao: colaborador.funcao,
           time: colaborador.time,
-        }));
-
+        }), { expires: 7 });
+  
         const simulatedUser = {
           name: colaborador.nome,
           avatar: 'https://example.com/avatar.jpg',
         };
-
-        localStorage.setItem('simulatedUser', JSON.stringify(simulatedUser));
-
-        login(email);
+  
+        Cookies.set('simulatedUser', JSON.stringify(simulatedUser), { expires: 7 });
+  
+        login(email, token);
         navigate('/home');
       } else {
         setError('Usuário não encontrado');
@@ -55,8 +61,11 @@ const Login = ({ toggleTheme }) => {
     } catch (error) {
       console.error('Erro ao fazer login:', error);
       setError('Erro ao fazer login');
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
     <Box

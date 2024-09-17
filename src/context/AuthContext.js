@@ -1,22 +1,36 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [email, setEmail] = useState(null);
+  const [email, setEmail] = useState(Cookies.get('email') || '');
+  const [token, setToken] = useState(Cookies.get('token') || '');
+  const [isAuthenticated, setIsAuthenticated] = useState(!!Cookies.get('token'));
 
-  const login = (email) => {
-    console.log('Logging in with email:', email);
-    setEmail(email);
+  useEffect(() => {
+    if (token) {
+      Cookies.set('token', token, { expires: 7 }); // Expira em 7 dias
+      Cookies.set('email', email, { expires: 7 });
+    }
+  }, [token, email]);
+
+  const login = (userEmail, userToken) => {
+    setEmail(userEmail);
+    setToken(userToken);
+    setIsAuthenticated(true);
   };
 
   const logout = () => {
-    console.log('Logging out');
-    setEmail(null);
+    Cookies.remove('email');
+    Cookies.remove('token');
+    setEmail('');
+    setToken('');
+    setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider value={{ email, login, logout }}>
+    <AuthContext.Provider value={{ email, isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

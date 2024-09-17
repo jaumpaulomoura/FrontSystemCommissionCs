@@ -244,9 +244,17 @@ const Reconquest = ({ toggleTheme }) => {
 
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex',height: '100%' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}>
+      <Box  component="main"
+        sx={{
+          flexGrow: 1,
+          bgcolor: 'background.default',
+          p: 3,
+          maxWidth: '1500px', // Ajuste conforme necessário
+          mx: 'auto', // Centraliza horizontalmente
+          overflow: 'auto' // Adiciona rolagem se necessário
+           }}>
         <Box position="absolute" top={16} right={16}>
           <ThemeToggleButton toggleTheme={toggleTheme} />
         </Box>
@@ -255,7 +263,7 @@ const Reconquest = ({ toggleTheme }) => {
         <Paper sx={{ mt: 2, p: 2 }}>
           <Grid container spacing={2}>
             <Grid container spacing={2} alignItems="flex-start">
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12} sm={6} md={1.4}>
                 <TextField
                   label="Data Inicial"
                   type="date"
@@ -268,7 +276,7 @@ const Reconquest = ({ toggleTheme }) => {
                   sx={{ mt: 1.5,ml:1.5 }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12} sm={6} md={1.4}>
                 <TextField
                   label="Data Final"
                   type="date"
@@ -281,7 +289,7 @@ const Reconquest = ({ toggleTheme }) => {
                   sx={{ mt: 1.5,ml:1.5  }}
                 />
               </Grid>
-              <Grid item md={2}>
+              <Grid item md={1.4}>
                 <FormControl fullWidth variant="filled">
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -297,7 +305,7 @@ const Reconquest = ({ toggleTheme }) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12} sm={6} md={1.4}>
                 <TextField
                   label="Filtrar por Cliente"
                   variant="filled"
@@ -320,28 +328,28 @@ const Reconquest = ({ toggleTheme }) => {
                   Buscar
                 </Button>
               </Grid>
-              <Grid item xs={12} sm={12} md={2}>
-                <Button
-                  onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
-                  sx={{
-                    mt: 1.5,
-                    ml:1.5, 
-                    backgroundColor: 'green',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: 'darkgreen',
-                    },
-                    height: '36px',
-                    width: '70%'
-                  }}
-                >
-                  Exportar PDF
-                </Button>
-              </Grid>
+              
             </Grid>
           </Grid>
         </Paper>
-
+        <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            sx={{
+              mt: 1.5,
+              backgroundColor: '#45a049',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'darkgreen',
+              },
+              height: '36px',
+              width: '10%', // Diminuir a largura do botão
+            }}
+          >
+            Exportar PDF
+          </Button>
+        </Grid>
+        <Grid container sx={{ mt: 2 }}>
         {loading ? (
           <CircularProgress sx={{ mt: 2 }} />
         ) : (
@@ -349,12 +357,20 @@ const Reconquest = ({ toggleTheme }) => {
             {error && <Alert severity="error">{error}</Alert>}
             {successMessage && <Alert severity="success">{successMessage}</Alert>}
             {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
-            <div style={{ width: 'max-content' }}>
+            <div style={{ flexGrow: 1, overflowY: 'auto'  }}>
               <DataGrid
                 rows={filteredData}
                 columns={columns}
-                pageSize={10}
-                rowsPerPageOptions={[10]}
+                initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 9,
+                  },
+                },
+              }}
+              autoHeight
+              pageSizeOptions={[9]}
+              disableColumnMenu
                 disableSelectionOnClick
                 sortModel={[
                   {
@@ -374,6 +390,7 @@ const Reconquest = ({ toggleTheme }) => {
             </div>
           </div>
         )}
+        </Grid>
       </Box>
     </Box>
   );

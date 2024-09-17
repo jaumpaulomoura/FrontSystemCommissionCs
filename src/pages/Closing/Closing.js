@@ -12,6 +12,7 @@ import { getFilteredClosingGroupData, getFilteredClosingData } from '../../servi
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Cookies from 'js-cookie'; 
 
 const Closing = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -295,7 +296,7 @@ const Closing = ({ toggleTheme }) => {
     doc.setFont("Helvetica", "bold");
     doc.text(`Relatório de Comissão - ${mesAno}`, 14, 10);
 
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = JSON.parse(Cookies.get('user'));
     if (user) {
       doc.setFontSize(8);
       doc.setFont("Helvetica", "normal");
@@ -443,7 +444,7 @@ const Closing = ({ toggleTheme }) => {
                     onClick={generatePDF}
                     sx={{
                       mb: 5,
-                      backgroundColor: 'green',
+                      backgroundColor: '#45a049',
                       color: 'white',
                       '&:hover': {
                         backgroundColor: 'darkgreen',

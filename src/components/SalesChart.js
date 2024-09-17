@@ -33,7 +33,7 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
   const sortedRankingData = [...rankingData].sort((a, b) => b.valor_bruto - a.valor_bruto);
 
   const rankingChartData = {
-    labels: sortedRankingData.map(d => d.cupom_vendedora),
+    labels: sortedRankingData.map(d => d.nome),
     datasets: [
       {
         label: 'Ranking por Cupom',

@@ -8,6 +8,9 @@ import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
 import { getFilteredTicketData, updateTicket, updateTicketCupom,updateTicketStatus } from '../../services/apiService';
 import { debounce } from 'lodash';
+import Cookies from 'js-cookie'; 
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Ticket = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -28,7 +31,7 @@ const Ticket = ({ toggleTheme }) => {
   const [notes, setNotes] = useState('');
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(Cookies.get('user'));
   const userFuncao = user ? user.funcao : '';
   const handleOpenModal = (notes) => {
     setNotes(notes);
@@ -230,7 +233,7 @@ const Ticket = ({ toggleTheme }) => {
       headerName: '',
       width: 150,
       renderCell: (params) => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(Cookies.get('user'));
 
         if (params.row.status === 'Aberto' && user && user.funcao !== 'Consultora') {
           return (
@@ -266,7 +269,7 @@ const Ticket = ({ toggleTheme }) => {
       headerName: '',
       width: 160,
       renderCell: (params) => {
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user = JSON.parse(Cookies.get('user'));
 
 
         if (params.row.status === 'Aberto' && user && user.funcao !== 'Consultora') {
@@ -300,6 +303,71 @@ const Ticket = ({ toggleTheme }) => {
     }
   ];
 
+
+
+  
+  const generatePDF = (data) => {
+    const doc = new jsPDF('landscape');
+    doc.setFont("Helvetica", "normal");
+
+    const now = new Date();
+    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const formattedTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+    doc.setFontSize(8);
+    doc.text(`Data: ${formattedDate}`, doc.internal.pageSize.width - 10, 7, { align: 'right' });
+    doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
+    doc.setFontSize(12);
+    doc.text('Relatório de Colaboradores', 18, 24);
+    // Define as colunas e os dados
+    const columns = [
+      { header: 'Ticket', dataKey: 'id' },
+      { header: 'Pedido', dataKey: 'orderId' },
+      { header: 'Ticket Octadesk', dataKey: 'octadeskId' },
+      { header: 'Motivo', dataKey: 'reason' },
+      { header: 'Status', dataKey: 'status' },
+      { header: 'Cupom', dataKey: 'cupomvendedora' },
+      { header: 'Data de Criação', dataKey: 'dateCreated' }
+    ];
+
+
+ 
+
+
+    const columnStyles = {
+      nome: { cellWidth: 40 }
+    }
+    const rows = data.map(row => ({
+      id: row.id?row.id:'',
+      orderId: row.orderId,
+      octadeskId: row.octadeskId,
+      reason: row.reason ,
+      status: row.status,
+      cupomvendedora: row.cupomvendedora,
+      dateCreated: row.dateCreated,
+    }));
+
+    // Adiciona a tabela ao PDF
+    autoTable(doc, {
+      columns: columns,
+      body: rows,
+      columnStyles: columnStyles,
+      startY: 30,
+      headStyles: {
+        fillColor: [41, 128, 186],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        valign: 'middle',
+        halign: 'center',
+      },
+    });
+
+    // Salva o PDF
+    doc.save('relatorio_ticket.pdf');
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -359,7 +427,7 @@ const Ticket = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item xs={12} sm={6} md={1.5}>
               <TextField
                 label="Data de Criação"
                 type="date"
@@ -383,8 +451,9 @@ const Ticket = ({ toggleTheme }) => {
                 />
               </Grid>
             )}
+        
 
-            <Grid item xs={9} sm={4} md={2}>
+            <Grid item xs={9} sm={4} md={1.4}>
               <FormControl fullWidth variant="filled">
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -400,9 +469,27 @@ const Ticket = ({ toggleTheme }) => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={2}></Grid>
+       
+           
           </Grid>
         </Paper>
+        <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            sx={{
+              mt: 1.5,
+              backgroundColor: '#45a049',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'darkgreen',
+              },
+              height: '36px',
+              width: '10%', // Diminuir a largura do botão
+            }}
+          >
+            Exportar PDF
+          </Button>
+        </Grid>
         {loading ? (
           <CircularProgress sx={{ mt: 2 }} />
         ) : (

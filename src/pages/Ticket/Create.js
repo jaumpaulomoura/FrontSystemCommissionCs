@@ -4,6 +4,7 @@ import SidebarMenu from '../../components/SidebarMenu';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { useNavigate } from 'react-router-dom';
 import { createTicket, getTicketData } from '../../services/apiService';
+import Cookies from 'js-cookie'; 
 
 const CreateTicket = ({ toggleTheme }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -34,7 +35,7 @@ const CreateTicket = ({ toggleTheme }) => {
                     month: '2-digit',
                     year: 'numeric',
                 });
-                const user = JSON.parse(localStorage.getItem('user'));
+                const user = JSON.parse(Cookies.get('user'));
                 const cupomvendedora = user ? user.cupom : 'Nome Padrão';
                 setFormData((prevData) => ({
                     ...prevData,
@@ -97,7 +98,7 @@ const CreateTicket = ({ toggleTheme }) => {
                 reason: '',
                 notes: '',
                 status: 'Aberto',
-                cupomvendedora: JSON.parse(localStorage.getItem('user'))?.name || '',
+                cupomvendedora: JSON.parse(Cookies.get('user'))?.name || '',
                 dateCreate: '',
                 dateUpdated: '',
             });

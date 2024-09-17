@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Avatar, Typography, Box, Stack } from '@mui/material';
 import { Assessment, Refresh as RefreshIcon, ShoppingCart as ShoppingCartIcon, Home as HomeIcon, Group as GroupIcon, Star as StarIcon, Logout as LogoutIcon, ConfirmationNumber as ConfirmationNumberIcon, TrendingUp as TrendingUpIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie'; 
 
 const SidebarMenu = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -12,8 +13,8 @@ const SidebarMenu = ({ open, onClose }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user'); 
+    Cookies.remove('token');
+    Cookies.remove('user'); 
     navigate('/');
   };
   
@@ -26,8 +27,8 @@ const SidebarMenu = ({ open, onClose }) => {
     setLogoutDialogOpen(false);
   };
 
-  const user = JSON.parse(localStorage.getItem('user'));
-
+  const userCookie = Cookies.get('user');
+  const user = userCookie ? JSON.parse(userCookie) : null;
   return (
     <>
       <Drawer
