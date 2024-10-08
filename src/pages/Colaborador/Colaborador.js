@@ -8,6 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import { getColaboradorData, deleteColaborador, updateColaborador } from '../../services/apiService';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useToast } from '../../components/ToastProvider';
+
+
 const Colaborador = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [data, setData] = useState([]);
@@ -23,6 +26,7 @@ const Colaborador = ({ toggleTheme }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [editingColaborador, setEditingColaborador] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const { showToast } = useToast();
 
   const navigate = useNavigate();
 
@@ -34,8 +38,7 @@ const Colaborador = ({ toggleTheme }) => {
         setData(result);
         setFilteredData(result);
       } catch (error) {
-        setError('Erro ao buscar dados de colaborador.');
-        console.error('Erro ao buscar dados de colaborador:', error);
+        showToast('Erro ao buscar dados de colaborador.','error');
       } finally {
         setLoading(false);
       }
@@ -118,8 +121,7 @@ const Colaborador = ({ toggleTheme }) => {
         setData(updatedColaboradores);
         setFilteredData(updatedColaboradores);
       } catch (error) {
-        setErrorMessage('Erro ao atualizar colaborador.');
-        console.error('Erro ao atualizar colaborador:', error);
+        showToast('Erro ao atualizar colaborador.','error');
       } finally {
         handleCloseModal();
       }
@@ -138,10 +140,9 @@ const Colaborador = ({ toggleTheme }) => {
       await deleteColaborador({ cupom, nome, funcao, time });
       setData(data.filter((item) => item.id !== colaborador.id));
       setFilteredData(filteredData.filter((item) => item.id !== colaborador.id));
-      setSuccessMessage('Colaborador deletado com sucesso.');
+      showToast('Colaborador deletado com sucesso.','success');
     } catch (error) {
-      setErrorMessage('Erro ao excluir colaborador.');
-      console.error('Erro ao excluir colaborador:', error);
+      showToast('Erro ao excluir colaborador.','error');
     }
   };
 

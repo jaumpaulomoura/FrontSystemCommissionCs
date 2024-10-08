@@ -46,33 +46,22 @@ const Order = ({ toggleTheme }) => {
     }
   };
 
-  // Função para aplicar filtros aos dados
   const applyFilters = () => {
     let filtered = data;
 
-    // Aplicar filtro de Order ID
     if (filterOrderid) {
       filtered = filtered.filter(order =>
         String(order.pedido).toLowerCase().includes(filterOrderid.toLowerCase())
       );
     }
 
-    // Aplicar filtro de Profile ID
     if (filterIdProfile) {
       filtered = filtered.filter(order =>
         String(order.id_cliente).toLowerCase().includes(filterIdProfile.toLowerCase())
       );
     }
 
-    // Aplicar filtro de data
-    // if (filterStartDate && filterEndDate) {
-    //   filtered = filtered.filter(order =>
-    //     new Date(order.data_submissao) >= new Date(filterStartDate) &&
-    //     new Date(order.data_submissao) <= new Date(filterEndDate)
-    //   );
-    // }
-
-    // Aplicar filtro de cupom
+ 
     if (filterCupom) {
       filtered = filtered.filter(order =>
         order.cupom_vendedora &&
@@ -134,17 +123,25 @@ const Order = ({ toggleTheme }) => {
 
   const columns = [
     { field: 'pedido', headerName: 'Pedido', width: 150 },
-    {
-      field: 'data_submissao',
+    {field: 'data_submissao',
       headerName: 'Data',
       width: 180,
+      sortComparator: (v1, v2) => new Date(v1) - new Date(v2),
       valueFormatter: (params) => {
-        const dateValue = params;
-
-        if (!dateValue) return 'Data não disponível';
-
+        const dateValue = params;     
+        if (!dateValue) {
+          console.log('Data não disponível');
+          return 'Data não disponível';
+        }    
         try {
-          const [year, month, day] = dateValue.split('-');
+          const [datePart] = dateValue.split('T'); 
+          console.log('Parte da data:', datePart);
+    
+          const [year, month, day] = datePart.split('-');
+    
+          if (!year || !month || !day) {
+            throw new Error('Formato de data inválido');
+          }    
           const formattedDate = `${day}/${month}/${year}`;
           return formattedDate;
         } catch (e) {
@@ -152,7 +149,7 @@ const Order = ({ toggleTheme }) => {
           return 'Data inválida';
         }
       },
-    },
+    },    
     {
       field: 'hora_submissao',
       headerName: 'Hora',
@@ -172,14 +169,135 @@ const Order = ({ toggleTheme }) => {
       sortComparator: (v1, v2) => v1.localeCompare(v2),
     },
     { field: 'status', headerName: 'Status', width: 120 },
+    
     { field: 'total_itens', headerName: 'Total Itens', width: 120 },
     { field: 'envio', headerName: 'Envio', width: 120 },
     { field: 'idloja', headerName: 'ID Loja', width: 120 },
     { field: 'site', headerName: 'Site', width: 180 },
-    { field: 'valor_bruto', headerName: 'Valor Bruto', width: 150 },
-    { field: 'valor_desconto', headerName: 'Valor Desconto', width: 150 },
-    { field: 'valor_frete', headerName: 'Valor Frete', width: 150 },
-    { field: 'valor_pago', headerName: 'Valor Pago', width: 150 },
+    // { field: 'valor_bruto', headerName: 'Valor Bruto', width: 150, },
+    // { field: 'valor_desconto', headerName: 'Valor Desconto', width: 150 },
+    // { field: 'valor_frete', headerName: 'Valor Frete', width: 150 },
+    // { field: 'valor_pago', headerName: 'Valor Pago', width: 150 },
+    {
+      field: 'valor_bruto',
+      headerName: 'Valor Bruto',
+      width: 150,
+      valueFormatter: (params) => {
+        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+    
+        // Replace comma with dot and convert to number
+        const numberValue = Number((params || '0').replace(',', '.'));
+    
+        // Format the number as a currency in BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    
+        // Return the formatted value with 'R$'
+        return `R$ ${formattedValue}`;
+      }
+    }
+    
+    ,
+    {
+      field: 'valor_desconto',
+      headerName: 'Valor Desconto',
+      width: 150,
+      valueFormatter: (params) => {
+        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+    
+        // Replace comma with dot and convert to number
+        const numberValue = Number((params || '0').replace(',', '.'));
+    
+        // Format the number as a currency in BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    
+        // Return the formatted value with 'R$'
+        return `R$ ${formattedValue}`;
+      }
+    },
+    {
+      field: 'valor_frete',
+      headerName: 'Valor Frete',
+      width: 150,
+      valueFormatter: (params) => {
+        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+    
+        // Replace comma with dot and convert to number
+        const numberValue = Number((params || '0').replace(',', '.'));
+    
+        // Format the number as a currency in BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    
+        // Return the formatted value with 'R$'
+        return `R$ ${formattedValue}`;
+      }
+    },
+    {
+      field: 'valor_pago',
+      headerName: 'Valor Pago',
+      width: 150,
+      valueFormatter: (params) => {
+        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+    
+        // Replace comma with dot and convert to number
+        const numberValue = Number((params || '0').replace(',', '.'));
+    
+        // Format the number as a currency in BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    
+        // Return the formatted value with 'R$'
+        return `R$ ${formattedValue}`;
+      }
+    }
+    
+    ,
+    {
+      field: 'valor_comissional',
+      headerName: 'Valor Comissional',
+      width: 150,
+      valueFormatter: (params) => {
+        console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
+    }
+    
+    
+    
+    
+,    
+    
     { field: 'cupom', headerName: 'Cupom', width: 150 },
     { field: 'cupom_vendedora', headerName: 'Cupom Vendedora', width: 180 },
     { field: 'metodo_pagamento', headerName: 'Método de Pagamento', width: 180 },
@@ -217,8 +335,7 @@ const Order = ({ toggleTheme }) => {
       ['Valor Comissional', valorTotalComissional.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]
     ];
 
-    // Estiliza os blocos no PDF
-    let startY = 35; // Ajuste conforme necessário
+    let startY = 35; 
     const blockWidth = 50;
     const blockHeight = 20;
     const blockRight = 5;
@@ -226,26 +343,24 @@ const Order = ({ toggleTheme }) => {
 
     blockData.forEach((block, index) => {
       const [label, value] = block;
-      const posX = initialX + (index * (blockWidth + blockRight)); // Espaçamento entre os blocos
+      const posX = initialX + (index * (blockWidth + blockRight)); 
 
-      // Verifica se a posição X está dentro da largura da página
       if (posX + blockWidth > doc.internal.pageSize.width - blockRight) {
         doc.addPage();
-        startY = 20; // Reset startY para a nova página
+        startY = 20; 
       }
 
-      doc.setFillColor(230, 230, 230); // Cor de fundo
-      doc.rect(posX, startY, blockWidth, blockHeight, 'F'); // Desenha o bloco com fundo
+      doc.setFillColor(230, 230, 230); 
+      doc.rect(posX, startY, blockWidth, blockHeight, 'F'); 
 
       doc.setTextColor(0);
       doc.setFontSize(10);
-      doc.text(label, posX + 5, startY + 10); // Label do bloco
+      doc.text(label, posX + 5, startY + 10); 
 
       doc.setFontSize(12);
-      doc.setTextColor(0, 102, 204); // Cor do valor
-      doc.text(value.toString(), posX + 5, startY + 15); // Valor do bloco
+      doc.setTextColor(0, 102, 204);
+      doc.text(value.toString(), posX + 5, startY + 15); 
     });
-    // Define as colunas e os dados
     let tableStartY = startY + blockHeight + 10;
     const columns = [
       { header: 'Pedido', dataKey: 'pedido' },
@@ -278,28 +393,21 @@ const Order = ({ toggleTheme }) => {
           if (!timeValue) return 'Hora não disponível';
 
           try {
-            // Verifica se é um número simples (ex: 4000) e trata como inválido
             if (!isNaN(timeValue) && typeof timeValue === 'number') {
               return 'Hora inválida';
             }
-
-            // Remove frações de segundos (caso venha no formato 16:12:12.38)
             const cleanedTimeValue = timeValue.split('.')[0];
 
-            // Verifica se o valor está no formato de hora (HH:MM:SS)
             if (/^\d{2}:\d{2}(:\d{2})?$/.test(cleanedTimeValue)) {
-              return cleanedTimeValue; // Retorna a hora formatada
+              return cleanedTimeValue; 
             }
 
-            // Caso contrário, tenta criar um objeto de data a partir do valor ISO
             const dateObj = new Date(timeValue);
 
-            // Verifica se a data é válida
             if (isNaN(dateObj.getTime())) {
               throw new Error('Data inválida');
             }
 
-            // Extrai horas, minutos e segundos
             const hours = String(dateObj.getUTCHours()).padStart(2, '0');
             const minutes = String(dateObj.getUTCMinutes()).padStart(2, '0');
             const seconds = String(dateObj.getUTCSeconds()).padStart(2, '0');
@@ -324,7 +432,6 @@ const Order = ({ toggleTheme }) => {
       { header: 'Valor Desconto', dataKey: 'valor_desconto' },
       { header: 'Valor Frete', dataKey: 'valor_frete' },
       { header: 'Valor Pago', dataKey: 'valor_pago' },
-      // { header: 'Cupom', dataKey: 'cupom' },
       { header: 'Cupom Vendedora', dataKey: 'cupom_vendedora' },
       { header: 'Método de Pagamento', dataKey: 'metodo_pagamento' },
       { header: 'Parcelas', dataKey: 'parcelas' },
@@ -348,7 +455,6 @@ const Order = ({ toggleTheme }) => {
       valor_desconto: row.valor_desconto,
       valor_frete: row.valor_frete,
       valor_pago: row.valor_pago,
-      // cupom: row.cupom,
       cupom_vendedora: row.cupom_vendedora,
       metodo_pagamento: row.metodo_pagamento,
       parcelas: row.parcelas,
@@ -356,7 +462,6 @@ const Order = ({ toggleTheme }) => {
 
     }));
 
-    // Adiciona a tabela ao PDF
     autoTable(doc, {
       columns: columns,
       body: rows,
@@ -374,29 +479,8 @@ const Order = ({ toggleTheme }) => {
         halign: 'center',
       },
     });
-
-    // Salva o PDF
     doc.save('relatorio_pedidos.pdf');
   };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   return (
     <Box
@@ -413,12 +497,11 @@ const Order = ({ toggleTheme }) => {
           flexGrow: 1,
           bgcolor: 'background.default',
           p: 3,
-          maxWidth: '1500px', // Ajuste conforme necessário
-          mx: 'auto', // Centraliza horizontalmente
-          overflow: 'auto' // Adiciona rolagem se necessário
+          maxWidth: '100%',
+          mx: 'auto',
+          overflow: 'auto'
         }}
       >
-
         <Box position="absolute" top={16} right={16}>
           <ThemeToggleButton toggleTheme={toggleTheme} />
         </Box>
@@ -430,10 +513,9 @@ const Order = ({ toggleTheme }) => {
             sx={{
               mt: 2,
               p: 2,
-              maxWidth: '1500px', // Evita que o Paper ultrapasse o contêiner principal
-              overflow: 'auto', // Permite rolar se o conteúdo exceder o tamanho
-            }}
-          >
+              maxWidth: '100%', 
+              overflow: 'auto',
+            }}>
             <Grid container spacing={2} direction="row" alignItems="flex-start">
               <Grid item xs={12} sm={4} md={2}>
                 <TextField
@@ -496,7 +578,6 @@ const Order = ({ toggleTheme }) => {
                   sx={{ minWidth: 120 }}
                 />
               </Grid>
-
               {userFuncao !== 'Consultora' && (
                 <Grid item xs={12} sm={4} md={2}>
                   <TextField
@@ -511,8 +592,6 @@ const Order = ({ toggleTheme }) => {
                 </Grid>
               )}
             </Grid>
-
-            {/* Boxes de Resumo */}
             <Grid container spacing={2} sx={{ mt: 2 }}>
               <Grid item xs={12} sm={4} md={2}>
                 <Paper sx={{ p: 2, textAlign: 'center' }}>
@@ -555,7 +634,7 @@ const Order = ({ toggleTheme }) => {
 
           <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
-              onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+              onClick={() => generatePDF(filteredData)}
               sx={{
                 mt: 1.5,
                 backgroundColor: '#45a049',
@@ -564,9 +643,8 @@ const Order = ({ toggleTheme }) => {
                   backgroundColor: 'darkgreen',
                 },
                 height: '36px',
-                width: '10%', // Diminuir a largura do botão
-              }}
-            >
+                width: '10%',
+              }}>
               Exportar PDF
             </Button>
           </Grid>
@@ -582,7 +660,7 @@ const Order = ({ toggleTheme }) => {
               <Paper
                 sx={{
                   flexGrow: 1,
-                  minHeight: '400px', // Define a altura mínima para o Paper
+                  minHeight: '400px',
                   overflow: 'auto',
                   display: 'flex',
                   flexDirection: 'column',
@@ -617,11 +695,6 @@ const Order = ({ toggleTheme }) => {
             </Grid>
           )}
         </Grid>
-
-
-
-
-
       </Box>
     </Box>
   );

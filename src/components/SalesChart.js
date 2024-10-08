@@ -52,25 +52,30 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
     acc[date] += total;
     return acc;
   }, {});
-
+  
+  // Ordena os dias numericamente
+  const sortedLabels = Object.keys(timeSalesData).sort((a, b) => Number(a) - Number(b));
+  
   const timeSalesChartData = {
-    labels: Object.keys(timeSalesData),
+    labels: sortedLabels, // Dias ordenados
     datasets: [
       {
         label: 'Vendas Diárias do Time',
-        data: Object.values(timeSalesData),
+        data: sortedLabels.map(day => timeSalesData[day]), // Valores correspondentes aos dias ordenados
         borderColor: 'rgba(255,99,132,1)',
         backgroundColor: 'rgba(255,99,132,0.2)',
         fill: true,
       },
     ],
   };
+  
 
   const options = {
     responsive: true,
     plugins: {
       legend: {
         position: 'top',
+        align:'end',
       },
       title: {
         display: true,
@@ -80,13 +85,13 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
         color: 'white',
         anchor: 'end',
         align: 'top',
-        rotation: 90,
+        rotation: 270,
         formatter: (value) => `${value.toFixed(2)}`, 
         offset: 5, 
       },
     },
   };
-
+console.log('timeSalesData',timeSalesData)
   return (
     <Grid container spacing={3}>
       {isConsultant ? (

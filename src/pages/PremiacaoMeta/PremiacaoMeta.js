@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Button, Paper, CircularProgress, Alert, TextField, Grid, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Box, Typography, Button, Paper, MenuItem, CircularProgress, Alert, TextField, Grid, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
 import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
 import { DataGrid } from '@mui/x-data-grid';
 import SidebarMenu from '../../components/SidebarMenu';
@@ -9,6 +9,8 @@ import { getFilteredPremiacaoMetaData, deletePremiacaoMeta, updatePremiacaoMeta 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import { useToast } from '../../components/ToastProvider';
+
 const PremiacaoMeta = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [data, setData] = useState([]);
@@ -17,13 +19,16 @@ const PremiacaoMeta = ({ toggleTheme }) => {
   const [error, setError] = useState(null);
   const [filterDescricao, setFilterDescricao] = useState('');
   const [filterTime, setFilterTime] = useState('');
+  const { showToast } = useToast();
   const [filterValor, setFilterValor] = useState('');
 
   const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+
   const [editingPremiacaoMeta, setEditingPremiacaoMeta] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,8 +39,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         setData(result);
         setFilteredData(result);
       } catch (error) {
-        setError('Erro ao buscar dados de premiacaoMeta.');
-        console.error('Erro ao buscar dados de premiacaoMeta:', error);
+        showToast('Erro ao buscar dados de premiacaoMeta.','error');
       } finally {
         setLoading(false);
       }
@@ -78,15 +82,18 @@ const PremiacaoMeta = ({ toggleTheme }) => {
 
   const handleEditClick = (premiacaoMeta) => {
     setEditingPremiacaoMeta(premiacaoMeta);
-    setOpenModal(true);
+    setOpenModal(true); // Adicione esta linha
   };
 
   const handleCloseModal = () => {
     setOpenModal(false);
     setEditingPremiacaoMeta(null);
   };
+  const handleSaveClick = () => {
+    setOpenConfirmDialog(true); // Abrir modal de confirmação
+  };
 
-  const handleSaveClick = async () => {
+  const handleConfirmSave = async () => {
     if (editingPremiacaoMeta) {
       try {
         const updatedData = {
@@ -96,46 +103,76 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         };
 
         await updatePremiacaoMeta(editingPremiacaoMeta.descricao, updatedData);
-        setSuccessMessage('PremiacaoMeta atualizado com sucesso.');
+        showToast('PremiacaoMeta atualizado com sucesso.','success');
 
         const updatedPremiacaoMetaes = data.map((item) =>
           item.descricao === editingPremiacaoMeta.descricao ? { ...item, ...updatedData } : item
         );
+
         setData(updatedPremiacaoMetaes);
         setFilteredData(updatedPremiacaoMetaes);
       } catch (error) {
-        setErrorMessage('Erro ao atualizar premiacaoMeta.');
-        console.error('Erro ao atualizar premiacaoMeta:', error);
+        showToast('Erro ao atualizar premiacaoMeta.','error');
+       
       } finally {
-        handleCloseModal();
+        setOpenConfirmDialog(false); // Fecha o modal de confirmação
+        handleCloseModal(); // Fecha o modal de edição
       }
     }
   };
 
-  const handleDelete = (premiacaoMeta) => {
-    if (window.confirm('Tem certeza de que deseja excluir este premiacaoMeta?')) {
-      deletePremiacaoMetaById(premiacaoMeta);
-    }
+  const handleCancelConfirm = () => {
+    setOpenConfirmDialog(false); // Fecha o modal de confirmação
   };
 
-  const deletePremiacaoMetaById = async (premiacaoMeta) => {
+  const handleDelete = async () => {
+    if (!itemToDelete) {
+      console.log("Nenhum item para deletar.");
+      return;
+    }
+  
+    // Extraia os valores de itemToDelete
+    const { descricao, time, valor } = itemToDelete;
+  
+    // Adicione logs para verificar os parâmetros
+    console.log("Parâmetros a serem enviados para exclusão:", { descricao, time, valor });
+  
     try {
-      const { descricao, time, valor } = premiacaoMeta;
-      await deletePremiacaoMeta({ descricao, time, valor });
-      setData(data.filter((item) => item.id !== premiacaoMeta.id));
-      setFilteredData(filteredData.filter((item) => item.id !== premiacaoMeta.id));
-      setSuccessMessage('PremiacaoMeta deletado com sucesso.');
+      // Passando os parâmetros como um objeto
+      await deletePremiacaoMeta({ descricao, time, valor }); // Certifique-se de passar um objeto
+      const updatedData = data.filter((premiacaoMeta) => premiacaoMeta.id !== itemToDelete.id);
+      setData(updatedData);
+      setFilteredData(updatedData);
+      showToast('Premiação Meta deletado com sucesso.', 'success');
     } catch (error) {
-      setErrorMessage('Erro ao excluir premiacaoMeta.');
-      console.error('Erro ao excluir premiacaoMeta:', error);
+      showToast('Erro ao excluir Premiação Meta.', 'error');
+    } finally {
+      closeDeleteDialog();
     }
   };
-
+  
+  
+  
   const columns = [
     { field: 'descricao', headerName: 'Descricao', width: 150 },
     { field: 'time', headerName: 'Time', width: 150 },
-    { field: 'valor', headerName: 'Valor', width: 200,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}` },
+    {
+      field: 'valor',
+      headerName: 'Valor',
+      width: 200,
+      valueFormatter: (params) => {
+        // Convert the value to a number
+        const numberValue = Number(params || 0);
+    
+        // Format with thousands separators and two decimal places
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+    
+        return `R$ ${formattedValue}`;
+      }
+    },
     {
       field: 'actions',
       headerName: 'Ações',
@@ -198,7 +235,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 backgroundColor: '#d32f2f',
               }
             }}
-            onClick={() => handleDelete(params.row)}
+            onClick={() => openDeleteDialog(params.row)}
           >
             <FaTrashAlt style={{ fontSize: '1rem', marginRight: 4 }} />
             Excluir
@@ -224,7 +261,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       { header: 'Descrição', dataKey: 'descricao' },
       { header: 'Time', dataKey: 'time' },
       { header: 'Valor', dataKey: 'valor' },
- 
+
     ];
     const columnStyles = {
       nome: { cellWidth: 40 }
@@ -233,7 +270,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       descricao: row.descricao,
       time: row.time,
       valor: row.valor,
-     
+
     }));
     const numberFormatter = new Intl.NumberFormat('pt-BR', {
       minimumFractionDigits: 2,
@@ -245,7 +282,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       ...row,
       valor: numberFormatter.format(row.valor), // Format 'valor' field
     }));
-    
+
     autoTable(doc, {
       columns: columns,
       body: formattedRows, // Use formatted rows here
@@ -266,6 +303,16 @@ const PremiacaoMeta = ({ toggleTheme }) => {
 
     // Salva o PDF
     doc.save('relatorio_colaborador.pdf');
+  };
+  const openDeleteDialog = (premiacaoMeta) => {
+    console.log("Abrindo diálogo de exclusão para:", premiacaoMeta); // Exibe o item no console
+    setItemToDelete(premiacaoMeta); // Armazena o item selecionado
+    setDeleteDialogOpen(true); // Abre o diálogo de exclusão
+  };
+  
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false); // Fecha o diálogo de exclusão
+    setItemToDelete(null); // Limpa o item armazenado
   };
   return (
     <Box sx={{ display: 'flex' }}>
@@ -317,7 +364,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-        
+
           </Grid>
         </Paper>
         <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -338,18 +385,17 @@ const PremiacaoMeta = ({ toggleTheme }) => {
           </Button>
         </Grid>
         {loading ? (
-          <CircularProgress sx={{ mt: 3 }} />
-        ) : error ? (
-          <Alert severity="error" sx={{ mt: 3 }}>{error}</Alert>
-        ) : (
-          <div style={{ height: 400, width: '100%', marginTop: 16 }}>
-            <DataGrid rows={filteredData} columns={columns} pageSize={5} />
-          </div>
-        )}
-        {successMessage && <Alert severity="success" sx={{ mt: 3 }}>{successMessage}</Alert>}
-        {errorMessage && <Alert severity="error" sx={{ mt: 3 }}>{errorMessage}</Alert>}
+        <CircularProgress sx={{ mt: 3 }} />
+      ) : error ? (
+        // Aqui a mensagem de erro será gerenciada pelo toast, então você pode remover o Alert
+        <div>{/* Algum outro fallback opcional */}</div>
+      ) : (
+        <div style={{ height: 400, width: '100%', marginTop: 16 }}>
+          <DataGrid rows={filteredData} columns={columns} pageSize={5} />
+        </div>
+      )}
       </Box>
-      <Dialog open={openModal} onClose={handleCloseModal} fullWidth maxWidth="sm">
+      <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>Editar PremiacaoMeta</DialogTitle>
         <DialogContent>
           {editingPremiacaoMeta && (
@@ -360,47 +406,68 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 value={editingPremiacaoMeta.descricao}
                 disabled
                 fullWidth
-                sx={{
-                  '& .MuiInputBase-input': {
-                    color: '#000000',
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: '#000000',
-                  },
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor: '#f5f5f5',
-                    '& fieldset': {
-                      borderColor: '#000000',
-                    },
-                    '&:hover fieldset': {
-                      borderColor: '#000000',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#000000',
-                    },
-                  },
-                }}
               />
+              {/* <TextField
+          label="Time"
+          variant="outlined"
+          value={editingPremiacaoMeta.time}
+          onChange={(e) => setEditingPremiacaoMeta({ ...editingPremiacaoMeta, time: e.target.value })}
+          fullWidth
+        /> */}
               <TextField
+                select
                 label="Time"
-                variant="outlined"
+                name="time"
                 value={editingPremiacaoMeta.time}
                 onChange={(e) => setEditingPremiacaoMeta({ ...editingPremiacaoMeta, time: e.target.value })}
-                fullWidth
-              />
+                margin="normal"
+                variant="filled"
+                sx={{
+                  width: '400px',
+                  height: '56px',
+                  borderRadius: '8px',
+                }}
+              >
+                <MenuItem value="Venda Ativa">Venda Ativa</MenuItem>
+                <MenuItem value="Reconquista">Reconquista</MenuItem>
+                {/* <MenuItem value="Todos">Todos</MenuItem> */}
+              </TextField>
 
-              <TextField
-                label="Valor"
-                variant="outlined"
-                value={editingPremiacaoMeta.valor}
-                onChange={(e) => setEditingPremiacaoMeta({ ...editingPremiacaoMeta, valor: e.target.value })}
-                fullWidth
-              />
-              
+
+
+            
+  <TextField
+              label="Valor"
+              name="valor"
+              value={editingPremiacaoMeta.valor}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Utiliza expressão regular para permitir apenas números e até duas casas decimais
+                if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
+                  setEditingPremiacaoMeta({ ...editingPremiacaoMeta, valor: value }); // Atualiza com o valor válido
+                }
+              }}
+              margin="normal"
+              variant="filled"
+              type="number" // Permite a entrada de números
+              inputProps={{
+                step: "0.01", // Permite valores decimais
+              }}
+              sx={{
+                width: '400px',
+                height: '56px',
+                borderRadius: '8px',
+              }}
+            />
+
+
+
+
+
             </Box>
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
           <Button
             onClick={handleCloseModal}
             sx={{
@@ -414,7 +481,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
             Cancelar
           </Button>
           <Button
-            onClick={handleSaveClick}
+            onClick={handleSaveClick} // Abre o modal de confirmação
             sx={{
               backgroundColor: '#45a049',
               color: '#fff',
@@ -427,6 +494,88 @@ const PremiacaoMeta = ({ toggleTheme }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={closeDeleteDialog}
+      >
+        <DialogTitle>Confirmar Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Tem certeza de que deseja deletar "{itemToDelete?.descricao}"?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Button
+              onClick={closeDeleteDialog}
+              sx={{
+                backgroundColor: 'red',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#d32f2f', // Um tom mais escuro de vermelho
+                }
+              }}
+            >
+              Cancelar
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              onClick={handleDelete}
+              sx={{
+                backgroundColor: '#45a049',
+                color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#388e3c', // Um tom mais escuro de verde
+                }
+              }}
+            >
+              Confirmar
+            </Button>
+          </Box>
+        </DialogActions>
+
+      </Dialog>
+      <Dialog
+        open={openConfirmDialog}
+        onClose={handleCancelConfirm}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Confirmação</DialogTitle>
+        <DialogContent>
+          <p>Tem certeza de que deseja salvar as alterações?</p>
+        </DialogContent>
+        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+          <Button
+            onClick={handleCancelConfirm}
+            sx={{
+              backgroundColor: '#d32f2f',
+              color: '#fff',
+              '&:hover': {
+                backgroundColor: '#d32f2f',
+              }
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmSave} // Realiza a ação de salvar
+            sx={{
+              backgroundColor: '#45a049',
+              color: '#fff',
+              '&:hover': {
+                backgroundColor: '#388e3c',
+              }
+            }}
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 };

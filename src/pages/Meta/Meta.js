@@ -6,15 +6,19 @@ import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
 import { getFilteredMetaData, deleteMeta, updateMeta } from '../../services/apiService';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
-import Cookies from 'js-cookie'; 
+import Cookies from 'js-cookie';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Meta = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [filtereds, setFiltereds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterCupom, setFilterCupom] = useState('');
+  const [filterNome, setFilterNome] = useState('');
   const [filterMesAno, setFilterMesAno] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -32,7 +36,6 @@ const Meta = ({ toggleTheme }) => {
       setLoading(true);
       try {
         const result = await getFilteredMetaData();
-
         setData(result);
 
         const uniqueData = result.filter(
@@ -53,11 +56,15 @@ const Meta = ({ toggleTheme }) => {
 
   useEffect(() => {
     applyFilters();
-  }, [filterCupom, filterMesAno, data]);
+  }, [filterCupom, filterMesAno, filterNome, data]);
 
   const applyFilters = () => {
     let filtered = data;
-
+    if (filterNome) {
+      filtered = filtered.filter((item) =>
+        item.colaborador_nome && item.colaborador_nome.toLowerCase().includes(filterNome.toLowerCase())
+      );
+    }
     if (filterCupom) {
       filtered = filtered.filter((item) =>
         item.cupom && item.cupom.toLowerCase().includes(filterCupom.toLowerCase())
@@ -76,8 +83,35 @@ const Meta = ({ toggleTheme }) => {
     );
 
     setFilteredData(uniqueFilteredData);
+    setFiltereds(filtered)
   };
+  const dadosGroup = [];
 
+  filtereds.reduce((acc, item) => {
+    let existente = dadosGroup.find(entry =>
+      entry.cupom === item.cupom && entry.colaborador_nome === item.colaborador_nome && entry.mes_ano === item.mes_ano
+    );
+
+    if (!existente) {
+      existente = {
+        colaborador_nome: item.colaborador_nome,
+        cupom: item.cupom,
+        mes_ano: item.mes_ano,
+        metas: []
+      };
+      dadosGroup.push(existente);
+    }
+
+    existente.metas.push({
+      meta: item.meta,
+      valor: item.valor,
+      porcentagem: item.porcentagem
+    });
+
+    return acc;
+  }, []);
+
+  console.log(dadosGroup);
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
@@ -195,10 +229,6 @@ const Meta = ({ toggleTheme }) => {
     },
   ];
 
-
-
-
-
   const handleOpen = (params) => {
     const selectedMeta = data.filter(
       (meta) => meta.cupom === params.row.cupom && meta.mes_ano === params.row.mes_ano
@@ -210,13 +240,113 @@ const Meta = ({ toggleTheme }) => {
 
   const handleClose = () => setOpen(false);
 
+  const generatePDF = (data) => {
+    const doc = new jsPDF('portrait');
+    doc.setFont("Helvetica", "normal");
 
 
+    const now = new Date();
+    const formattedDate = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+    const formattedTime = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+
+    doc.setFontSize(8);
+    doc.text(`Data: ${formattedDate}`, doc.internal.pageSize.width - 10, 7, { align: 'right' });
+    doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
+
+    doc.setFontSize(12);
+    doc.text('Relatório de Metas', 18, 24);
+
+    const groupedData = data.reduce((acc, item) => {
+      const key = `${item.cupom}-${item.mes_ano}`;
+      if (!acc[key]) {
+        acc[key] = {
+          colaborador_nome: item.colaborador_nome,
+          cupom: item.cupom,
+          mes_ano: item.mes_ano,
+          metas: []
+        };
+      }
+      acc[key].metas.push({
+        meta: item.meta,
+        porcentagem: item.porcentagem,
+        valor: item.valor
+      });
+      return acc;
+    }, {});
+
+    const tableData = [];
+    Object.values(groupedData).forEach((group) => {
+      tableData.push([group.colaborador_nome, group.cupom, group.mes_ano, '', '', '']);
+      const sortedMetas = group.metas.sort((a, b) => a.valor - b.valor);
+
+      sortedMetas.forEach((meta) => {
+        tableData.push(['', '', '', meta.meta, meta.porcentagem, meta.valor]);
+      });
+    });
+
+    const columns = [
+      { header: 'Nome', dataKey: 'colaborador_nome' },
+      { header: 'Cupom', dataKey: 'cupom' },
+      { header: 'Mes ano', dataKey: 'mes_ano' },
+      { header: 'Meta', dataKey: 'meta' },
+      { header: 'Porcentagem', dataKey: 'porcentagem' },
+      { header: 'Valor', dataKey: 'valor' }
+    ];
+
+    autoTable(doc, {
+      head: [columns.map(col => col.header)],
+      body: tableData,
+      startY: 30,
+      columnStyles: {
+        0: { cellWidth: 30, marginleft: 0 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 25 },
+        3: { cellWidth: 50 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 20 }
+      },
+      didDrawCell: (data) => {
+        if (data.row.index >= 0 && (data.row.raw[3] === '' || data.row.raw[4] === '' || data.row.raw[5] === '')) {
+          doc.setFillColor(220, 220, 220);
+          doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+
+          doc.setTextColor(0, 0, 0);
+          const text = (data.cell.text || '').toString().trim();
+
+          let marginLeft = 10;
+
+          if (data.column.index === 0) {
+            marginLeft = 2;
+          } else if (data.column.index === 1) {
+            marginLeft = 2;
+          }
+          else if (data.column.index === 2) {
+            marginLeft = 2;
+          }
+          const x = data.cell.x + marginLeft;
+          const y = data.cell.y + (data.cell.height / 2) + 1.5;
+
+          doc.text(text, x, y);
+        }
+      },
 
 
+      headStyles: {
+        fillColor: [41, 128, 186],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 10,
+        cellPadding: 2,
+        valign: 'middle',
+        textColor: [0, 0, 0],
+      },
+      margin: { top: 30 },
+    });
 
-
-
+    doc.save('relatorio_meta.pdf');
+  };
 
 
 
@@ -245,7 +375,17 @@ const Meta = ({ toggleTheme }) => {
           </Button>)}
         <Paper sx={{ mt: 2, p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={2}>
+              <TextField
+                label="Filtrar por Nome"
+                variant="filled"
+                value={filterNome}
+                onChange={(e) => setFilterNome(e.target.value)}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Filtrar por Cupom"
                 variant="filled"
@@ -255,7 +395,7 @@ const Meta = ({ toggleTheme }) => {
                 size="small"
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Filtrar por Mês-Ano"
                 variant="filled"
@@ -267,6 +407,23 @@ const Meta = ({ toggleTheme }) => {
             </Grid>
           </Grid>
         </Paper>
+        <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            onClick={() => generatePDF(filtereds)}
+            sx={{
+              mt: 1.5,
+              backgroundColor: '#45a049',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'darkgreen',
+              },
+              height: '36px',
+              width: '10%',
+            }}
+          >
+            Exportar PDF
+          </Button>
+        </Grid>
         {loading ? (
           <CircularProgress sx={{ mt: 3 }} />
         ) : error ? (
@@ -325,8 +482,8 @@ const Meta = ({ toggleTheme }) => {
                   label="Porcentagem"
                   fullWidth
                   variant="outlined"
-                  value={editingMeta.porcentagem}
-                  onChange={(e) => setEditingMeta({ ...editingMeta, porcentagem: e.target.value })}
+                  value={editingMeta.porcentagem ? editingMeta.porcentagem * 100 : ''}
+                  onChange={(e) => setEditingMeta({ ...editingMeta, porcentagem: e.target.value / 100 })}
                 />
                 <TextField
                   margin="dense"
@@ -391,31 +548,41 @@ const Meta = ({ toggleTheme }) => {
                     />
                   </Grid>
                   <Grid item xs={4}>
-                    <TextField
-                      label="Porcentagem"
-                      value={meta.porcentagem}
-                      fullWidth
-                      size="small"
-                      margin="dense"
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                      variant="outlined"
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      label="Valor"
-                      value={meta.valor}
-                      fullWidth
-                      size="small"
-                      margin="dense"
-                      InputProps={{
-                        readOnly: true,
-                      }}
-                      variant="outlined"
-                    />
-                  </Grid>
+                  <TextField
+                    label="Porcentagem"
+                    value={
+                      meta.porcentagem
+                        ? `${(meta.porcentagem * 100).toLocaleString('pt-BR')}%`
+                        : ''
+                    }
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    variant="outlined"
+                  />
+                </Grid>
+
+                <Grid item xs={4}>
+                  <TextField
+                    label="Valor"
+                    value={
+                      meta.valor
+                        ? `R$ ${(meta.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : ''
+                    }
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    variant="outlined"
+                  />
+                </Grid>
+
                 </Grid>
               </Box>
             ))

@@ -8,10 +8,12 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useToast } from '../../components/ToastProvider';
 
 const CreateColaborador = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     cupom: '',
     nome: '',
@@ -50,7 +52,7 @@ const CreateColaborador = ({ toggleTheme }) => {
       });
       navigate('/colaborador');
     } catch (error) {
-      console.error('Erro ao criar colaborador:', error);
+      showToast('Erro ao criar colaborador:', 'error');
     }
   };
 

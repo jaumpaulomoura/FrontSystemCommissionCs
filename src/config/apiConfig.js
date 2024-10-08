@@ -4,6 +4,9 @@ const API_BASE_URL = 'http://localhost:5001/api'; //DEV
 
 export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/login`,
+  UPDATE_PASSWORD:`${API_BASE_URL}/update-password`,
+  FORGOT_PASSWORD:`${API_BASE_URL}/forgotPassword`,
+  RESET_PASSWORD:`${API_BASE_URL}/resetPassword`,
   COLABORADOR: `${API_BASE_URL}/colaborador`,
   PREMIACAO_META: `${API_BASE_URL}/premiacaoMeta`,
   PREMIACAO_RECONQUISTA: `${API_BASE_URL}/premiacaoReconquista`,
@@ -19,7 +22,4 @@ export const API_ENDPOINTS = {
   CLOSINGORDER:`${API_BASE_URL}/closingOrder`,
   RECONQUEST:`${API_BASE_URL}/reconquest`,
   RECONQUESTGROUP:`${API_BASE_URL}/reconquestGroup`,
-
-
-
 };

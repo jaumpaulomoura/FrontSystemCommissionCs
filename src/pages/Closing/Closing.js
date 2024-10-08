@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Paper, CircularProgress, Alert, TextField, Grid, IconButton, Modal, Button
+  Box, Typography, Paper, CircularProgress, Alert, TextField, Grid, IconButton, Modal, Button, Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import CheckIcon from '@mui/icons-material/Check';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import PrintIcon from '@mui/icons-material/Print';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import InputOutlinedIcon from '@mui/icons-material/InputOutlined';
 import SidebarMenu from '../../components/SidebarMenu';
-import { getFilteredClosingGroupData, getFilteredClosingData } from '../../services/apiService';
+import { getFilteredClosingGroupData, getFilteredClosingData, getFilteredTicketData } from '../../services/apiService';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import Cookies from 'js-cookie'; 
+import Cookies from 'js-cookie';
 
 const Closing = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -24,7 +25,8 @@ const Closing = ({ toggleTheme }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [loadingModalData, setLoadingModalData] = useState(false);
-
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -97,6 +99,50 @@ const Closing = ({ toggleTheme }) => {
     setModalData([]);
   };
 
+
+  
+  const ErrorDialog = ({ open, onClose, message }) => (
+    <Dialog
+    open={open}
+    onClose={onClose}
+    BackdropProps={{
+      style: {
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      },
+    }}
+    
+  >
+      <DialogTitle>
+        <Box display="flex" alignItems="center">
+          Erro
+          <WarningAmberRoundedIcon sx={{ verticalAlign: 'middle', marginLeft: '4px', color: '#ffb300' }} />
+        </Box>
+      </DialogTitle>
+      <DialogContent>
+        <Typography>{message}</Typography>
+      </DialogContent>
+      <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        <Box sx={{ flexGrow: 1 }}>
+          <Button onClick={() => navigate('/ticket')} sx={{
+            backgroundColor: '#45a049',
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: '#388e3c',
+            }
+          }}>Verificar</Button>
+        </Box>
+        <Box>
+          <Button onClick={onClose} sx={{
+            backgroundColor: 'red',
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: '#d32f2f',
+            }
+          }}>Fechar</Button>
+        </Box>
+      </DialogActions>
+    </Dialog>
+  );
   const columns = [
     {
       field: 'action',
@@ -104,11 +150,56 @@ const Closing = ({ toggleTheme }) => {
       width: 150,
       renderCell: (params) => {
         const hasDate = !!params.row.dt_insert;
-        const handleClick = () => {
-          if (!hasDate) {
-            navigate(`/closing/create/${params.row.mes_ano}`);
+        const handleClick = async () => {
+          try {
+            const filteredData = await getFilteredTicketData(); // Aguarda a resolução da Promise
+
+            // Log para ver o que está sendo retornado por getFilteredTicketData
+            console.log('Dados retornados de getFilteredTicketData:', filteredData);
+
+            // Verifica se o retorno é um array para poder filtrar os resultados
+            if (Array.isArray(filteredData)) {
+              // Log para ver params.row.mes_ano
+              console.log('Mês/Ano do params.row:', params.row.mes_ano);
+
+              // Filtra os dados para encontrar qualquer item que corresponda ao mês, ano e status 'Aberto'
+              const foundItems = filteredData.filter(item => {
+                // Certifique-se de que dateCreated seja um objeto Date
+                const dateCreated = new Date(item.dateCreated);
+                const createdMesAno = `${dateCreated.getFullYear()}-${String(dateCreated.getMonth() + 1).padStart(2, '0')}`.trim(); // Formato YYYY-MM
+
+                // Converte rowMesAno de MM-YYYY para YYYY-MM
+                const [mes, ano] = params.row.mes_ano.split('-');
+                const rowMesAno = `${ano.trim()}-${mes.trim()}`; // Formato YYYY-MM
+
+                // Log para verificar a comparação
+                console.log('Mês/Ano do dateCreated:', createdMesAno);
+                console.log('Mês/Ano do params.row (ajustado):', rowMesAno);
+                console.log('Status do item:', item.status);
+
+                // Verifica se o mês/ano coincide e se o status é 'Aberto' (insensível a maiúsculas)
+                return createdMesAno === rowMesAno && item.status.toLowerCase() === 'aberto';
+              });
+
+              // Log os itens encontrados
+              console.log('Itens encontrados com fechamento aberto:', foundItems);
+
+              if (foundItems.length > 0) {
+                setErrorMessage('Existem Tickets em abertos para este mês e ano.');
+                setErrorDialogOpen(true);
+              } else if (!hasDate) {
+                navigate(`/closing/create/${params.row.mes_ano}`);
+              }
+            } else {
+              console.error('Retorno inesperado de getFilteredTicketData:', filteredData);
+              alert('Erro ao obter dados de fechamento.');
+            }
+          } catch (error) {
+            console.error('Erro ao buscar os dados:', error);
+            alert('Erro ao obter dados de fechamento.');
           }
         };
+
 
         return (
           <>
@@ -122,6 +213,11 @@ const Closing = ({ toggleTheme }) => {
             <IconButton onClick={() => handleOpenModal(params.row.mes_ano)}>
               <PrintIcon sx={{ color: 'gray', fontSize: 24 }} />
             </IconButton>
+            <ErrorDialog
+              open={errorDialogOpen}
+              onClose={() => setErrorDialogOpen(false)}
+              message={errorMessage}
+            />
           </>
         );
       },
@@ -162,27 +258,88 @@ const Closing = ({ toggleTheme }) => {
       field: 'total_frete',
       headerName: 'Total Valor Frete',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'total_pago',
       headerName: 'Total Valor Pago',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'total_comissional',
       headerName: 'Total Comissional',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     { field: 'meta_atingida', headerName: 'Meta', width: 80 },
-    { field: 'porcentagem_meta', headerName: 'Porcentagem', width: 80 },
+    {
+      field: 'porcentagem_meta', headerName: 'Porcentagem', width: 80, valueFormatter: (params) => {
+        // Verifica se o valor está definido
+        if (params !== undefined && params !== null) {
+          // Multiplica por 100 e formata como percentual
+          return `${(params * 100).toLocaleString('pt-BR')}%`;
+        }
+        return ''; // Retorna uma string vazia se o valor não estiver definido
+      }
+    },
     {
       field: 'Valor_comisao',
       headerName: ' ValorComissão',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     { field: 'premiacao_meta', headerName: 'Premiacao Meta', width: 80 },
     { field: 'qtd_reconquista', headerName: 'Reconquista', width: 150 },
@@ -190,32 +347,97 @@ const Closing = ({ toggleTheme }) => {
       field: 'vlr_reconquista',
       headerName: 'Valor Premiação Reconquista',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'vlr_total_reco',
       headerName: 'Total Valor Premiação Reconquista',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     { field: 'qtd_repagar', headerName: 'Repagar', width: 150 },
     {
       field: 'vlr_recon_mes_ant',
       headerName: 'Valor Premiação Repagar',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'vlr_total_recon_mes_ant',
       headerName: 'Total Valor Premiação Repagar',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'total_receber',
       headerName: 'Valor Total',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
   ];
 
@@ -326,26 +548,25 @@ const Closing = ({ toggleTheme }) => {
         // Cálculo da Premiação Reconquista (caso aplicável)
         const premiacaoReconquista = parseFloat(row.vlr_total_recon_mes_ant || '0') +
           parseFloat(row.vlr_total_reco || '0');
-       
 
-        // Cálculo do Valor Total incluindo ou não a Premiação Reconquista
+
         const valorTotal = parseFloat(row.total_comissional || '0') +
           parseFloat(row.valor_comissao || '0') +
           parseFloat(row.premiacao_meta || '0') +
           (user?.time === "Reconquista" ? premiacaoReconquista : 0);
-
         return [
           row.nome || '',
-          numberFormatter.format(parseFloat(row.total_comissional || '0')),
+          `R$ ${numberFormatter.format(parseFloat(row.total_comissional || '0'))}`,
           row.meta_atingida || '',
           `${numberFormatter.format(parseFloat(row.porcentagem_meta || '0') * 100)}%`,
-          numberFormatter.format(parseFloat(row.valor_comissao || '0')),
-          numberFormatter.format(parseFloat(row.premiacao_meta || '0')),
+          `R$ ${numberFormatter.format(parseFloat(row.valor_comissao || '0'))}`,
+          `R$ ${numberFormatter.format(parseFloat(row.premiacao_meta || '0'))}`,
           ...(user?.time === "Reconquista"
-            ? [numberFormatter.format(premiacaoReconquista)]
+            ? [`R$ ${numberFormatter.format(premiacaoReconquista)}`]
             : []),
-          numberFormatter.format(row.total_receber),  
+          `R$ ${numberFormatter.format(parseFloat(row.total_receber || '0'))}`,
         ];
+
       }),
       headStyles: {
         fillColor: [41, 128, 186],
@@ -386,7 +607,7 @@ const Closing = ({ toggleTheme }) => {
 
         <Paper sx={{ mt: 2, p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Filtrar por Mês-Ano"
                 variant="filled"
@@ -512,27 +733,3 @@ const Closing = ({ toggleTheme }) => {
 };
 
 export default Closing;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

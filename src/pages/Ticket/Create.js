@@ -5,10 +5,12 @@ import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { useNavigate } from 'react-router-dom';
 import { createTicket, getTicketData } from '../../services/apiService';
 import Cookies from 'js-cookie'; 
+import { useToast } from '../../components/ToastProvider';
 
 const CreateTicket = ({ toggleTheme }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [formData, setFormData] = useState({
         id: '',
         orderId: '',
@@ -76,21 +78,40 @@ const CreateTicket = ({ toggleTheme }) => {
     };
 
     const validateForm = () => {
-        if (!formData.orderId || !formData.octadeskId || !formData.reason) {
-            setError('Todos os campos são obrigatórios!');
-            return false;
+        let isValid = true; 
+        const errors = []; 
+    
+        // Verificação dos campos obrigatórios
+        if (!formData.orderId) {
+            errors.push('Número do Pedido');
+            isValid = false; 
         }
-        setError('');
-        return true;
+        if (!formData.octadeskId) {
+            errors.push('Número do atendimento do Octadesk');
+            isValid = false; 
+        }
+        if (!formData.reason) {
+            errors.push('Motivo');
+            isValid = false; 
+        }
+    
+        // Se houver mensagens de erro, concatene-as e exiba o toast
+        if (!isValid) {
+            const message = `${errors.join(', ')} é obrigatório!`;
+            showToast(message, 'error');
+        }
+    
+        return isValid; 
     };
-
+    
+    
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-
+        e.preventDefault(); // Previne o comportamento padrão do formulário
+    
+        if (!validateForm()) return; // Se não for válido, exibe os toasts e retorna
+    
         try {
-            const response = await createTicket(formData);
-
+            const response = await createTicket(formData); // Cria o ticket
             setFormData({
                 id: '',
                 orderId: '',
@@ -102,19 +123,20 @@ const CreateTicket = ({ toggleTheme }) => {
                 dateCreate: '',
                 dateUpdated: '',
             });
-            navigate('/ticket');
+            showToast('Ticket criado com sucesso!', 'success'); // Toast de sucesso após criação
+            navigate('/ticket'); // Navega para a página de tickets
         } catch (error) {
             console.error('Erro ao criar ticket:', error);
-            setError('Erro ao criar ticket. Verifique o console para mais detalhes.');
+            showToast('Erro ao criar ticket. Verifique o console para mais detalhes.', 'error'); // Toast de erro
         }
     };
-
+    
 
 
     const handleSidebarToggle = () => {
         setSidebarOpen(!sidebarOpen);
     };
-
+    
     return (
         <Box sx={{ display: 'flex' }}>
             <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -125,6 +147,7 @@ const CreateTicket = ({ toggleTheme }) => {
                 <Typography variant="h4">Criar Ticket</Typography>
                 <Paper sx={{ mt: 3, p: 3, borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    
                         <Grid container spacing={2}>
                             <Grid item xs={2}>
                                 <TextField

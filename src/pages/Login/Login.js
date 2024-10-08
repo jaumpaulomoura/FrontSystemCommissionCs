@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import ThemeToggleButton from '../components/ThemeToggleButton';
-import { getColaboradorData, getLogin } from '../services/apiService';
-import { useAuth } from '../context/AuthContext';
+import ThemeToggleButton from '../../components/ThemeToggleButton';
+import { getColaboradorData, getLogin } from '../../services/apiService';
+import { useAuth } from '../../context/AuthContext';
 import Cookies from 'js-cookie';
+import { useToast } from '../../components/ToastProvider';
 
 const Login = ({ toggleTheme }) => {
   const [email, setEmail] = useState('');
@@ -13,59 +14,63 @@ const Login = ({ toggleTheme }) => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleLogin = async () => {
     setLoading(true);
     setError('');
+
     try {
-     
-      const token = await getLogin(email, password);
-  
-      if (!token) {
-        throw new Error('Token não recebido');
-      }
-  
-      // console.log(token);  // Verifique se o token está correto
-  
-     
-      Cookies.set('token', token, { expires: 7 });
-      Cookies.set('email', email, { expires: 7 });
-  
-     
-      const colaboradores = await getColaboradorData();
-      
-     
-      const colaborador = colaboradores.find(colaborador => colaborador.email === email);
-      if (colaborador) {
-        
-        Cookies.set('user', JSON.stringify({
-          email: colaborador.email,
-          cupom: colaborador.cupom,
-          nome: colaborador.nome,
-          funcao: colaborador.funcao,
-          time: colaborador.time,
-        }), { expires: 7 });
-  
-        const simulatedUser = {
-          name: colaborador.nome,
-          avatar: 'https://example.com/avatar.jpg',
-        };
-  
-        Cookies.set('simulatedUser', JSON.stringify(simulatedUser), { expires: 7 });
-  
-        login(email, token);
-        navigate('/home');
-      } else {
-        setError('Usuário não encontrado');
-      }
+        const token = await getLogin(email, password);
+
+        // Check if a token is received
+        if (!token) {
+            showToast('Senha incorreta ou email inválido', 'error');
+            return; // Exit if no token is returned
+        }
+
+        // Store the token and email in cookies
+        Cookies.set('token', token, { expires: 7 });
+        Cookies.set('email', email, { expires: 7 });
+
+        const colaboradores = await getColaboradorData();
+        const colaborador = colaboradores.find(colaborador => colaborador.email === email);
+
+        if (colaborador) {
+            Cookies.set('user', JSON.stringify({
+                email: colaborador.email,
+                cupom: colaborador.cupom,
+                nome: colaborador.nome,
+                funcao: colaborador.funcao,
+                time: colaborador.time,
+            }), { expires: 7 });
+
+            const simulatedUser = {
+                name: colaborador.nome,
+                avatar: 'https://example.com/avatar.jpg',
+            };
+
+            Cookies.set('simulatedUser', JSON.stringify(simulatedUser), { expires: 7 });
+
+            login(email, token);
+            showToast('Login realizado com sucesso', 'success');
+            navigate('/home');
+        } else {
+            showToast('Usuário não encontrado', 'error');
+        }
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      setError('Erro ao fazer login');
+        // Check if the error is due to incorrect credentials
+        if (error.response && error.response.status === 401) {
+            // Unauthorized error - invalid credentials
+            showToast('Senha incorreta ou email inválido', 'error');
+        } else {
+            // Other errors
+            showToast('Erro ao fazer login. Tente novamente mais tarde', 'error');
+        }
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
-  
+};
 
   return (
     <Box
@@ -178,7 +183,12 @@ const Login = ({ toggleTheme }) => {
         >
           {loading ? <CircularProgress size={24} /> : 'Entrar'}
         </Button>
-        <Typography variant="body1" gutterBottom sx={{ marginTop: '15px' }}>
+        <Typography
+          variant="body1"
+          gutterBottom
+          sx={{ marginTop: '15px', cursor: 'pointer' }}
+          onClick={() => navigate('/forgotPassword')}
+        >
           Esqueci minha senha
         </Typography>
         <Typography variant="h6" gutterBottom sx={{ marginTop: 'auto' }}>

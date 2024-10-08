@@ -185,27 +185,125 @@ const CreateClosing = ({ toggleTheme }) => {
       field: 'total_valor_frete',
       headerName: 'Total Valor Frete',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+       valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+       const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; 
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'total_valor_pago',
       headerName: 'Total Valor Pago',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+       valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'total_comissional',
       headerName: 'Total Comissional',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+       valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     { field: 'meta', headerName: 'Meta', width: 80 },
-    { field: 'porcentagem', headerName: 'Porcentagem', width: 80 },
+    {
+      field: 'porcentagem',
+      headerName: 'Porcentagem',
+      width: 80,
+      valueFormatter: (params) => {
+        // Verifica se o valor está definido
+        if (params !== undefined && params !== null) {
+          // Multiplica por 100 e formata como percentual
+          return `${(params * 100).toLocaleString('pt-BR')}%`;
+        }
+        return ''; // Retorna uma string vazia se o valor não estiver definido
+      }
+    }
+,    
     {
       field: 'Valor_comisao',
       headerName: 'Valor Comissão',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+       valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     { field: 'premiacao_meta', headerName: 'Premiacao Meta', width: 80 },
     { field: 'qtd_reconquista', headerName: 'Reconquista', width: 150 },
@@ -213,32 +311,152 @@ const CreateClosing = ({ toggleTheme }) => {
       field: 'valor_premiacao',
       headerName: 'Valor Premiação Reconquista',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+       valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'total_valor_premiacao',
       headerName: 'Total Valor Premiação Reconquista',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     { field: 'qtd_repagar', headerName: 'Repagar', width: 150 },
     {
       field: 'valor_repagar',
       headerName: 'Valor Premiação Repagar',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'valorTotalRepagar',
       headerName: 'Total Valor Premiação Repagar',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
     {
       field: 'valorTotal',
       headerName: 'Valor Total',
       width: 150,
-      valueFormatter: (params) => `R$ ${Number(params || 0).toFixed(2)}`
+      valueFormatter: (params) => {
+        // console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        
+        // Se o valor não estiver definido, retorna '0'
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        
+        // Substitui a vírgula por ponto e converte para número
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        
+        // Verifica se a conversão para número foi bem-sucedida
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+        }
+        
+        // Formata o número como moeda em BRL
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        
+        // Retorna o valor formatado com 'R$'
+        return `R$ ${formattedValue}`;
+      }
     },
   ];
 

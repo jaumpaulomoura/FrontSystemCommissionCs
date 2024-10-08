@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Avatar, Typography, Box, Stack } from '@mui/material';
+import { ListItemButton, ClickAwayListener, Paper, MenuItem, Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, Avatar, Typography, Box, Stack, IconButton, Collapse, } from '@mui/material';
 import { Assessment, Refresh as RefreshIcon, ShoppingCart as ShoppingCartIcon, Home as HomeIcon, Group as GroupIcon, Star as StarIcon, Logout as LogoutIcon, ConfirmationNumber as ConfirmationNumberIcon, TrendingUp as TrendingUpIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie'; 
-
+import Cookies from 'js-cookie';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import StarBorder from '@mui/icons-material/StarBorder';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import KeyIcon from '@mui/icons-material/VpnKey';
 const SidebarMenu = ({ open, onClose }) => {
   const navigate = useNavigate();
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [opens, setOpens] = useState(false);
+
+  const handleClick = () => {
+    setOpens(!opens);
+  };
+
+  const handleClickAway = () => {
+    setOpens(false);
+  };
 
   const handleNavigation = (route) => {
     navigate(route);
@@ -14,11 +28,11 @@ const SidebarMenu = ({ open, onClose }) => {
 
   const handleLogout = () => {
     Cookies.remove('token');
-    Cookies.remove('user'); 
+    Cookies.remove('user');
     navigate('/');
   };
-  
-  
+
+
   const openLogoutDialog = () => {
     setLogoutDialogOpen(true);
   };
@@ -50,15 +64,36 @@ const SidebarMenu = ({ open, onClose }) => {
       >
         <Box>
           {user ? (
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={2}
-              sx={{ p: 2 }}
-            >
-              <Avatar alt={user.nome} src={user.avatar} />
-              <Typography variant="subtitle1">{user.nome}</Typography>
-            </Stack>
+            <ClickAwayListener onClickAway={handleClickAway}>
+              <List
+                sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+                component="nav"
+              >
+                {/* Item com avatar e nome */}
+                <ListItemButton onClick={handleClick}>
+                  <ListItemIcon>
+                    <Avatar alt={user.nome} src={user.avatar} />
+                  </ListItemIcon>
+                  <ListItemText primary={user.nome} />
+                  {opens ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+
+                {/* Submenu para redefinir senha */}
+                <Collapse in={opens} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    <ListItemButton sx={{ pl: 4 }} onClick={() => handleNavigation('/resetPassword')}>
+                      <ListItemIcon>
+                        <KeyIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Resetar Senha" />
+                    </ListItemButton>
+                  </List>
+                </Collapse>
+              </List>
+            </ClickAwayListener>
+
+
+
           ) : (
             <Stack
               direction="row"
@@ -158,19 +193,22 @@ const SidebarMenu = ({ open, onClose }) => {
         open={logoutDialogOpen}
         onClose={closeLogoutDialog}
       >
-        <DialogTitle>Confirmar Logout</DialogTitle>
+        <DialogTitle> Tem certeza de que deseja sair?</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          {/* <DialogContentText>
             Tem certeza de que deseja sair?
-          </DialogContentText>
+          </DialogContentText> */}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={closeLogoutDialog} color="primary">
-            Cancelar
-          </Button>
-          <Button onClick={handleLogout} color="primary">
-            Sair
-          </Button>
+        <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        <Button onClick={closeLogoutDialog} sx={{ color: '#fff', backgroundColor: '#4caf50', '&:hover': { backgroundColor: '#388e3c' } }}>
+  Cancelar
+</Button>
+<Button onClick={handleLogout} sx={{ color: '#fff', backgroundColor: '#f44336', '&:hover': { backgroundColor: '#d32f2f' } }}>
+  Sair
+</Button>
+
+
+
         </DialogActions>
       </Dialog>
     </>

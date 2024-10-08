@@ -6,11 +6,12 @@ import NotesIcon from '@mui/icons-material/Notes';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
-import { getFilteredTicketData, updateTicket, updateTicketCupom,updateTicketStatus } from '../../services/apiService';
+import { getFilteredTicketData, updateTicket, updateTicketCupom } from '../../services/apiService';
 import { debounce } from 'lodash';
-import Cookies from 'js-cookie'; 
+import Cookies from 'js-cookie';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useToast } from '../../components/ToastProvider';
 
 const Ticket = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -24,15 +25,20 @@ const Ticket = ({ toggleTheme }) => {
   const [filterOctadeskid, setFilterOctadeskid] = useState('');
   const [filterDateCreated, setFilterDateCreated] = useState('');
   const [filterCupom, setFilterCupom] = useState('');
+  const [filterNome, setFilterNome] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [open, setOpen] = useState(false);
   const [notes, setNotes] = useState('');
-
+  const { showToast } = useToast();
   const navigate = useNavigate();
+
+
   const user = JSON.parse(Cookies.get('user'));
   const userFuncao = user ? user.funcao : '';
+
+
   const handleOpenModal = (notes) => {
     setNotes(notes);
     setOpen(true);
@@ -49,8 +55,8 @@ const Ticket = ({ toggleTheme }) => {
         setData(result);
         setFilteredData(result);
       } catch (error) {
-        setError('Erro ao buscar dados de ticket.');
-        console.error('Erro ao buscar dados de ticket:', error);
+        showToast('Erro ao buscar dados de ticket.', 'error'); 
+
       } finally {
         setLoading(false);
       }
@@ -102,6 +108,12 @@ const Ticket = ({ toggleTheme }) => {
           String(ticket.dateCreated).toLowerCase().includes(filterDateCreated.toLowerCase())
         );
       }
+      if (filterNome) {
+        filtered = filtered.filter((item) =>
+          item.nome &&
+          item.nome.toLowerCase().includes(filterNome.toLowerCase())
+        );
+      }
       if (filterCupom) {
         filtered = filtered.filter((item) =>
           item.cupomvendedora &&
@@ -110,7 +122,7 @@ const Ticket = ({ toggleTheme }) => {
       }
       setFilteredData(filtered);
     }, 300),
-    [filterId, filterOrderid, filterReason, filterOctadeskid, statusFilter, filterCupom, filterDateCreated, data]
+    [filterId, filterOrderid, filterReason, filterOctadeskid, statusFilter, filterNome, filterCupom, filterDateCreated, data]
   );
 
   useEffect(() => {
@@ -131,33 +143,29 @@ const Ticket = ({ toggleTheme }) => {
         status,
         dateupdated: new Date()
       });
-  
+
       const updatedTicket = data.find(ticket => ticket.id === id);
-  
+
       if (updatedTicket) {
         if (status === 'Autorizado') {
-          if (updatedTicket.reason === 'Status para Aprovado') {
-            await updateTicketStatus(updatedTicket.orderId, 'APPROVED');
-          } else if (updatedTicket.reason === 'Status para Cancelado') {
-            await updateTicketStatus(updatedTicket.orderId, 'REMOVED');
-          } else {
+          if (updatedTicket.reason !== 'Status para Aprovado' && updatedTicket.reason !== 'Status para Cancelado') {
             await updateTicketCupom(updatedTicket.orderId, updatedTicket.cupomvendedora);
           }
         }
-  
+
         setData(prevData =>
           prevData.map(ticket =>
             ticket.id === id ? { ...ticket, status } : ticket
           )
         );
-  
-        setSuccessMessage(`Ticket ${status === 'Autorizado' ? 'autorizado' : 'não autorizado'} com sucesso!`);
+
+        showToast(`Ticket ${status === 'Autorizado' ? 'autorizado' : 'não autorizado'} com sucesso!`, 'success');
       }
     } catch (error) {
-      setErrorMessage(`Erro ao ${status === 'Autorizado' ? 'autorizar' : 'não autorizar'} o ticket.`);
+      showToast(`Erro ao ${status === 'Autorizado' ? 'autorizar' : 'não autorizar'} o ticket.`, 'error');
     }
   };
-  
+
   const handleStatusChange = (event) => {
     const value = event.target.value;
 
@@ -175,10 +183,11 @@ const Ticket = ({ toggleTheme }) => {
 
   const columns = [
     { field: 'id', headerName: 'Ticket', width: 80 },
-    { field: 'orderId', headerName: 'Pedido', width: 80 },
+    { field: 'orderId', headerName: 'Pedido', width: 100 },
     { field: 'octadeskId', headerName: 'Ticket do Octadesk', width: 170 },
     { field: 'reason', headerName: 'Motivo', width: 120 },
     { field: 'status', headerName: 'Status', width: 120 },
+    { field: 'nome', headerName: 'Nome', width: 150 },
     { field: 'cupomvendedora', headerName: 'Cupom Vendedora', width: 150 },
     {
       field: 'dateCreated', headerName: 'Data de Criação', width: 150,
@@ -305,7 +314,7 @@ const Ticket = ({ toggleTheme }) => {
 
 
 
-  
+
   const generatePDF = (data) => {
     const doc = new jsPDF('landscape');
     doc.setFont("Helvetica", "normal");
@@ -330,17 +339,17 @@ const Ticket = ({ toggleTheme }) => {
     ];
 
 
- 
+
 
 
     const columnStyles = {
       nome: { cellWidth: 40 }
     }
     const rows = data.map(row => ({
-      id: row.id?row.id:'',
+      id: row.id ? row.id : '',
       orderId: row.orderId,
       octadeskId: row.octadeskId,
-      reason: row.reason ,
+      reason: row.reason,
       status: row.status,
       cupomvendedora: row.cupomvendedora,
       dateCreated: row.dateCreated,
@@ -368,11 +377,32 @@ const Ticket = ({ toggleTheme }) => {
     // Salva o PDF
     doc.save('relatorio_ticket.pdf');
   };
+  if (error) {
+    toast.error(error);
+  }
 
+  if (successMessage) {
+    toast.success(successMessage);
+  }
+
+  if (errorMessage) {
+    toast.error(errorMessage);
+  }
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          bgcolor: 'background.default',
+          p: 3,
+          maxWidth: '100%', // Ajuste conforme necessário
+          mx: 'auto', // Centraliza horizontalmente
+          overflow: 'auto' // Adiciona rolagem se necessário
+        }}
+      >
+
         <Box position="absolute" top={16} right={16}>
           <ThemeToggleButton toggleTheme={toggleTheme} />
         </Box>
@@ -385,7 +415,14 @@ const Ticket = ({ toggleTheme }) => {
         }} onClick={handleInsert}>
           Inserir
         </Button>
-        <Paper sx={{ mt: 2, p: 2 }}>
+        <Paper
+          sx={{
+            mt: 2,
+            p: 2,
+            maxWidth: '100%', // Evita que o Paper ultrapasse o contêiner principal
+            overflow: 'auto', // Permite rolar se o conteúdo exceder o tamanho
+          }}
+        >
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={1.8}>
               <TextField
@@ -451,7 +488,19 @@ const Ticket = ({ toggleTheme }) => {
                 />
               </Grid>
             )}
-        
+            {userFuncao !== 'Consultora' && (
+              <Grid item xs={12} sm={2} md={1.9}>
+                <TextField
+                  label="Filtrar por Nome"
+                  variant="filled"
+                  value={filterNome}
+                  onChange={(e) => setFilterNome(e.target.value)}
+                  fullWidth
+                  size="small"
+                />
+              </Grid>
+            )}
+
 
             <Grid item xs={9} sm={4} md={1.4}>
               <FormControl fullWidth variant="filled">
@@ -469,11 +518,11 @@ const Ticket = ({ toggleTheme }) => {
                 </Select>
               </FormControl>
             </Grid>
-       
-           
+
+
           </Grid>
         </Paper>
-        <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Grid item xs={12} sm={12} md={7} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
             onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
             sx={{
@@ -484,7 +533,7 @@ const Ticket = ({ toggleTheme }) => {
                 backgroundColor: 'darkgreen',
               },
               height: '36px',
-              width: '10%', // Diminuir a largura do botão
+              width: '11%', // Diminuir a largura do botão
             }}
           >
             Exportar PDF
@@ -493,15 +542,21 @@ const Ticket = ({ toggleTheme }) => {
         {loading ? (
           <CircularProgress sx={{ mt: 2 }} />
         ) : (
-          <div style={{ height: 600, width: '100%', marginTop: 16 }}>
-            {error && <Alert severity="error">{error}</Alert>}
-            {successMessage && <Alert severity="success">{successMessage}</Alert>}
-            {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+          <div style={{ height: 400, width: '100%', marginTop: 16 }}>
+      
             <DataGrid
               rows={filteredData}
               columns={columns}
-              pageSize={10}
-              rowsPerPageOptions={[10]}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 7,
+                  },
+                },
+              }}
+              autoHeight
+              pageSizeOptions={[7]}
+              disableColumnMenu
             />
           </div>
         )}

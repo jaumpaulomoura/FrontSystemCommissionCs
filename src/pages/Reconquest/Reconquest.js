@@ -251,7 +251,7 @@ const Reconquest = ({ toggleTheme }) => {
           flexGrow: 1,
           bgcolor: 'background.default',
           p: 3,
-          maxWidth: '1500px', // Ajuste conforme necessário
+          maxWidth: '100%', // Ajuste conforme necessário
           mx: 'auto', // Centraliza horizontalmente
           overflow: 'auto' // Adiciona rolagem se necessário
            }}>
@@ -263,7 +263,7 @@ const Reconquest = ({ toggleTheme }) => {
         <Paper sx={{ mt: 2, p: 2 }}>
           <Grid container spacing={2}>
             <Grid container spacing={2} alignItems="flex-start">
-              <Grid item xs={12} sm={6} md={1.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <TextField
                   label="Data Inicial"
                   type="date"
@@ -276,7 +276,7 @@ const Reconquest = ({ toggleTheme }) => {
                   sx={{ mt: 1.5,ml:1.5 }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={1.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <TextField
                   label="Data Final"
                   type="date"
@@ -289,7 +289,7 @@ const Reconquest = ({ toggleTheme }) => {
                   sx={{ mt: 1.5,ml:1.5  }}
                 />
               </Grid>
-              <Grid item md={1.4}>
+              <Grid item md={2}>
                 <FormControl fullWidth variant="filled">
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -305,7 +305,7 @@ const Reconquest = ({ toggleTheme }) => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6} md={1.4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <TextField
                   label="Filtrar por Cliente"
                   variant="filled"

@@ -15,6 +15,77 @@ export const getLogin = async (email, password) => {
     throw error;
   }
 };
+export const updatePassword = async (email, data) => {
+  try {
+    const token = Cookies.get('token');
+    console.log('data', data);
+
+    const response = await axios.put(`${API_ENDPOINTS.LOGIN}`, 
+      { email, ...data },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      // Erro com resposta do servidor
+      if (error.response.status === 401) {
+        console.error('Senha Incorreta');
+        throw new Error(error.response.data.message || 'Senha Incorreta'); // Mensagem personalizada
+      } else {
+        console.error('Erro ao atualizar senha:', error.response.data.message);
+        throw new Error(error.response.data.message || 'Erro desconhecido');
+      }
+    } else if (error.request) {
+      // Erro na requisição (sem resposta)
+      console.error('Erro na requisição:', error.request);
+      throw new Error('Erro na requisição');
+    } else {
+      // Erro na configuração da requisição
+      console.error('Erro na configuração:', error.message);
+      throw new Error('Erro na configuração da requisição');
+    }
+  }
+};
+export const emailPassword = async (data) => {
+  try {
+    const response = await axios.post(`${API_ENDPOINTS.FORGOT_PASSWORD}`, data);
+    return response.data;
+  } catch (error) {
+    if (error.response) {
+      throw new Error(error.response.data.message || 'Erro ao enviar e-mail. Por favor, tente novamente.');
+    } else if (error.request) {
+      throw new Error('Erro na requisição');
+    } else {
+      throw new Error('Erro na configuração da requisição');
+    }
+  }
+};
+export const resetPassword = async (data, token) => {
+  try {
+      console.log('Token antes da requisição:', token);
+      const response = await axios.put(`${API_ENDPOINTS.RESET_PASSWORD}`, data, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+          },
+      });
+      console.log('Resposta da API:', response.data);
+      return response.data;
+  } catch (error) {
+      if (error.response) {
+          console.error('Erro na resposta:', error.response.data);
+          throw new Error(error.response.data.message || 'Erro ao alterar senha. Por favor, tente novamente.');
+      } else if (error.request) {
+          throw new Error('Erro na requisição');
+      } else {
+          throw new Error('Erro na configuração da requisição');
+      }
+  }
+};
 
 export const getColaboradorData = async () => {
   try {
@@ -244,19 +315,31 @@ export const createPremiacaoMeta = async (data) => {
 export const deletePremiacaoMeta = async (params) => {
   try {
     const token = Cookies.get('token');
-    const queryParams = new URLSearchParams(params).toString();
-    const response = await axios.delete(`${API_ENDPOINTS.PREMIACAO_META}/?${queryParams}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,  
-        },
-      });
+    const { descricao, time, valor } = params;
+
+    // Log dos parâmetros que serão enviados
+    console.log("Parâmetros a serem enviados:", { descricao, time, valor });
+
+    const response = await axios.delete(`${API_ENDPOINTS.PREMIACAO_META}`, {
+      params: {
+        descricao,
+        time,
+        valor,
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("Resposta do servidor:", response.data); // Log da resposta do servidor
     return response.data;
   } catch (error) {
     console.error('Erro ao excluir PremiacaoMeta:', error);
     throw error;
   }
 };
+
+
 
 // Função para atualizar um PremiacaoMeta
 export const updatePremiacaoMeta = async (descricao, data) => {
@@ -350,19 +433,25 @@ export const createPremiacaoReconquista = async (data) => {
 export const deletePremiacaoReconquista = async (params) => {
   try {
     const token = Cookies.get('token');
-    const queryParams = new URLSearchParams(params).toString();
-    const response = await axios.delete(`${API_ENDPOINTS.PREMIACAO_RECONQUISTA}/?${queryParams}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,  
-        },
-      });
+    const { descricao, time, valor } = params; // Usando 'params' em vez de 'premiacaoReconquista'
+    
+    const response = await axios.delete(`${API_ENDPOINTS.PREMIACAO_RECONQUISTA}`, {
+      params: {
+        descricao: descricao,  // ou outro identificador único
+        time: time,
+        valor: valor
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,  
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Erro ao excluir PremiacaoReconquista:', error);
     throw error;
   }
 };
+
 
 // Função para atualizar um PremiacaoReconquista
 export const updatePremiacaoReconquista = async (descricao, data) => {
