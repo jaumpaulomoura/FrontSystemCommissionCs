@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   FORGOT_PASSWORD:`${API_BASE_URL}/forgotPassword`,
   RESET_PASSWORD:`${API_BASE_URL}/resetPassword`,
   COLABORADOR: `${API_BASE_URL}/colaborador`,
+  COLABORADORCHB: `${API_BASE_URL}/colaboradorChb`,
   PREMIACAO_META: `${API_BASE_URL}/premiacaoMeta`,
   PREMIACAO_RECONQUISTA: `${API_BASE_URL}/premiacaoReconquista`,
   META: `${API_BASE_URL}/meta`,

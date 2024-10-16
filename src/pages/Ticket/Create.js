@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, TextField, Typography, Paper, FormControl, InputLabel, Select, MenuItem, Grid } from '@mui/material';
+import { Box, Button, TextField, Typography, Paper, FormControl, InputLabel, Select, MenuItem, Grid, Autocomplete } from '@mui/material';
 import SidebarMenu from '../../components/SidebarMenu';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import { useNavigate } from 'react-router-dom';
-import { createTicket, getTicketData } from '../../services/apiService';
-import Cookies from 'js-cookie'; 
+import { createTicket, getTicketData, getColaboradorData } from '../../services/apiService';
+import Cookies from 'js-cookie';
 import { useToast } from '../../components/ToastProvider';
 
 const CreateTicket = ({ toggleTheme }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const navigate = useNavigate();
+    const [selectedName, setSelectedName] = useState('');
+    const [selectedCupom, setSelectedCupom] = useState('');
+    const [colaboradores, setColaboradores] = useState([]);
+    const [user, setUser] = useState(null);
+    const [nextIds, setNextIds] = useState('')
     const { showToast } = useToast();
     const [formData, setFormData] = useState({
         id: '',
@@ -28,9 +33,11 @@ const CreateTicket = ({ toggleTheme }) => {
         const fetchTicketsAndSetId = async () => {
             try {
                 const tickets = await getTicketData();
+                console.log('ticket', tickets);
                 const lastId = tickets.length > 0 ? Math.max(...tickets.map(ticket => parseInt(ticket.id))) : 0;
                 const nextId = lastId + 1;
-
+                console.log('nextId', nextId)
+                setNextIds(nextId)
                 const today = new Date();
                 const formattedDate = today.toLocaleDateString('pt-BR', {
                     day: '2-digit',
@@ -45,6 +52,7 @@ const CreateTicket = ({ toggleTheme }) => {
                     dateCreate: formattedDate,
                     cupomvendedora,
                 }));
+
             } catch (error) {
                 setError('Erro ao buscar dados de tickets.');
                 console.error('Erro ao buscar dados de tickets:', error);
@@ -78,40 +86,143 @@ const CreateTicket = ({ toggleTheme }) => {
     };
 
     const validateForm = () => {
-        let isValid = true; 
-        const errors = []; 
-    
+        let isValid = true;
+        const errors = [];
+
         // Verificação dos campos obrigatórios
         if (!formData.orderId) {
             errors.push('Número do Pedido');
-            isValid = false; 
+            isValid = false;
         }
         if (!formData.octadeskId) {
             errors.push('Número do atendimento do Octadesk');
-            isValid = false; 
+            isValid = false;
         }
         if (!formData.reason) {
             errors.push('Motivo');
-            isValid = false; 
+            isValid = false;
         }
-    
+
         // Se houver mensagens de erro, concatene-as e exiba o toast
         if (!isValid) {
             const message = `${errors.join(', ')} é obrigatório!`;
             showToast(message, 'error');
         }
-    
-        return isValid; 
+
+        return isValid;
     };
-    
-    
+
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault(); // Previne o comportamento padrão do formulário
+
+    //     if (!validateForm()) return; // Se não for válido, exibe os toasts e retorna
+
+    //     try {
+    //         const response = await createTicket(formData); // Cria o ticket
+    //         setFormData({
+    //             id: '',
+    //             orderId: '',
+    //             octadeskId: '',
+    //             reason: '',
+    //             notes: '',
+    //             status: 'Aberto',
+    //             cupomvendedora: JSON.parse(Cookies.get('user'))?.name || '',
+    //             dateCreate: '',
+    //             dateUpdated: '',
+    //         });
+    //         showToast('Ticket criado com sucesso!', 'success'); // Toast de sucesso após criação
+    //         navigate('/ticket'); // Navega para a página de tickets
+    //     } catch (error) {
+    //         console.error('Erro ao criar ticket:', error);
+    //         showToast('Erro ao criar ticket. Verifique o console para mais detalhes.', 'error'); // Toast de erro
+    //     }
+    // };
+
+
+    // useEffect para preencher cupom baseado na função do usuário
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getColaboradorData();
+                const user = JSON.parse(Cookies.get('user'));
+                console.log('user', user)
+
+                if (user) {
+                    if (user.funcao === "Consultora") {
+                        // Se Consultora, preenche com seu próprio cupom e nome
+                        setSelectedName(user.nome);
+                        setSelectedCupom(user.cupom);
+                        setFormData({ ...formData, cupomvendedora: user.cupom });
+                    } else {
+                        // Caso contrário, filtra por time ou exibe todos
+                        const filteredColaboradores = user.time
+                            ? data.filter(colaborador => colaborador.time === user.time)
+                            : data;
+                        setColaboradores(filteredColaboradores);
+                    }
+                } else {
+                    console.warn('Usuário não encontrado.');
+                    setColaboradores(data);
+                }
+            } catch (err) {
+                showToast('Erro ao buscar dados dos colaboradores.', 'error');
+                console.error('Erro ao buscar dados dos colaboradores:', err);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // Modifica handleNameChange para permitir seleção de outros cupons se não for Consultora
+    const handleNameChange = (event, newValue) => {
+        const nomeDigitado = newValue || '';
+        setSelectedName(nomeDigitado);
+
+        const colaborador = colaboradores.find(colab => colab.nome.toLowerCase() === nomeDigitado.toLowerCase());
+
+        if (colaborador) {
+            setSelectedCupom(colaborador.cupom);
+            setFormData({ ...formData, cupomvendedora: colaborador.cupom });
+            setError('');
+        } else {
+            setSelectedCupom('');
+            setFormData({ ...formData, cupomvendedora: '' });
+            setError('Colaborador não encontrado.');
+        }
+    }; const handleCupomChange = (event, newValue) => {
+        const cupomDigitado = newValue || '';
+        setSelectedCupom(cupomDigitado);
+        setFormData({ ...formData, cupomvendedora: cupomDigitado });
+
+        const colaborador = colaboradores.find(colab => colab.cupom.toLowerCase() === cupomDigitado.toLowerCase());
+
+        if (colaborador) {
+            setSelectedName(colaborador.nome);
+        } else {
+            setSelectedName('');
+            setFormData({ ...formData, cupomvendedora: '' });
+        }
+    };
+
+    // handleSubmit para tratar criação de ticket com base na função
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Previne o comportamento padrão do formulário
-    
-        if (!validateForm()) return; // Se não for válido, exibe os toasts e retorna
-    
+        e.preventDefault();
+        console.log('Dados do formulário antes da validação:', formData);
+        if (!validateForm()) return;
+
         try {
-            const response = await createTicket(formData); // Cria o ticket
+            // Garante que Consultora usa seu próprio cupom, enquanto outros podem escolher
+            const user = JSON.parse(Cookies.get('user'));
+            const cupomVendedora = user.funcao === 'Consultora' ? user.cupom : formData.cupomvendedora;
+
+            const response = await createTicket({
+                ...formData,
+                cupomvendedora: cupomVendedora,
+                status: 'Aberto',
+            });
+            console.log('Resposta da API:', response);
+
             setFormData({
                 id: '',
                 orderId: '',
@@ -119,24 +230,22 @@ const CreateTicket = ({ toggleTheme }) => {
                 reason: '',
                 notes: '',
                 status: 'Aberto',
-                cupomvendedora: JSON.parse(Cookies.get('user'))?.name || '',
+                cupomvendedora: cupomVendedora,
                 dateCreate: '',
                 dateUpdated: '',
             });
-            showToast('Ticket criado com sucesso!', 'success'); // Toast de sucesso após criação
-            navigate('/ticket'); // Navega para a página de tickets
+
+            showToast('Ticket criado com sucesso!', 'success');
+            navigate('/ticket');
         } catch (error) {
             console.error('Erro ao criar ticket:', error);
-            showToast('Erro ao criar ticket. Verifique o console para mais detalhes.', 'error'); // Toast de erro
+            showToast('Erro ao criar ticket. Verifique o console para mais detalhes.', 'error');
         }
     };
-    
-
-
     const handleSidebarToggle = () => {
         setSidebarOpen(!sidebarOpen);
     };
-    
+
     return (
         <Box sx={{ display: 'flex' }}>
             <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -147,45 +256,62 @@ const CreateTicket = ({ toggleTheme }) => {
                 <Typography variant="h4">Criar Ticket</Typography>
                 <Paper sx={{ mt: 3, p: 3, borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    
-                        <Grid container spacing={2}>
-                            <Grid item xs={2}>
-                                <TextField
-                                    label="Número do Ticket"
-                                    name="id"
-                                    value={formData.id}
-                                    onChange={handleInputChange}
-                                    fullWidth
-                                    variant="filled"
-                                    sx={{
-                                        width: '180px',
-                                        height: '56px',
-                                        borderRadius: '8px',
-                                    }}
-                                    InputProps={{
-                                        readOnly: true,
-                                    }}
-                                />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <TextField
-                                    label="Cupom"
-                                    name="cupomvendedora"
-                                    value={formData.cupomvendedora}
-                                    onChange={handleInputChange}
-                                    fullWidth
-                                    variant="filled"
-                                    sx={{
-                                        width: '190px',
-                                        height: '56px',
-                                        borderRadius: '8px',
-                                    }}
-                                    InputProps={{
-                                        readOnly: true,
-                                    }}
-                                />
-                            </Grid>
+
+                        <Grid item xs={10} sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
+                            
+                                <Grid item xs={2}>
+                                    <TextField
+                                        label="Número do Ticket"
+                                        name="id"
+                                        value={nextIds}
+                                        onChange={handleInputChange}
+                                        fullWidth
+                                        variant="filled"
+                                        sx={{
+                                            width: '180px',
+                                            height: '56px',
+                                            borderRadius: '8px',
+                                        }}
+                                        InputProps={{
+                                            readOnly: true,
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={5}>
+                                    <Autocomplete
+                                        value={selectedName || ''}
+                                        onChange={handleNameChange}
+                                        options={user?.funcao === "Consultora" ? [user.name] : colaboradores.map(colab => colab.nome)}
+                                        renderInput={(params) => <TextField {...params} label="Nome" variant="outlined" />}
+                                        noOptionsText="Nenhuma opção disponível"
+                                        isOptionEqualToValue={(option, value) => option === value}
+                                        sx={{
+                                            width: '180px',
+                                            height: '56px',
+                                            borderRadius: '8px',
+                                        }}
+                                    />
+                                </Grid>
+
+
+                                <Grid item xs={10}>
+                                    <Autocomplete
+                                        value={selectedCupom || ''}
+                                        onChange={handleCupomChange}
+                                        options={user?.funcao === "Consultora" ? [user.cupom] : colaboradores.map(colab => colab.cupom)}
+                                        renderInput={(params) => <TextField {...params} label="Cupom" variant="outlined" />}
+                                        noOptionsText="Nenhuma opção disponível"
+                                        isOptionEqualToValue={(option, value) => option === value}
+                                        sx={{
+                                            width: '180px',
+                                            height: '56px',
+                                            borderRadius: '8px',
+                                        }}
+                                    />
+                                </Grid>
+                            
                         </Grid>
+
 
                         <TextField
                             label="Número do Pedido"

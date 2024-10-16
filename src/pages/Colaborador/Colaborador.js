@@ -35,6 +35,7 @@ const Colaborador = ({ toggleTheme }) => {
       setLoading(true);
       try {
         const result = await getColaboradorData();
+        console.log(result)
         setData(result);
         setFilteredData(result);
       } catch (error) {
@@ -105,11 +106,13 @@ const Colaborador = ({ toggleTheme }) => {
       try {
         const updatedData = {
           nome: editingColaborador.nome,
-          sobrenome: editingColaborador.sobrenome,
+          // sobrenome: editingColaborador.sobrenome,
           funcao: editingColaborador.funcao,
           time: editingColaborador.time,
           email: editingColaborador.email,
           password: editingColaborador.password,
+          dtadmissao:editingColaborador.dtadmissao,
+          dtdemissao:editingColaborador.dtdemissao,
         };
 
         await updateColaborador(editingColaborador.cupom, updatedData);
@@ -148,12 +151,37 @@ const Colaborador = ({ toggleTheme }) => {
 
   const columns = [
     { field: 'cupom', headerName: 'Cupom', width: 150 },
-    { field: 'nome', headerName: 'Nome', width: 150 },
-    { field: 'sobrenome', headerName: 'Sobrenome', width: 150 },
+    { field: 'nome', headerName: 'Nome', width: 250 },
+    // { field: 'sobrenome', headerName: 'Sobrenome', width: 150 },
 
     { field: 'funcao', headerName: 'Função', width: 200 },
     { field: 'time', headerName: 'Time', width: 150 },
     { field: 'email', headerName: 'Email', width: 150 },
+    {
+      field: 'dtadmissao',
+      headerName: 'Data Admissão',
+      width: 150,
+      valueFormatter: (params) => {
+        if (!params) return ''; // Retorna vazio se não houver data
+        const date = new Date(params);
+        return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+      },
+    },
+    
+    
+    
+    
+    {
+      field: 'dtdemissao',
+      headerName: 'Data Demissão',
+      width: 150,
+      valueFormatter: (params) => {
+        if (!params) return ''; // Retorna vazio se não houver data
+        const date = new Date(params);
+        return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+      },
+    },
+    
     {
       field: 'actions',
       headerName: '',
@@ -240,7 +268,7 @@ const Colaborador = ({ toggleTheme }) => {
     const columns = [
       { header: 'Cupom', dataKey: 'cupom' },
       { header: 'Nome', dataKey: 'nome' },
-      { header: 'Sobrenome', dataKey: 'sobrenome' },
+      // { header: 'Sobrenome', dataKey: 'sobrenome' },
       { header: 'Função', dataKey: 'funcao' },
       { header: 'Time', dataKey: 'time' },
       { header: 'Email', dataKey: 'email' }
@@ -251,7 +279,7 @@ const Colaborador = ({ toggleTheme }) => {
     const rows = data.map(row => ({
       cupom: row.cupom ? row.cupom : '',
       nome: row.nome,
-      sobrenome: row.sobrenome,
+      // sobrenome: row.sobrenome,
       funcao: row.funcao,
       time: row.time,
       email: row.email,
@@ -280,8 +308,20 @@ const Colaborador = ({ toggleTheme }) => {
     // Salva o PDF
     doc.save('relatorio_colaborador.pdf');
   };
-
-
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString.trim());
+    if (isNaN(date.getTime())) return ''; // Retorna string vazia se a data for inválida
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+  };
+  const convertDateFormat = (dateString) => {
+    const parts = dateString.split('/');
+    if (parts.length !== 3) return ''; // return empty string if format is incorrect
+    const day = parts[0];
+    const month = parts[1];
+    const year = parts[2];
+    return `${year}-${month}-${day}`; // returns yyyy-mm-dd format
+};
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -424,13 +464,13 @@ const Colaborador = ({ toggleTheme }) => {
                 onChange={(e) => setEditingColaborador({ ...editingColaborador, nome: e.target.value })}
                 fullWidth
               />
-              <TextField
+              {/* <TextField
                 label="SobreNome"
                 variant="outlined"
                 value={editingColaborador.sobrenome}
                 onChange={(e) => setEditingColaborador({ ...editingColaborador, sobrenome: e.target.value })}
                 fullWidth
-              />
+              /> */}
               <TextField
                 label="Função"
                 variant="outlined"
@@ -452,6 +492,64 @@ const Colaborador = ({ toggleTheme }) => {
                 onChange={(e) => setEditingColaborador({ ...editingColaborador, email: e.target.value })}
                 fullWidth
               />
+       <Grid item xs={10} sx={{ display: 'flex', flexDirection: 'row', gap: 2 }}>
+    <Grid item xs={12} sm={6} md={2}>        
+        <TextField
+            label="Data Admissão"
+            //  type="date"
+            variant="outlined"
+            value={formatDate(editingColaborador.dtadmissao)}
+            disabled
+            fullWidth
+            sx={{
+                minWidth: 269,
+                minHeight: 100,
+                '& .MuiInputBase-input': {
+                    color: '#000000',
+                },
+                '& .MuiInputLabel-root': {
+                    color: '#000000',
+                },
+                '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#f5f5f5',
+                    '& fieldset': {
+                        borderColor: '#000000',
+                    },
+                    '&:hover fieldset': {
+                        borderColor: '#000000',
+                    },
+                    '&.Mui-focused fieldset': {
+                        borderColor: '#000000',
+                    },
+                },
+            }}
+        /> 
+    </Grid>
+
+    <Grid item xs={12} sm={6} md={2}>
+        <TextField
+            label="Data Demissão"
+            type="date"
+            variant="filled"
+            value={editingColaborador.dtdemissao || ''}
+            onChange={(e) => {
+                const selectedDate = e.target.value;
+                setEditingColaborador({ ...editingColaborador, dtdemissao: selectedDate });
+            }}
+            fullWidth
+            // size="mediu"
+            InputLabelProps={{ shrink: true }}
+            sx={{
+                minWidth: 269,
+                minHeight: 100,
+                '& .MuiFilledInput-root': {
+                    backgroundColor: '#f5f5f5',
+                }
+            }}
+        />
+    </Grid>
+</Grid>
+
             </Box>
           )}
         </DialogContent>

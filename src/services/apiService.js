@@ -105,6 +105,25 @@ export const getColaboradorData = async () => {
     throw error;
   }
 };
+export const getColaboradorDataChb = async () => {
+  try {
+    // Obtém o token do localStorage (ou outro armazenamento onde você salvou o token)
+    const token = Cookies.get('token');
+    
+    // Faz a requisição com o token no cabeçalho Authorization
+    const response = await axios.get(API_ENDPOINTS.COLABORADORCHB, {
+      headers: {
+        Authorization: `Bearer ${token}`,  // Envia o token no cabeçalho
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter dados de colaboradores:', error);
+    throw error;
+  }
+};
+
 
 // Função para criar um colaborador
 export const createColaborador = async (data) => {

@@ -254,6 +254,7 @@ const Closing = ({ toggleTheme }) => {
     { field: 'mes', headerName: 'Mês', width: 80 },
     { field: 'cupom_vendedora', headerName: 'Cupom Vendedora', width: 150 },
     { field: 'nome', headerName: 'Nome', width: 150 },
+    { field: 'funcao', headerName: 'Função', width: 150 },
     {
       field: 'total_frete',
       headerName: 'Total Valor Frete',
@@ -530,7 +531,16 @@ const Closing = ({ toggleTheme }) => {
       doc.text(`Time: ${user.time || 'Desconhecido'}`, 14, 20);
     }
 
-    const sortedModalData = [...modalData].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+    const sortedModalData = [...modalData]
+    .sort((a, b) => {
+      // Primeiro, compara por função
+      const funcaoCompare = (a.funcao || '').localeCompare(b.funcao || '');
+      if (funcaoCompare !== 0) return funcaoCompare;
+  
+      // Se as funções forem iguais, compara por nome
+      return (a.nome || '').localeCompare(b.nome || '');
+    });
+  
     const totalValue = sortedModalData.reduce((sum, row) => sum + parseFloat(row.total_receber || '0'), 0);
     const numberFormatter = new Intl.NumberFormat('pt-BR', {
       minimumFractionDigits: 2,
@@ -540,7 +550,7 @@ const Closing = ({ toggleTheme }) => {
     autoTable(doc, {
       startY: 25,
       head: [
-        ['Nome', 'Total Comissional', 'Meta', 'Porcentagem', 'Valor Comissão', 'Premiação Meta']
+        ['Função','Nome', 'Total Comissional', 'Meta', 'Porcentagem', 'Valor Comissão', 'Premiação Meta']
           .concat(user?.time === "Reconquista" ? ['Premiação Reconquista'] : [])
           .concat(['Valor Total']),
       ],
@@ -549,13 +559,15 @@ const Closing = ({ toggleTheme }) => {
         const premiacaoReconquista = parseFloat(row.vlr_total_recon_mes_ant || '0') +
           parseFloat(row.vlr_total_reco || '0');
 
+        const nomeFormatado = (row.nome || '').split(' ').slice(0, 3).join(' ');
 
         const valorTotal = parseFloat(row.total_comissional || '0') +
           parseFloat(row.valor_comissao || '0') +
           parseFloat(row.premiacao_meta || '0') +
           (user?.time === "Reconquista" ? premiacaoReconquista : 0);
         return [
-          row.nome || '',
+          row.funcao || '',
+          nomeFormatado || '',
           `R$ ${numberFormatter.format(parseFloat(row.total_comissional || '0'))}`,
           row.meta_atingida || '',
           `${numberFormatter.format(parseFloat(row.porcentagem_meta || '0') * 100)}%`,
@@ -574,8 +586,8 @@ const Closing = ({ toggleTheme }) => {
         fontStyle: 'bold',
       },
       styles: {
-        fontSize: 10,
-        cellPadding: 2,
+        fontSize: 9.5,
+        cellPadding: 1.2,
         valign: 'middle',
         halign: 'center',
       },

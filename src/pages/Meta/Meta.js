@@ -37,10 +37,11 @@ const Meta = ({ toggleTheme }) => {
       try {
         const result = await getFilteredMetaData();
         setData(result);
+        console.log(data)
 
         const uniqueData = result.filter(
           (value, index, self) =>
-            index === self.findIndex((t) => t.cupom === value.cupom && t.mes_ano === value.mes_ano)
+            index === self.findIndex((t) => t.cupom === value.cupom && t.nome === value.nome && t.mes_ano === value.mes_ano)
         );
 
         setFilteredData(uniqueData);
@@ -62,7 +63,7 @@ const Meta = ({ toggleTheme }) => {
     let filtered = data;
     if (filterNome) {
       filtered = filtered.filter((item) =>
-        item.colaborador_nome && item.colaborador_nome.toLowerCase().includes(filterNome.toLowerCase())
+        item.nome && item.nome.toLowerCase().includes(filterNome.toLowerCase())
       );
     }
     if (filterCupom) {
@@ -79,36 +80,41 @@ const Meta = ({ toggleTheme }) => {
 
     const uniqueFilteredData = filtered.filter(
       (value, index, self) =>
-        index === self.findIndex((t) => t.cupom === value.cupom && t.mes_ano === value.mes_ano)
+        index === self.findIndex((t) => t.cupom === value.cupom &&t.nome  === value.nome && t.mes_ano === value.mes_ano)
     );
 
     setFilteredData(uniqueFilteredData);
     setFiltereds(filtered)
   };
-  const dadosGroup = [];
 
-  filtereds.reduce((acc, item) => {
-    let existente = dadosGroup.find(entry =>
-      entry.cupom === item.cupom && entry.colaborador_nome === item.colaborador_nome && entry.mes_ano === item.mes_ano
+console.log('filtereds',filtereds)
+  const dadosGroup = filtereds.reduce((acc, item) => {
+    // Verifica se já existe um registro para o cupom, nome e mês/ano
+    let existente = acc.find(entry =>
+      entry.nome === item.nome && 
+      entry.cupom === item.cupom && 
+      entry.mes_ano === item.mes_ano
     );
-
+  console.log('existente',existente)
+    // Se não existir, cria um novo registro
     if (!existente) {
       existente = {
-        colaborador_nome: item.colaborador_nome,
+        nome: item.nome,
         cupom: item.cupom,
         mes_ano: item.mes_ano,
         metas: []
       };
-      dadosGroup.push(existente);
+      acc.push(existente); // Adiciona o novo registro ao acumulador
     }
-
+  
+    // Adiciona a meta ao registro existente
     existente.metas.push({
       meta: item.meta,
       valor: item.valor,
       porcentagem: item.porcentagem
     });
-
-    return acc;
+  
+    return acc; // Retorna o acumulador para a próxima iteração
   }, []);
 
   console.log(dadosGroup);
@@ -179,7 +185,7 @@ const Meta = ({ toggleTheme }) => {
 
   const columns = [
     {
-      field: 'colaborador_nome',
+      field: 'nome',
       headerName: 'Nome',
       width: 150,
       sortable: true,
@@ -231,7 +237,7 @@ const Meta = ({ toggleTheme }) => {
 
   const handleOpen = (params) => {
     const selectedMeta = data.filter(
-      (meta) => meta.cupom === params.row.cupom && meta.mes_ano === params.row.mes_ano
+      (meta) => meta.cupom === params.row.cupom&&meta.nome === params.row.nome&& meta.mes_ano === params.row.mes_ano
     );
     const sortedMetaInfo = [...selectedMeta].sort((a, b) => a.porcentagem - b.porcentagem);
     setMetaInfo(sortedMetaInfo);
@@ -260,7 +266,7 @@ const Meta = ({ toggleTheme }) => {
       const key = `${item.cupom}-${item.mes_ano}`;
       if (!acc[key]) {
         acc[key] = {
-          colaborador_nome: item.colaborador_nome,
+          nome: item.nome,
           cupom: item.cupom,
           mes_ano: item.mes_ano,
           metas: []
@@ -276,7 +282,7 @@ const Meta = ({ toggleTheme }) => {
 
     const tableData = [];
     Object.values(groupedData).forEach((group) => {
-      tableData.push([group.colaborador_nome, group.cupom, group.mes_ano, '', '', '']);
+      tableData.push([group.nome, group.cupom, group.mes_ano, '', '', '']);
       const sortedMetas = group.metas.sort((a, b) => a.valor - b.valor);
 
       sortedMetas.forEach((meta) => {
@@ -285,7 +291,7 @@ const Meta = ({ toggleTheme }) => {
     });
 
     const columns = [
-      { header: 'Nome', dataKey: 'colaborador_nome' },
+      { header: 'Nome', dataKey: 'nome' },
       { header: 'Cupom', dataKey: 'cupom' },
       { header: 'Mes ano', dataKey: 'mes_ano' },
       { header: 'Meta', dataKey: 'meta' },

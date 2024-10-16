@@ -1,5 +1,7 @@
+
+
 import React, { useState, useEffect } from 'react';
-import { Box, Button, TextField, Typography, Paper, Grid, Autocomplete, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText } from '@mui/material';
+import { Box, Button, TextField, Typography, Paper, Grid, Autocomplete, Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText,MenuItem } from '@mui/material';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
 import { createMeta } from '../../services/apiService';
@@ -14,18 +16,32 @@ import Cookies from 'js-cookie';
 
 dayjs.locale('pt-br');
 
-const metaDataInitial = [
+const metaDataConsultora = [
   { meta: 'Não atingiu a meta', porcentagem: '0.005', valor: '0' },
   { meta: 'Meta', porcentagem: '0.01', valor: '0' },
   { meta: 'Super meta', porcentagem: '0.015', valor: '0' },
   { meta: 'Meta Desafio', porcentagem: '0.02', valor: '0' },
 ];
+const metaDataLider = [
+  { meta: 'Não atingiu a meta', porcentagem: '0.0015', valor: '0' },
+  { meta: 'Meta', porcentagem: '0.0025', valor: '0' },
+  { meta: 'Super meta', porcentagem: '0.0035', valor: '0' },
+  { meta: 'Meta Desafio', porcentagem: '0.005', valor: '0' },
+];
+const metaDataSupervisora = [
+  { meta: 'Não atingiu a meta', porcentagem: '0.003', valor: '0' },
+  { meta: 'Meta', porcentagem: '0.005', valor: '0' },
+  { meta: 'Super meta', porcentagem: '0.007', valor: '0' },
+  { meta: 'Meta Desafio', porcentagem: '0.01', valor: '0' },
+];
+
+
 
 
 const CreateMeta = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [formData, setFormData] = useState({ cupom: '' });
-  const [metaData, setMetaData] = useState(metaDataInitial);
+  const [metaData, setMetaData] = useState(metaDataConsultora);
   const [selectedDate, setSelectedDate] = useState(null);
   const [error, setError] = useState('');
   const [colaboradores, setColaboradores] = useState([]);
@@ -33,8 +49,22 @@ const CreateMeta = ({ toggleTheme }) => {
   const [selectedCupom, setSelectedCupom] = useState('');
   const { showToast } = useToast();
   const [salvarDialogOpen, setSalvarDialogOpen] = useState(false);
-
+  const [funcao, setFuncao] = useState('Consultora'); // Valor padrão
   const navigate = useNavigate();
+
+  const handleNivelChange = (event) => {
+    const selectedNivel = event.target.value;
+    setFuncao(selectedNivel);
+
+    // Usando if para alterar os dados
+    if (selectedNivel === 'Lider') {
+      setMetaData(metaDataLider);
+    } else if (selectedNivel === 'Supervisora') {
+      setMetaData(metaDataSupervisora);
+    } else {
+      setMetaData(metaDataConsultora);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,7 +139,7 @@ const CreateMeta = ({ toggleTheme }) => {
     let isValid = true;
     let errors = [];
     let warnings = [];
-
+    console.log('Valores do Formulário:', formData);
     if (!formData.cupom) {
       errors.push('Cupom é obrigatório!');
     }
@@ -195,6 +225,7 @@ const CreateMeta = ({ toggleTheme }) => {
 
       return {
         cupom: formData.cupom,
+        nome: formData.nome,
         mes_ano: formattedDate,
         meta: item.meta,
         porcentagem: porcentagem,
@@ -246,40 +277,52 @@ const CreateMeta = ({ toggleTheme }) => {
   const handleNameChange = (event, newValue) => {
     const nomeDigitado = newValue || ''; // Caso newValue seja null ou undefined
     setSelectedName(nomeDigitado);
-
+  
     const colaborador = colaboradores.find(
       (colab) => colab.nome.toLowerCase() === nomeDigitado.toLowerCase()
     );
-
+  
     if (colaborador) {
       setSelectedCupom(colaborador.cupom);
-      setFormData({ ...formData, cupom: colaborador.cupom });
+      setFormData({ ...formData, cupom: colaborador.cupom, nome: colaborador.nome });
+      setFuncao(colaborador.funcao); // Atualiza a função do colaborador
       setError('');
+  
+      // Chama handleNivelChange passando o valor da função
+      handleNivelChange({ target: { value: colaborador.funcao } });
     } else {
       setSelectedCupom('');
       setFormData({ ...formData, cupom: '' });
+      setFuncao(''); // Limpa a função se o colaborador não for encontrado
       setError('Colaborador não encontrado.');
     }
   };
-
+  
   const handleCupomChange = (event, newValue) => {
     const cupomDigitado = newValue || '';
     setSelectedCupom(cupomDigitado);
     setFormData({ ...formData, cupom: cupomDigitado });
-
+  
     const colaborador = colaboradores.find(
       (colab) => colab.cupom.toLowerCase() === cupomDigitado.toLowerCase()
     );
-
+  
     if (colaborador) {
       setSelectedName(colaborador.nome);
+      setFormData({ ...formData, nome: colaborador.nome });
+      setFuncao(colaborador.funcao); // Atualiza a função do colaborador
       setError('');
+  
+      // Chama handleNivelChange passando o valor da função
+      handleNivelChange({ target: { value: colaborador.funcao } });
     } else {
       setSelectedName('');
       setFormData({ ...formData, cupom: '' });
+      setFuncao(''); // Limpa a função se o colaborador não for encontrado
       setError('Cupom não encontrado.');
     }
   };
+  
 
   const openSalvarDialog = () => {
     console.log('openSalvarDialog foi chamado'); // Adiciona log para depuração
@@ -392,10 +435,18 @@ const CreateMeta = ({ toggleTheme }) => {
                     isOptionEqualToValue={(option, value) => option === value}
                   />
                 </Grid>
-
-
-
-                <Grid item xs={2.05}>
+                <Grid item xs={2.5}>
+  <TextField
+    label="Função"
+    value={funcao} // Valor da função do colaborador
+    fullWidth
+    required
+    InputProps={{
+      readOnly: true, // Campo somente leitura
+    }}
+  />
+</Grid>
+                <Grid item xs={2.4}>
                   <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="pt-br">
                     <DatePicker
                       label="Selecione Mês/Ano"

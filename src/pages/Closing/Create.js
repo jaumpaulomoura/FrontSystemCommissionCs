@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate, useParams } from 'react-router-dom';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
-import { getFilteredOClosingOrderData, getFilteredReconquestGroupData, getPremiacaoReconquistaData, getFilteredClosingsData, getColaboradorData, createClosing } from '../../services/apiService';
+import {getFilteredMetaData, getFilteredOClosingOrderData, getFilteredReconquestGroupData, getPremiacaoReconquistaData, getFilteredClosingsData, getColaboradorData, createClosing } from '../../services/apiService';
 import Cookies from 'js-cookie'; 
 
 const CreateClosing = ({ toggleTheme }) => {
@@ -17,6 +17,7 @@ const CreateClosing = ({ toggleTheme }) => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  // const [filteredColaboradores, setFilteredColaboradores] = useState([]);
   const navigate = useNavigate();
   const { mes_ano } = useParams();
 
@@ -24,6 +25,7 @@ const CreateClosing = ({ toggleTheme }) => {
 
   const user = JSON.parse(Cookies.get('user'));
   const userTime = user ? user.time : '';
+  const userFuncao = user ? user.funcao : '';
 
   const getStartDate = () => {
     if (mes_ano) {
@@ -62,115 +64,225 @@ const CreateClosing = ({ toggleTheme }) => {
   
 
 
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [result, colaboradores] = await Promise.all([
+        const colaboradores = await getColaboradorData();
+
+        const filteredColaboradores = colaboradores.filter(colaborador => {
+          return colaborador.time.trim() === userTime.trim() && 
+                 colaborador.funcao !== 'Consultora' && 
+                 colaborador.funcao !== 'Admin';
+        });
+        const [closingOrderData] = await Promise.all([
           getFilteredOClosingOrderData(filterStartDate, filterEndDate),
-          getColaboradorData(),
         ]);
-
-        const colaboradoresMap = colaboradores.reduce((acc, colaborador) => {
-          acc[colaborador.cupom] = colaborador.nome;
-          return acc;
-        }, {});
-
+  
         let reconquestData = [];
         let premiacaoData = [];
         let reconquestAnteriorMap = {};
-
+  
         if (userTime === 'Reconquista') {
           [reconquestData, premiacaoData] = await Promise.all([
             getFilteredReconquestGroupData(filterStartDate, filterEndDate),
             getPremiacaoReconquistaData(),
           ]);
-
-          const [currentYear, currentMonth] = filterStartDate.split('-').map(Number);
-          const { month, year } = getPreviousMonthYear(currentMonth, currentYear);
-          const mesAno = `${month.toString().padStart(2, '0')}-${year}`;
-          const vlrReconquestAnterior = await getFilteredClosingsData(mesAno);
-
-          reconquestAnteriorMap = vlrReconquestAnterior.reduce((acc, item) => {
-            acc[item.cupom_vendedora] = item;
-            return acc;
-          }, {});
+  
+          const mesAno = getPreviousMonthYearData(filterStartDate);
+          reconquestAnteriorMap = await getReconquestAnteriorData(mesAno);
         }
-
-        const reconquestMap = reconquestData.reduce((acc, item) => {
-          acc[item.cupom_vendedora] = item;
-          return acc;
-        }, {});
-
-        const resultWithIds = result.map(closing => {
-          const nomeColaborador = colaboradoresMap[closing.cupom_vendedora] || 'N/A';
-
-          let qtd_reconquista = 0;
-          let qtd_repagar = 0;
-          let premiacao = null;
-          let valor_repagar = 0;
-          let valorTotalRepagar = 0;
-          let Valor_comisao = parseFloat(closing.Valor_comisao) || 0;
-          let valorTotal = parseFloat(closing.Valor_comisao || 0) + parseFloat(closing.premiacao_meta || 0);
-
-          if (userTime === 'Reconquista') {
-            const reconquest = reconquestMap[closing.cupom_vendedora] || {};
-            qtd_reconquista = reconquest.Reconquista || 0;
-            qtd_repagar = reconquest.Repagar || 0;
-            premiacao = premiacaoData.find(p => qtd_reconquista >= p.minimo && qtd_reconquista <= p.maximo);
-            const reconquestAnterior = reconquestAnteriorMap[closing.cupom_vendedora] || {};
-            valor_repagar = parseFloat(reconquestAnterior.vlr_reconquista) || 0;
-            valorTotalRepagar = qtd_repagar * valor_repagar;
-
-            valorTotal += (premiacao ? premiacao.valor * qtd_reconquista : 0) + valorTotalRepagar;
-          }
-
-          return {
-            id: `${closing.cupom_vendedora}`,
-            ano: closing.ano || '',
-            mes: closing.mes || '',
-            cupom_vendedora: closing.cupom_vendedora || '',
-            nome: nomeColaborador,
-            total_comissional: parseFloat(closing.total_comissional) || 0,
-            total_valor_frete: parseFloat(closing.total_valor_frete) || 0,
-            total_valor_pago: parseFloat(closing.total_valor_pago) || 0,
-            meta: closing.meta || '',
-            porcentagem: parseFloat(closing.porcentagem) || 0,
-            premiacao_meta: parseFloat(closing.premiacao_meta) || 0,
-            Valor_comisao: Valor_comisao,
-            qtd_reconquista: qtd_reconquista,
-            qtd_repagar: qtd_repagar,
-            valor_premiacao: premiacao ? premiacao.valor : 0,
-            total_valor_premiacao: premiacao ? premiacao.valor * qtd_reconquista : 0,
-            valor_repagar: valor_repagar,
-            valorTotalRepagar: valorTotalRepagar,
-            valorTotal: valorTotal,
-          };
-        });
-
+  
+        const reconquestMap = mapReconquestData(reconquestData);
+  
+        const resultWithIds = closingOrderData.map(closing => 
+          mapClosingData(closing, reconquestMap, premiacaoData, reconquestAnteriorMap)
+        );
+  
         setData(resultWithIds);
         setFilteredData(resultWithIds);
+        addManagerRows(resultWithIds, filteredColaboradores);
       } catch (error) {
-        setError('Erro ao buscar dados.');
+        setError('Erro ao buscar dados: ' + error.message);
         console.error('Erro ao buscar dados:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, [filterStartDate, filterEndDate]);
+  
+  const getPreviousMonthYearData = (startDate) => {
+    const [currentYear, currentMonth] = startDate.split('-').map(Number);
+    const { month, year } = getPreviousMonthYear(currentMonth, currentYear);
+    return `${month.toString().padStart(2, '0')}-${year}`;
+  };
+  
+  const mapReconquestData = (reconquestData) => {
+    return reconquestData.reduce((acc, item) => {
+      acc[item.cupom_vendedora] = item;
+      return acc;
+    }, {});
+  };
+  
+  const mapClosingData = (closing, reconquestMap, premiacaoData, reconquestAnteriorMap) => {
+    let qtd_reconquista = 0;
+    let qtd_repagar = 0;
+    let premiacao = null;
+    let valor_repagar = 0;
+    let valorTotalRepagar = 0;
+    let Valor_comisao = parseFloat(closing.Valor_comisao) || 0;
+    let valorTotal = Valor_comisao + parseFloat(closing.premiacao_meta || 0);
+  
+    if (userTime === 'Reconquista') {
+      const reconquest = reconquestMap[closing.cupom_vendedora] || {};
+      qtd_reconquista = reconquest.Reconquista || 0;
+      qtd_repagar = reconquest.Repagar || 0;
+      premiacao = premiacaoData.find(p => qtd_reconquista >= p.minimo && qtd_reconquista <= p.maximo);
+      const reconquestAnterior = reconquestAnteriorMap[closing.cupom_vendedora] || {};
+      valor_repagar = parseFloat(reconquestAnterior.vlr_reconquista) || 0;
+      valorTotalRepagar = qtd_repagar * valor_repagar;
+  
+      valorTotal += (premiacao ? premiacao.valor * qtd_reconquista : 0) + valorTotalRepagar;
+    }
+  
+    return {
+      id: `${closing.cupom_vendedora} - ${closing.nome}`,
+      ano: closing.ano || '',
+      mes: closing.mes || '',
+      cupom_vendedora: closing.cupom_vendedora || '',
+      nome: closing.nome || '',
+      funcao:closing.funcao||'',
+      total_comissional: parseFloat(closing.total_comissional) || 0,
+      total_valor_frete: parseFloat(closing.total_valor_frete) || 0,
+      total_valor_pago: parseFloat(closing.total_valor_pago) || 0,
+      meta: closing.meta || '',
+      porcentagem: parseFloat(closing.porcentagem) || 0,
+      premiacao_meta: parseFloat(closing.premiacao_meta) || 0,
+      Valor_comisao: Valor_comisao,
+      qtd_reconquista: qtd_reconquista,
+      qtd_repagar: qtd_repagar,
+      valor_premiacao: premiacao ? premiacao.valor : 0,
+      total_valor_premiacao: premiacao ? premiacao.valor * qtd_reconquista : 0,
+      valor_repagar: valor_repagar,
+      valorTotalRepagar: valorTotalRepagar,
+      valorTotal: valorTotal,
+    };
+  };
+  
+  const getReconquestAnteriorData = async (mesAno) => {
+    const vlrReconquestAnterior = await getFilteredClosingsData(mesAno);
+    return vlrReconquestAnterior.reduce((acc, item) => {
+      acc[item.cupom_vendedora] = item;
+      return acc;
+    }, {});
+  };
 
+  const addManagerRows = async (resultWithIds, filteredColaboradores) => {
+    console.log('resultWithIds:', resultWithIds);
+    console.log('filteredColaboradores:', filteredColaboradores);
+    
+    const primeiroMes = resultWithIds.length > 0 ? resultWithIds[0].mes : ''; // Apenas o primeiro mês
+    const primeiroAno = resultWithIds.length > 0 ? resultWithIds[0].ano : '';
+    const mesAnoConcatenado = `${String(primeiroMes).padStart(2, '0')}-${String(primeiroAno).padStart(4, '0')}`;
+    
+    const total_comissional = resultWithIds.reduce((sum, item) => sum + item.total_comissional, 0);
+    const total_valor_frete = resultWithIds.reduce((sum, item) => sum + item.total_valor_frete, 0);
+    const total_valor_pago = resultWithIds.reduce((sum, item) => sum + item.total_valor_pago, 0);
+  
+    console.log('Total Comissional:', total_comissional);
+    console.log('Total Valor Frete:', total_valor_frete);
+    console.log('Total Valor Pago:', total_valor_pago);
+  
+    const allMetas = await getFilteredMetaData(); // Chama a API para buscar todas as metas
+    console.log('All Metas:', allMetas); // Log para verificar as metas retornadas
 
-  const applyFilters = useCallback(() => {
-    let filtered = data;
-    setFilteredData(filtered);
-  }, [data]);
+    // Mapeamento dos colaboradores para criar as linhas do manager
+    const managerRows = await Promise.all(filteredColaboradores.map(async (colaborador) => {
+      // Filtrando os dados de metas para o colaborador atual
+      const filteredMeta = allMetas.filter(meta => {
+        return (
+          meta.cupom === colaborador.cupom && 
+          meta.mes_ano === mesAnoConcatenado // Usando a concatenação para comparação
+        );
+      });
 
-  useEffect(() => {
-    applyFilters();
-  }, [data, applyFilters]);
+      console.log(`Filtered Metas for ${colaborador.cupom}:`, filteredMeta); // Log para verificar as metas filtradas
+
+      // Inicializa as variáveis para armazenar o status da meta e a porcentagem
+      let metaAtingida = 'Não tem meta cadastrada'; // Padrão
+      let metaValor = 0; // Valor da meta correspondente
+      let porcentagem = 0; // Porcentagem padrão
+
+      // Verifica se existem metas para o colaborador
+      if (filteredMeta.length > 0) {
+        // Itera sobre as metas para determinar a situação
+        for (const meta of filteredMeta) {
+          console.log(`Comparando total_comissional: ${total_comissional} com meta.valor: ${meta.valor}`); // Log para comparação
+          
+          // Compara o total_comissional com o valor da meta
+          if (meta.valor > 0 && total_comissional >= meta.valor) { // Apenas considere metas com valor > 0
+            if (total_comissional >= meta.valor) {
+              metaAtingida = meta.meta; // A meta foi atingida
+              metaValor = meta.valor; // Armazena o valor da meta
+              porcentagem = meta.porcentagem; // Armazena a porcentagem da meta atingida
+               // Para na primeira meta atingida
+            } 
+          } else {
+            // Aqui, você pode adicionar lógica adicional se quiser tratar metas com valor 0
+            // Por exemplo, se a meta for 0, considere que a meta foi atingida ou ignore-a
+            console.log(`Meta com valor 0 encontrada para ${colaborador.cupom}, ignorando para comparação.`);
+          }
+        }
+      }
+      const Valor_comisao = total_comissional * porcentagem; // Calcula o valor da comissão
+      const valorTotal = Valor_comisao  
+      return {
+      id: `${colaborador.cupom} - ${colaborador.nome}`,
+      ano: primeiroAno,
+      mes: primeiroMes,
+      cupom_vendedora: colaborador.cupom,
+      nome: colaborador.nome,
+      funcao: colaborador.funcao,
+      total_comissional: total_comissional,
+      total_valor_frete: total_valor_frete,
+      total_valor_pago: total_valor_pago,
+      meta: metaAtingida, // Preencher com a meta atingida
+      porcentagem: porcentagem, 
+      premiacao_meta: 0,
+      Valor_comisao: Valor_comisao,
+      qtd_reconquista: 0,
+      qtd_repagar: 0,
+      valor_premiacao: 0,
+      total_valor_premiacao: 0,
+      valor_repagar: 0,
+      valorTotalRepagar: 0,
+       valorTotal: valorTotal, 
+    };
+  }));
+  
+    console.log('Manager Rows:', managerRows);
+  
+    const finalData = [...resultWithIds, ...managerRows];
+    console.log('finalData',finalData)
+    setData(finalData);
+    setFilteredData(finalData);
+    console.log('Final Data:', finalData);
+  };
+  setTimeout(() => {
+    console.log('Data após setData:', data);
+    console.log('Filtered Data após setFilteredData:', filteredData);
+}, 0);
+  
+  // const applyFilters = useCallback(() => {
+  //   let filtered = data;
+  //   setFilteredData(filtered);
+  // }, [data]);
+
+  // useEffect(() => {
+  //   applyFilters();
+  // }, [data, applyFilters]);
 
   const handleSidebarToggle = () => {
     setSidebarOpen(!sidebarOpen);
@@ -181,6 +293,7 @@ const CreateClosing = ({ toggleTheme }) => {
     { field: 'mes', headerName: 'Mês', width: 80 },
     { field: 'cupom_vendedora', headerName: 'Cupom Vendedora', width: 150 },
     { field: 'nome', headerName: 'Nome', width: 150 },
+    { field: 'funcao', headerName: 'Função', width: 150 },
     {
       field: 'total_valor_frete',
       headerName: 'Total Valor Frete',
@@ -461,6 +574,7 @@ const CreateClosing = ({ toggleTheme }) => {
   ];
 
 
+console.log(filteredData)
   const handleInsert = async (e) => {
     e.preventDefault();
 
@@ -475,6 +589,7 @@ const CreateClosing = ({ toggleTheme }) => {
       ano: item.ano || '',
       mes_ano: formatMesAno(item.mes, item.ano),
       cupom_vendedora: item.cupom_vendedora || '',
+      funcao: item.funcao || '',
       total_pago: item.total_valor_pago || 0,
       total_frete: item.total_valor_frete || 0,
       total_comissional: item.total_comissional || 0,
@@ -545,3 +660,20 @@ const CreateClosing = ({ toggleTheme }) => {
 };
 
 export default CreateClosing;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

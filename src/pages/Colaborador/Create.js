@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Paper, MenuItem } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, TextField, Typography, Paper, MenuItem, Grid, Autocomplete } from '@mui/material';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
-import { createColaborador } from '../../services/apiService';
+import { createColaborador, getColaboradorDataChb } from '../../services/apiService';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -10,18 +10,25 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useToast } from '../../components/ToastProvider';
 
+
+
 const CreateColaborador = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [colaboradoresChb, setColaboradoresChb] = useState([]);
+  const [selectedName, setSelectedName] = useState('');
   const [formData, setFormData] = useState({
     cupom: '',
     nome: '',
-    sobrenome: '',  
+    // sobrenome: '',  
     funcao: '',
     time: '',
     email: '',
-    password: ''
+    password: '',
+    dtadmissao: '',
+    dtdemissao: ''
+
   });
 
   const handleInputChange = (e) => {
@@ -31,25 +38,75 @@ const CreateColaborador = ({ toggleTheme }) => {
       [name]: value,
     });
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getColaboradorDataChb();
+        setColaboradoresChb(data);
+      } catch (error) {
+        console.error("Erro ao buscar dados dos colaboradores:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const formatText = (text) => {
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const handleNameChange = (event, newValue) => {
+    // Update the selected name for the Autocomplete input
+    setSelectedName(newValue);
+    const formattedName = formatText(newValue);
+    // Find the selected collaborator based on the formatted name
+    const colaboradorSelecionado = colaboradoresChb.find(colab => formatText(colab.fp02nom) === formattedName);
+
+    if (colaboradorSelecionado) {
+      setFormData({
+        ...formData,
+        nome: formattedName, // Ensure you're setting the correct name
+        dtadmissao: colaboradorSelecionado.fp02dtadmi || '', // Adjust as needed
+        dtdemissao: colaboradorSelecionado.dt_demissao || '', // Adjust as needed
+      });
+    } else {
+      // If no valid collaborator is selected, clear admission and dismissal dates
+      setFormData({
+        ...formData,
+        nome: formattedName,
+        dtadmissao: '',
+        dtdemissao: '',
+      });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.cupom || !formData.nome || !formData.sobrenome || !formData.funcao || !formData.time || !formData.email || !formData.password) {  // Corrigido para validar todos os campos
+    if (!formData.cupom || !formData.nome || !formData.funcao || !formData.time || !formData.email || !formData.password) {
       alert('Todos os campos são obrigatórios!');
       return;
     }
 
     try {
-      const response = await createColaborador(formData);
+      const response = await createColaborador({
+        ...formData,
+        nome: formatText(formData.nome.trim()), // exemplo de sanitização simples
+      });
       setFormData({
         cupom: '',
         nome: '',
-        sobrenome: '',  
         funcao: '',
         time: '',
         email: '',
-        password: ''
+        password: '',
+        dtadmissao: '',
+        dtdemissao: ''
       });
+      showToast('Colaborador criado com sucesso!', 'success');
       navigate('/colaborador');
     } catch (error) {
       showToast('Erro ao criar colaborador:', 'error');
@@ -69,6 +126,12 @@ const CreateColaborador = ({ toggleTheme }) => {
   // Função para evitar que a tecla Enter seja pressionada
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
+  };
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString.trim());
+    if (isNaN(date.getTime())) return ''; // Retorna string vazia se a data for inválida
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
   return (
     <Box sx={{ display: 'flex' }}>
@@ -94,34 +157,18 @@ const CreateColaborador = ({ toggleTheme }) => {
                 borderRadius: '8px',
               }}
             />
-            <TextField
-              label="Nome"
-              name="nome"
-              value={formData.nome}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              variant="filled"
-              sx={{
-                width: '400px',
-                height: '56px',
-                borderRadius: '8px',
-              }}
-            />
-            <TextField
-              label="Sobrenome"
-              name="sobrenome"
-              value={formData.sobrenome}
-              onChange={handleInputChange}
-              fullWidth
-              margin="normal"
-              variant="filled"
-              sx={{
-                width: '400px',
-                height: '56px',
-                borderRadius: '8px',
-              }}
-            />
+            <Grid item xs={5}>
+              <Autocomplete
+                value={selectedName || ''}
+                onChange={handleNameChange}
+                options={colaboradoresChb.map(colab => formatText(colab.fp02nom))}
+                renderInput={(params) => <TextField {...params} label="Nome" variant="outlined" />}
+                noOptionsText="Nenhuma opção disponível"
+                isOptionEqualToValue={(option, value) => option === value}
+                sx={{ width: '400px', height: '56px', borderRadius: '8px' }}
+              />
+            </Grid>
+
             <TextField
               select
               label="Função"
@@ -138,7 +185,8 @@ const CreateColaborador = ({ toggleTheme }) => {
               }}
             >
               <MenuItem value="Consultora">Consultora</MenuItem>
-              <MenuItem value="Gerente">Gerente</MenuItem>
+              <MenuItem value="Supervisora">Supervisora</MenuItem>
+              <MenuItem value="Lider">Lider</MenuItem>
               <MenuItem value="Administrador">Administrador</MenuItem>
             </TextField>
 
@@ -205,6 +253,29 @@ const CreateColaborador = ({ toggleTheme }) => {
                 borderRadius: '8px',
               }}
             />
+          <TextField
+  label="Data de Admissão"
+  name="dtadmissao"
+  value={formatDate(formData.dtadmissao)} // Formata a data aqui
+  onChange={handleInputChange}
+  fullWidth
+  margin="normal"
+  variant="filled"
+  InputProps={{ readOnly: true }} // Definido como somente leitura
+  sx={{ width: '400px', height: '56px', borderRadius: '8px' }}
+/>
+<TextField
+  label="Data de Demissão"
+  name="dtdemissao"
+  value={formatDate(formData.dtdemissao)} // Formata a data aqui
+  onChange={handleInputChange}
+  fullWidth
+  margin="normal"
+  variant="filled"
+  InputProps={{ readOnly: true }} // Definido como somente leitura
+  sx={{ width: '400px', height: '56px', borderRadius: '8px' }}
+/>
+
             <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
               <Button type="submit" variant="contained" color="primary" sx={{ borderRadius: '8px' }}>
                 Salvar

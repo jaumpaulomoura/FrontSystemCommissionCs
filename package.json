@@ -19,6 +19,7 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "cors": "^2.8.5",
     "cssnano": "^7.0.4",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
     "js-cookie": "^3.0.5",
     "jspdf": "^2.5.1",
