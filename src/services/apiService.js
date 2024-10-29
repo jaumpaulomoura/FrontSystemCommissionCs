@@ -564,6 +564,95 @@ export const getFilteredPedidosDiaData = async (year, month, day) => {
 
 
 
+
+
+
+
+
+export const getFilteredPedidosItemData = async (startDate, endDate) => {
+      try {
+      const token = Cookies.get('token');
+      const user = JSON.parse(Cookies.get('user'));
+      if (!user) {
+        throw new Error('Usuário não encontrado no localStorage');
+      }
+  
+      const params = new URLSearchParams();
+  
+     
+      if (startDate) {
+        params.append('startDate', startDate);
+      }
+      if (endDate) {
+        params.append('endDate', endDate);
+      }
+      if (user.funcao === 'Consultora') {
+        params.append('cupomvendedora', user.cupom);
+      } else {
+        params.append('time', user.time);
+      }
+  
+   
+      const response = await axios.get(`${API_ENDPOINTS.ORDERITENS}?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,  
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao obter e filtrar dados de pedidios item:', error);
+      throw error;
+    }
+  };
+
+
+
+
+
+
+  export const getFilteredPedidosItemDataGroup = async (startDate, endDate) => {
+    try {
+    const token = Cookies.get('token');
+    const user = JSON.parse(Cookies.get('user'));
+    if (!user) {
+      throw new Error('Usuário não encontrado no localStorage');
+    }
+
+    const params = new URLSearchParams();
+
+   
+    if (startDate) {
+      params.append('startDate', startDate);
+    }
+    if (endDate) {
+      params.append('endDate', endDate);
+    }
+    if (user.funcao === 'Consultora') {
+      params.append('cupomvendedora', user.cupom);
+    } else {
+      params.append('time', user.time);
+    }
+
+ 
+    const response = await axios.get(`${API_ENDPOINTS.ORDERITENSGROUP}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,  
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter e filtrar dados de pedidios item:', error);
+    throw error;
+  }
+};
+
+
+
+
+
+
 export const getPedidosMensalData = async (cupomVendedora, year, month) => {
   try {
     const token = Cookies.get('token');
@@ -808,9 +897,7 @@ export const getFilteredOrderData = async (startDate, endDate) => {
       params.append('time', user.time);
     }
 
-  console.log('startDate',startDate)
-  console.log('endDate',endDate)
-  console.log('params', params.toString());
+ 
     const response = await axios.get(`${API_ENDPOINTS.ORDER}?${params.toString()}`,
     {
       headers: {
@@ -824,6 +911,43 @@ export const getFilteredOrderData = async (startDate, endDate) => {
   }
 };
 
+
+export const getFilteredOrderItensData = async (startDate, endDate) => {
+  try {
+    const token = Cookies.get('token');
+    const user = JSON.parse(Cookies.get('user'));
+    if (!user) {
+      throw new Error('Usuário não encontrado no localStorage');
+    }
+
+    const params = new URLSearchParams();
+
+   
+    if (startDate) {
+      params.append('startDate', startDate);
+    }
+    if (endDate) {
+      params.append('endDate', endDate);
+    }
+    if (user.funcao === 'Consultora') {
+      params.append('cupomvendedora', user.cupom);
+    } else {
+      params.append('time', user.time);
+    }
+
+ 
+    const response = await axios.get(`${API_ENDPOINTS.ORDERITENS}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,  
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter e filtrar dados de tickets:', error);
+    throw error;
+  }
+};
 
 
 

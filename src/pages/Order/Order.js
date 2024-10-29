@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Paper, CircularProgress, Alert, TextField, Grid } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, Box, Typography, Button, Paper, CircularProgress, Alert, TextField, Grid } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,8 @@ import ThemeToggleButton from '../../components/ThemeToggleButton';
 import Cookies from 'js-cookie';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const Order = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -61,7 +63,7 @@ const Order = ({ toggleTheme }) => {
       );
     }
 
- 
+
     if (filterCupom) {
       filtered = filtered.filter(order =>
         order.cupom_vendedora &&
@@ -123,25 +125,26 @@ const Order = ({ toggleTheme }) => {
 
   const columns = [
     { field: 'pedido', headerName: 'Pedido', width: 150 },
-    {field: 'data_submissao',
+    {
+      field: 'data_submissao',
       headerName: 'Data',
       width: 180,
       sortComparator: (v1, v2) => new Date(v1) - new Date(v2),
       valueFormatter: (params) => {
-        const dateValue = params;     
+        const dateValue = params;
         if (!dateValue) {
           console.log('Data não disponível');
           return 'Data não disponível';
-        }    
+        }
         try {
-          const [datePart] = dateValue.split('T'); 
+          const [datePart] = dateValue.split('T');
           console.log('Parte da data:', datePart);
-    
+
           const [year, month, day] = datePart.split('-');
-    
+
           if (!year || !month || !day) {
             throw new Error('Formato de data inválido');
-          }    
+          }
           const formattedDate = `${day}/${month}/${year}`;
           return formattedDate;
         } catch (e) {
@@ -149,7 +152,7 @@ const Order = ({ toggleTheme }) => {
           return 'Data inválida';
         }
       },
-    },    
+    },
     {
       field: 'hora_submissao',
       headerName: 'Hora',
@@ -169,7 +172,7 @@ const Order = ({ toggleTheme }) => {
       sortComparator: (v1, v2) => v1.localeCompare(v2),
     },
     { field: 'status', headerName: 'Status', width: 120 },
-    
+
     { field: 'total_itens', headerName: 'Total Itens', width: 120 },
     { field: 'envio', headerName: 'Envio', width: 120 },
     { field: 'idloja', headerName: 'ID Loja', width: 120 },
@@ -184,21 +187,21 @@ const Order = ({ toggleTheme }) => {
       width: 150,
       valueFormatter: (params) => {
         console.log('valor_bruto params:', params); // Debugging line to see the actual value
-    
+
         // Replace comma with dot and convert to number
         const numberValue = Number((params || '0').replace(',', '.'));
-    
+
         // Format the number as a currency in BRL
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
-    
+
         // Return the formatted value with 'R$'
         return `R$ ${formattedValue}`;
       }
     }
-    
+
     ,
     {
       field: 'valor_desconto',
@@ -206,16 +209,16 @@ const Order = ({ toggleTheme }) => {
       width: 150,
       valueFormatter: (params) => {
         console.log('valor_bruto params:', params); // Debugging line to see the actual value
-    
+
         // Replace comma with dot and convert to number
         const numberValue = Number((params || '0').replace(',', '.'));
-    
+
         // Format the number as a currency in BRL
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
-    
+
         // Return the formatted value with 'R$'
         return `R$ ${formattedValue}`;
       }
@@ -226,16 +229,16 @@ const Order = ({ toggleTheme }) => {
       width: 150,
       valueFormatter: (params) => {
         console.log('valor_bruto params:', params); // Debugging line to see the actual value
-    
+
         // Replace comma with dot and convert to number
         const numberValue = Number((params || '0').replace(',', '.'));
-    
+
         // Format the number as a currency in BRL
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
-    
+
         // Return the formatted value with 'R$'
         return `R$ ${formattedValue}`;
       }
@@ -246,21 +249,21 @@ const Order = ({ toggleTheme }) => {
       width: 150,
       valueFormatter: (params) => {
         console.log('valor_bruto params:', params); // Debugging line to see the actual value
-    
+
         // Replace comma with dot and convert to number
         const numberValue = Number((params || '0').replace(',', '.'));
-    
+
         // Format the number as a currency in BRL
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
-    
+
         // Return the formatted value with 'R$'
         return `R$ ${formattedValue}`;
       }
     }
-    
+
     ,
     {
       field: 'valor_comissional',
@@ -268,36 +271,36 @@ const Order = ({ toggleTheme }) => {
       width: 150,
       valueFormatter: (params) => {
         console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
-        
+
         // Se o valor não estiver definido, retorna '0'
         if (!params) {
           return 'R$ 0,00';
         }
-        
+
         // Substitui a vírgula por ponto e converte para número
         const numberValue = parseFloat(params.toString().replace(',', '.'));
-        
+
         // Verifica se a conversão para número foi bem-sucedida
         if (isNaN(numberValue)) {
           return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
         }
-        
+
         // Formata o número como moeda em BRL
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
-        
+
         // Retorna o valor formatado com 'R$'
         return `R$ ${formattedValue}`;
       }
     }
-    
-    
-    
-    
-,    
-    
+
+
+
+
+    ,
+
     { field: 'cupom', headerName: 'Cupom', width: 150 },
     { field: 'cupom_vendedora', headerName: 'Cupom Vendedora', width: 180 },
     { field: 'metodo_pagamento', headerName: 'Método de Pagamento', width: 180 },
@@ -330,12 +333,13 @@ const Order = ({ toggleTheme }) => {
     const blockData = [
       ['Total de Pedidos', totalPedidos],
       ['Total de Itens', totalItens],
-      ['Valor Pago Total', valorPagoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
-      ['Valor Frete Total', valorFreteTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
-      ['Valor Comissional', valorTotalComissional.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })]
+      ['Valor Pago Total', valorPagoTotal ? valorPagoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A'],
+      ['Valor Frete Total', valorFreteTotal ? valorFreteTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A'],
+      ['Valor Comissional', valorTotalComissional ? valorTotalComissional.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A']
+
     ];
 
-    let startY = 35; 
+    let startY = 35;
     const blockWidth = 50;
     const blockHeight = 20;
     const blockRight = 5;
@@ -343,23 +347,23 @@ const Order = ({ toggleTheme }) => {
 
     blockData.forEach((block, index) => {
       const [label, value] = block;
-      const posX = initialX + (index * (blockWidth + blockRight)); 
+      const posX = initialX + (index * (blockWidth + blockRight));
 
       if (posX + blockWidth > doc.internal.pageSize.width - blockRight) {
         doc.addPage();
-        startY = 20; 
+        startY = 20;
       }
 
-      doc.setFillColor(230, 230, 230); 
-      doc.rect(posX, startY, blockWidth, blockHeight, 'F'); 
+      doc.setFillColor(230, 230, 230);
+      doc.rect(posX, startY, blockWidth, blockHeight, 'F');
 
       doc.setTextColor(0);
       doc.setFontSize(10);
-      doc.text(label, posX + 5, startY + 10); 
+      doc.text(label, posX + 5, startY + 10);
 
       doc.setFontSize(12);
       doc.setTextColor(0, 102, 204);
-      doc.text(value.toString(), posX + 5, startY + 15); 
+      doc.text(value.toString(), posX + 5, startY + 15);
     });
     let tableStartY = startY + blockHeight + 10;
     const columns = [
@@ -399,7 +403,7 @@ const Order = ({ toggleTheme }) => {
             const cleanedTimeValue = timeValue.split('.')[0];
 
             if (/^\d{2}:\d{2}(:\d{2})?$/.test(cleanedTimeValue)) {
-              return cleanedTimeValue; 
+              return cleanedTimeValue;
             }
 
             const dateObj = new Date(timeValue);
@@ -482,6 +486,78 @@ const Order = ({ toggleTheme }) => {
     doc.save('relatorio_pedidos.pdf');
   };
 
+
+
+  const generateExcel = (data) => {
+      // Definindo as colunas
+      const columns = [
+          'Pedido', 'Data', 'Hora', 'Status', 'Total Itens',
+          'Envio', 'ID Loja', 'Site', 'Valor Bruto',
+          'Valor Desconto', 'Valor Frete', 'Valor Pago',
+          'Cupom Vendedora', 'Método de Pagamento', 'Parcelas', 'Cliente'
+      ];
+  
+      // Formatando os dados
+      const formattedData = data.map(row => [
+          row.pedido || 'N/A',
+          row.data_submissao ? new Date(row.data_submissao).toLocaleDateString() : 'Data não disponível',
+          row.hora_submissao ? row.hora_submissao.split('.')[0] : 'Hora não disponível',
+          row.status || 'N/A',
+          row.total_itens || 0,
+          row.envio || 'N/A',
+          row.idloja || 'N/A',
+          row.site || 'N/A',
+          row.valor_bruto || 0,
+          row.valor_desconto || 0,
+          row.valor_frete || 0,
+          row.valor_pago || 0,
+          row.cupom_vendedora || 'N/A',
+          row.metodo_pagamento || 'N/A',
+          row.parcelas || 0,
+          row.id_cliente || 'N/A'
+      ]);
+  
+      // Criar uma nova planilha com os dados formatados
+      const worksheet = XLSX.utils.aoa_to_sheet([columns, ...formattedData]);
+  
+      // Estilizar o cabeçalho
+      const headerCellStyle = {
+          fill: { fgColor: { rgb: '0066CC' } }, // Cor de fundo azul
+          font: { bold: true, color: { rgb: 'FFFFFF' } }, // Negrito e cor da fonte branca
+          alignment: { horizontal: 'center' } // Centralizar texto
+      };
+  
+      // Aplicar estilo às células do cabeçalho
+      columns.forEach((col, index) => {
+          const cellAddress = XLSX.utils.encode_cell({ c: index, r: 0 }); // Endereço da célula (0 é a linha do cabeçalho)
+          worksheet[cellAddress].s = headerCellStyle; // Aplicar estilo
+      });
+  
+      // Criar um novo livro
+      const workbook = XLSX.utils.book_new();
+  
+      // Adicionar a planilha ao livro
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
+  
+      // Gerar o arquivo Excel e forçar download
+      XLSX.writeFile(workbook, 'dados.xlsx');
+  };
+  
+
+  // Exemplo de chamada da função
+  const [exportFormat, setExportFormat] = React.useState('');
+  const handleExportChange = (e) => {
+    const selectedFormat = e.target.value;
+    setExportFormat(selectedFormat); // Atualiza o estado com o valor selecionado
+
+    // Chama a função correspondente com os dados filtrados
+    if (selectedFormat === 'excel') {
+      generateExcel(filteredData); // Chama a função para exportar como Excel
+    } else if (selectedFormat === 'pdf') {
+      generatePDF(filteredData); // Chama a função para exportar como PDF
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -513,48 +589,72 @@ const Order = ({ toggleTheme }) => {
             sx={{
               mt: 2,
               p: 2,
-              maxWidth: '100%', 
+              maxWidth: '100%',
               overflow: 'auto',
             }}>
-            <Grid container spacing={2} direction="row" alignItems="flex-start">
-              <Grid item xs={12} sm={4} md={2}>
-                <TextField
-                  label="Data Inicial"
-                  type="date"
-                  variant="filled"
-                  value={filterStartDate}
-                  onChange={(e) => setFilterStartDate(e.target.value)}
-                  fullWidth
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  sx={{ minWidth: 120 }}
-                />
+            <Grid container direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+              {/* Grid para os campos de Data Inicial, Data Final e Buscar */}
+              <Grid item container direction="row" xs={12} sm={8} md={8} spacing={2} alignItems="center">
+                <Grid item xs={12} sm={4} md={3}>
+                  <TextField
+                    label="Data Inicial"
+                    type="date"
+                    variant="filled"
+                    value={filterStartDate}
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ minWidth: 120 }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4} md={3}>
+                  <TextField
+                    label="Data Final"
+                    type="date"
+                    variant="filled"
+                    value={filterEndDate}
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ minWidth: 120 }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4} md={3}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 1.5, mb: 1, width: '100%' }}
+                    onClick={handleSearch}
+                  >
+                    Buscar
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={4} md={2}>
-                <TextField
-                  label="Data Final"
-                  type="date"
-                  variant="filled"
-                  value={filterEndDate}
-                  onChange={(e) => setFilterEndDate(e.target.value)}
-                  fullWidth
-                  size="small"
-                  InputLabelProps={{ shrink: true }}
-                  sx={{ minWidth: 120 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={4} md={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{ mt: 1.5, mb: 1, width: '100%' }}
-                  onClick={handleSearch}
-                >
-                  Buscar
-                </Button>
-              </Grid>
-            </Grid>
+              <Grid item xs={6} sm={4} md={3} container justifyContent="flex-end">
+                <FormControl sx={{ width: '150px' }}>
+                  <InputLabel id="export-select-label"></InputLabel>
+                  <Select
+                    labelId="export-select-label"
+                    value={exportFormat}
+                    onChange={handleExportChange} // Atualiza o estado e chama a função de exportação
+                    displayEmpty
+                  >
+                    <MenuItem value="" disabled>
+                      <Box display="flex" alignItems="center">
+                        Exportar <FileDownloadIcon sx={{ ml: 1 }} />
+                      </Box>
+                    </MenuItem>
 
+                    <MenuItem value="excel">Excel</MenuItem>  {/* Opção para Excel */}
+                    <MenuItem value="pdf">PDF</MenuItem>        {/* Opção para PDF */}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+
+            </Grid>
             <Grid container spacing={2} direction="row" alignItems="flex-start" sx={{ mt: 2 }}>
               <Grid item xs={12} sm={4} md={2}>
                 <TextField
@@ -632,8 +732,11 @@ const Order = ({ toggleTheme }) => {
             </Grid>
           </Paper>
 
-          <Grid sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
+          <Grid sx={{
+            display: 'flex', justifyContent: 'flex-end', height: '100%',
+            width: '100%',
+          }}>
+            {/* <Button
               onClick={() => generatePDF(filteredData)}
               sx={{
                 mt: 1.5,
@@ -647,6 +750,41 @@ const Order = ({ toggleTheme }) => {
               }}>
               Exportar PDF
             </Button>
+            <Button
+              onClick={() => generateExcel(filteredData)}
+              sx={{
+                mt: 1.5,
+                backgroundColor: '#45a049',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: 'darkgreen',
+                },
+                height: '36px',
+                width: '10%',
+              }}>
+              Exportar Excel
+            </Button> */}
+
+            {/* <FormControl sx={{
+              mt: 1.5,
+             
+              height: '40px',
+              width: '10%',
+            }}>
+              <InputLabel id="export-select-label">Exportar</InputLabel>
+              <Select
+                labelId="export-select-label"
+                value={exportFormat}
+                onChange={handleExportChange} 
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Exportar
+                </MenuItem>
+                <MenuItem value="excel">Excel</MenuItem>  
+                <MenuItem value="pdf">PDF</MenuItem>        
+              </Select>
+            </FormControl> */}
           </Grid>
         </Box>
         <Grid container sx={{ mt: 2 }}>

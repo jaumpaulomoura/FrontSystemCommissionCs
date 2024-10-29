@@ -21,7 +21,7 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
     labels: dailyData.map(d => d.date),
     datasets: [
       {
-        label: 'Vendas Diárias',
+        label: 'Vendas DiÃ¡rias',
         data: dailyData.map(d => d.total),
         borderColor: 'rgba(75,192,192,1)',
         backgroundColor: 'rgba(75,192,192,0.2)',
@@ -60,7 +60,7 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
     labels: sortedLabels, // Dias ordenados
     datasets: [
       {
-        label: 'Vendas Diárias do Time',
+        label: 'Vendas Diarias do Time',
         data: sortedLabels.map(day => timeSalesData[day]), // Valores correspondentes aos dias ordenados
         borderColor: 'rgba(255,99,132,1)',
         backgroundColor: 'rgba(255,99,132,0.2)',
@@ -79,7 +79,7 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
       },
       title: {
         display: true,
-        text: 'Gráfico de Vendas',
+        text: 'Grafico de Vendas',
       },
       datalabels: {
         color: 'white',
@@ -97,7 +97,7 @@ console.log('timeSalesData',timeSalesData)
       {isConsultant ? (
         <Grid item xs={10} sm={6} md={6}>
           <Paper sx={{ p: 2, mx: 'auto', width: '100%' }}> 
-            <Typography variant="h6">Gráfico de Vendas Diárias</Typography>
+            <Typography variant="h6">GrÃ¡fico de Vendas DiÃ¡rias</Typography>
             <div style={{ height: '100%', width: '100%' }}>
               <Line data={dailyChartData} options={options} />
             </div>
@@ -107,7 +107,7 @@ console.log('timeSalesData',timeSalesData)
         <>
           <Grid item xs={12} sm={6}>
             <Paper sx={{ p: 2, height: 430 }}>
-              <Typography variant="h6">Vendas Diárias do Time</Typography>
+              <Typography variant="h6">Vendas DiÃ¡rias do Time</Typography>
               <div style={{ height: '100%', width: '100%' }}>
                 <Line data={timeSalesChartData} options={options} />
               </div>

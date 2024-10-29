@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
   PREMIACAO_RECONQUISTA: `${API_BASE_URL}/premiacaoReconquista`,
   META: `${API_BASE_URL}/meta`,
   ORDER: `${API_BASE_URL}/orders`,
+  ORDERITENS: `${API_BASE_URL}/ordersItem`,
+  ORDERITENSGROUP: `${API_BASE_URL}/ordersItemGroup`,  
   PEDIDOS_DIARIO: `${API_BASE_URL}/ordersByDay`,
   PEDIDOS_MENSAL: `${API_BASE_URL}/ordersByMonth`,
   TICKET: `${API_BASE_URL}/ticket`,
