@@ -29,8 +29,7 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
       },
     ],
   };
-
-  const sortedRankingData = [...rankingData].sort((a, b) => b.valor_bruto - a.valor_bruto);
+  const sortedRankingData = Array.isArray(rankingData) ? [...rankingData].sort((a, b) => b.valor_bruto - a.valor_bruto) : [];
 
   const rankingChartData = {
     labels: sortedRankingData.map(d => d.nome),
@@ -72,6 +71,7 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
 
   const options = {
     responsive: true,
+    // maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
@@ -91,23 +91,25 @@ const SalesChart = ({ dailyData, rankingData, isConsultant }) => {
       },
     },
   };
-console.log('timeSalesData',timeSalesData)
+// console.log('timeSalesData',timeSalesData)
   return (
     <Grid container spacing={3}>
       {isConsultant ? (
-        <Grid item xs={10} sm={6} md={6}>
-          <Paper sx={{ p: 2, mx: 'auto', width: '100%' }}> 
-            <Typography variant="h6">GrÃ¡fico de Vendas DiÃ¡rias</Typography>
+       
+         <Grid item xs={12} >
+          <Paper sx={{ p: 2, height: 430 }}>
+            <Typography variant="h6">Gráfico de Vendas Diárias</Typography>
             <div style={{ height: '100%', width: '100%' }}>
-              <Line data={dailyChartData} options={options} />
+              <Line data={dailyChartData} options={options}  />
             </div>
           </Paper>
         </Grid>
+       
       ) : (
         <>
           <Grid item xs={12} sm={6}>
             <Paper sx={{ p: 2, height: 430 }}>
-              <Typography variant="h6">Vendas DiÃ¡rias do Time</Typography>
+              <Typography variant="h6">Vendas Diárias do Time</Typography>
               <div style={{ height: '100%', width: '100%' }}>
                 <Line data={timeSalesChartData} options={options} />
               </div>

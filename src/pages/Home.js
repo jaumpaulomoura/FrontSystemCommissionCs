@@ -21,7 +21,7 @@ const Home = ({ onLogout, toggleTheme }) => {
     const [filteredRankingData, setFilteredRankingData] = useState([]);
     const [filteredMetasComProgresso, setFilteredMetasComProgresso] = useState([]);
     const [filteredPedidosItem, setFilteredPedidosItem] = useState([]);
-
+    const [pedidosItem, setPedidosItem] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [totalDailySales, setTotalDailySales] = useState(0);
     const [totalMonthlySales, setTotalMonthlySales] = useState(0);
@@ -37,13 +37,16 @@ const Home = ({ onLogout, toggleTheme }) => {
     const funcao = user ? user.funcao : '';
     useEffect(() => {
         setUserRole(funcao);
-    }, [funcao]);
+        if (funcao === 'Consultora') {
+            setSelectedCupom(cupomVendedora);
+        }
+    }, [funcao, cupomVendedora]);
 
     const fetchData = async () => {
         setLoading(true);
         setError(null);
         try {
-            
+
 
             const year = selectedMonthYear.split('-')[0];
             const month = selectedMonthYear.split('-')[1];
@@ -57,7 +60,7 @@ const Home = ({ onLogout, toggleTheme }) => {
             const metaData = await getFilteredMetaData();
             console.log("Start Date:", formattedStartDate);
             console.log("End Date:", formattedEndDate);
-            
+
 
 
 
@@ -72,24 +75,24 @@ const Home = ({ onLogout, toggleTheme }) => {
 
             setDailyData(dailyChartData);
 
-            if (funcao !== 'Consultora') {
-                const rankingData = monthlySalesData.reduce((acc, item) => {
-                    const cupom = item.cupom_vendedora;
-                    if (!acc[cupom]) {
-                        acc[cupom] = { nome: item.nome, total: 0 };
-                    }
-                    acc[cupom].total += parseFloat(item.valor_bruto);
-                    return acc;
-                }, {});
 
-                const rankingChartData = Object.keys(rankingData).map(cupom => ({
-                    cupom_vendedora: cupom,
-                    nome: rankingData[cupom].nome,
-                    valor_bruto: Number(rankingData[cupom].total.toFixed(2))
-                }));
+            const rankingData = monthlySalesData.reduce((acc, item) => {
+                const cupom = item.cupom_vendedora;
+                if (!acc[cupom]) {
+                    acc[cupom] = { nome: item.nome, total: 0 };
+                }
+                acc[cupom].total += parseFloat(item.valor_bruto);
+                return acc;
+            }, {});
 
-                setRankingData(rankingChartData);
-            }
+            const rankingChartData = Object.keys(rankingData).map(cupom => ({
+                cupom_vendedora: cupom,
+                nome: rankingData[cupom].nome,
+                valor_bruto: Number(rankingData[cupom].total.toFixed(2))
+            }));
+
+            setRankingData(rankingChartData);
+
 
 
 
@@ -135,11 +138,13 @@ const Home = ({ onLogout, toggleTheme }) => {
         const filteredMeta = selectedCupom
             ? metaData.filter(meta => meta.cupom === selectedCupom && meta.mes_ano === formattedMonthYear)
             : metaData.filter(meta => meta.mes_ano === formattedMonthYear);
-
+        console.log(filteredMeta)
+        console.log(rankingData)
         const salesByCupom = rankingData.reduce((acc, sale) => {
             acc[sale.cupom_vendedora] = (acc[sale.cupom_vendedora] || 0) + sale.valor_bruto;
             return acc;
         }, {});
+        console.log(salesByCupom)
 
         const metasComProgresso = Object.keys(salesByCupom).map(cupom => {
             const totalVendas = salesByCupom[cupom] || 0;
@@ -189,7 +194,7 @@ const Home = ({ onLogout, toggleTheme }) => {
         const orderMap = Object.fromEntries(order.map((item, index) => [item, index]));
 
         // Adicione console.log para depurar
-        console.log('Metas antes da ordenação:', metasComProgresso);
+        // console.log('Metas antes da ordenação:', metasComProgresso);
 
         // Ordenar as metasComProgresso pela ordem desejada
         metasComProgresso.sort((a, b) => {
@@ -199,20 +204,22 @@ const Home = ({ onLogout, toggleTheme }) => {
             return aOrder - bOrder;
         });
 
-        console.log('Metas após a ordenação:', metasComProgresso);
+        // console.log('Metas após a ordenação:', metasComProgresso);
 
         const metasFiltradasComProgresso = selectedCupom
             ? metasComProgresso.filter(meta => meta.cupom === selectedCupom)
             : metasComProgresso;
-
+        console.log(metasFiltradasComProgresso)
         setFilteredMetasComProgresso(metasFiltradasComProgresso);
     }, [rankingData, metaData, selectedCupom, selectedMonthYear]);
+    console.log("Cupom selecionado:", selectedCupom);
 
 
 
 
 
-    console.log(filteredMetasComProgresso)
+
+    // console.log(filteredMetasComProgresso)
 
     useEffect(() => {
         // Fetch de dados
@@ -231,6 +238,7 @@ const Home = ({ onLogout, toggleTheme }) => {
                     funcao === 'Consultora' ? selectedCupom : ''
                 );
                 console.log("Pedidos Item:", pedidosItem);
+                setPedidosItem(pedidosItem);
                 setFilteredPedidosItem(pedidosItem);
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
@@ -240,19 +248,41 @@ const Home = ({ onLogout, toggleTheme }) => {
         if (selectedMonthYear) {
             fetchDataItens();
         }
-    }, [selectedMonthYear, selectedCupom]); // Remova dependências não utilizadas
+    }, [selectedMonthYear]);
+    useEffect(() => {
+        const filterData = () => {
+            console.log("Valor de funcao:", funcao);
+            console.log("Valor de selectedCupom:", selectedCupom);
+
+            if ((funcao === 'Consultora' || funcao === 'Lider') && selectedCupom) {
+
+                const filteredData = pedidosItem.filter(item => item.cupom_vendedora === selectedCupom);
+                console.log("Pedidos filtrados:", filteredData); // Log filtered data
+                setFilteredPedidosItem(filteredData);
+            } else {
+                console.log("Caindo no else, retornando todos os dados");
+                setFilteredPedidosItem(pedidosItem); // Return all data if no filter
+            }
+        };
+
+        filterData();
+    }, [selectedCupom, pedidosItem]);
+
+
     useEffect(() => {
         const processSummedData = () => {
-            if (filteredPedidosItem.length === 0) return; // Evita processamento se não houver dados
-    
+            if (filteredPedidosItem.length === 0) return;
+            console.log("Pedidos filtrados antes da soma:", filteredPedidosItem);
             const aggregatedData = filteredPedidosItem.reduce((acc, item) => {
-                const { marca, catGestor_desc, classGestor_desc, quantidade, valorPago } = item;
-                
-                // Certifique-se de que valorPago seja uma string antes de usar replace
+                const { marca, catGestor_desc, classGestor_desc, quantidade, valorPago, valorDesconto } = item;
+
+                // Certifique-se de que valorPago e desconto sejam strings antes de usar replace
                 const valorPagoFloat = (typeof valorPago === 'string' ? parseFloat(valorPago.replace(',', '.')) : 0);
-    
+                const descontoFloat = (typeof valorDesconto === 'string' ? parseFloat(valorDesconto.replace(',', '.')) : 0);
+                const valorPagobruto = (typeof valorPago === 'string' ? parseFloat(valorPago.replace(',', '.')) : 0) + (typeof valorDesconto === 'string' ? parseFloat(valorDesconto.replace(',', '.')) : 0)
+
                 const key = `${marca}-${catGestor_desc}-${classGestor_desc}`;
-    
+
                 if (!acc[key]) {
                     acc[key] = {
                         id: key,
@@ -260,25 +290,41 @@ const Home = ({ onLogout, toggleTheme }) => {
                         catGestor_desc,
                         classGestor_desc,
                         quantidadeTotal: 0,
-                        valorTotal: 0, // Este ainda será usado
+                        valorTotalPago: 0,
+                        valorTotalBruto: 0,
+                        valorDesconto: 0, // Inicializando o campo de desconto
+                        quantidadeDescontos: 0, // Para contar quantos descontos foram aplicados
                     };
                 }
-    
+
                 acc[key].quantidadeTotal += quantidade;
-                acc[key].valorTotal += valorPagoFloat; // Somando valorPago
-    
+                acc[key].valorTotalPago += valorPagoFloat;
+                acc[key].valorTotalBruto += valorPagobruto;
+                acc[key].valorDesconto += descontoFloat; // Somando desconto
+                acc[key].quantidadeDescontos += quantidade > 0 ? 1 : 0; // Incrementa se a quantidade for maior que zero
+
                 return acc;
             }, {});
-    
-            setSummedData(Object.values(aggregatedData)); // Garante que isso retorna um array
+
+            // Adicionar a média do desconto após a agregação
+            const summedDataWithAverage = Object.values(aggregatedData).map(item => {
+                const mediaDesconto = item.quantidadeDescontos > 0 ? (item.valorDesconto / item.valorTotalBruto) : 0;
+                return {
+                    ...item,
+                    mediaDesconto, // Adiciona a média do desconto ao item
+                };
+            });
+            console.log("Dados somados antes de atualizar o estado:", summedDataWithAverage);
+            setSummedData(summedDataWithAverage); // Atualiza o estado com os dados processados
         };
-    
+
         processSummedData(); // Chame a função para processar os dados
     }, [filteredPedidosItem]);
-    
+
+
     // Visualização do resultado processado
-    console.log("Dados agregados por categoria:", summedData);
-    
+    // console.log("Dados agregados por categoria:", summedData);
+
 
     const calculateTotals = () => {
         // Filtra as vendas diárias apenas para o dia selecionado
@@ -333,7 +379,7 @@ const Home = ({ onLogout, toggleTheme }) => {
 
 
     const columns = [
-        { field: 'nome', headerName: 'Nome', width: 170, },
+        { field: 'nome', headerName: 'Nome', width: 150, },
         // { field: 'cupom', headerName: 'Cupom', flex: 1 },
         {
             field: 'metaAtual',
@@ -371,7 +417,14 @@ const Home = ({ onLogout, toggleTheme }) => {
             }
         },
         {
-            field: 'faltaParaMeta', headerName: 'Falta para a Proxima Meta', width: 200, valueFormatter: (params) => {
+            field: 'faltaParaMeta', headerName: 'Falta para a Proxima Meta', width: 110,
+            renderHeader: () => (
+                <div style={{ textAlign: 'center', whiteSpace: 'normal' }}>
+                    <span>Falta para a</span><br />
+                    <span>Proxima Meta</span>
+                </div>
+            ),
+            valueFormatter: (params) => {
                 // Convert the value to a number
                 const numberValue = Number(params || 0);
 
@@ -384,9 +437,24 @@ const Home = ({ onLogout, toggleTheme }) => {
                 return `R$ ${formattedValue}`;
             }
         },
-        { field: 'proximaMeta', headerName: 'Próxima Meta', width: 130, },
         {
-            field: 'valorProximaMeta', headerName: 'Valor da Próxima Meta', width: 180, valueFormatter: (params) => {
+            field: 'proximaMeta', headerName: 'Próxima Meta', width: 100,
+            renderHeader: () => (
+                <div style={{ textAlign: 'center', whiteSpace: 'normal' }}>
+                    <span>Proxima</span><br />
+                    <span>Meta</span>
+                </div>
+            ),
+        },
+        {
+            field: 'valorProximaMeta', headerName: 'Valor da Próxima Meta', width: 110,
+            renderHeader: () => (
+                <div style={{ textAlign: 'center', whiteSpace: 'normal' }}>
+                    <span>Valor da</span><br />
+                    <span>Proxima Meta</span>
+                </div>
+            ),
+            valueFormatter: (params) => {
                 // Convert the value to a number
                 const numberValue = Number(params || 0);
 
@@ -477,7 +545,7 @@ const Home = ({ onLogout, toggleTheme }) => {
 
 
 
-                    <Grid container spacing={2} sx={{ display: 'flex', flexWrap: 'wrap', mt: 1 }}>
+                    <Grid container spacing={2} sx={{ display: 'flex', direction: 'row', flexWrap: 'wrap', mt: 1 }}>
                         <Grid item xs={12} sm={6}>
                             <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                 <div>
@@ -499,21 +567,42 @@ const Home = ({ onLogout, toggleTheme }) => {
                                 </Typography>
                             </Paper>
                         </Grid>
-                        <Grid item xs={12}>
-                            <SalesChart
-                                dailyData={filteredData}
-                                rankingData={filteredRankingData}
-                                isConsultant={userRole === 'Consultora'}
-                                selectedCupom={selectedCupom}
-                            />
-                        </Grid>
+                        
+                            {userRole === 'Consultora' ? (
+                                <>
+                                    {/* Coluna para o gráfico */}
+                                    <Grid item xs={12} sm={6}>
+                                     
+                                            <SalesChart
+                                                dailyData={filteredData}
+                                                isConsultant={true}
+                                                selectedCupom={selectedCupom}
+                                                style={{ height: '100%', width: '100%' }}
+                                            />
+                                    </Grid>
+
+                                    {/* Coluna para a tabela */}
+                                    <Grid item xs={12} sm={6}>
+                                        <Paper sx={{ p: 2, height: 430 }}> {/* Definindo uma altura fixa */}
+                                            <DataGridCat summedData={summedData} />
+                                        </Paper>
+                                    </Grid>
+                                </>
+                            ) : (
+                                // Renderiza SalesChart e DataGridCat para outros tipos de função
+                                <>
+                                <Grid item xs={12} >
+                                    <SalesChart
+                                        dailyData={filteredData}
+                                        rankingData={filteredRankingData}
+                                        isConsultant={false}
+                                        selectedCupom={selectedCupom}
+                                    />
+</Grid>
+                                </>
+                            )}
+                        
                     </Grid>
-
-
-
-
-
-
                 )}
 
 
@@ -526,7 +615,7 @@ const Home = ({ onLogout, toggleTheme }) => {
 
                 <Grid container spacing={2} sx={{ display: 'flex', flexWrap: 'wrap', mt: 1 }}>
 
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6}> {funcao !== 'Consultora' && (
                         <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             {filteredMetasComProgresso.length === 0 ? (
                                 <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -551,35 +640,36 @@ const Home = ({ onLogout, toggleTheme }) => {
                                         initialState={{
                                             pagination: {
                                                 paginationModel: {
-                                                    pageSize: 9,
+                                                    pageSize: 16,
                                                 },
                                             },
                                         }}
                                         autoHeight
-                                        pageSizeOptions={[9]}
+                                        pageSizeOptions={[16]}
                                         disableColumnMenu
+                                        rowHeight={30}
                                     />
                                 </Paper>
                             )}
                         </Paper>
+                    )}
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        
-                    <Paper
+                        {funcao !== 'Consultora' && (
+                            <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Paper
                                     sx={{
                                         width: '100%',
                                         marginTop: '10px',
-                                        // border: '1px solid #ccc',
-                                        // borderRadius: '8px',
                                         padding: '16px',
                                     }}
                                 >
-                    
-                        {/* <SalesChartItens summedData={summedData} /> */}
-                        <DataGridCat summedData={summedData} />
+                                    {/* <SalesChartItens summedData={summedData} /> */}
+                                    <DataGridCat summedData={summedData} />
+                                </Paper>
+                            </Paper>
+                        )}
 
-       
-                        </Paper>
                     </Grid>
                 </Grid>
             </Box>
@@ -607,7 +697,13 @@ const Home = ({ onLogout, toggleTheme }) => {
                                 {modalData.map((sale, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{sale.cupomVendedora} - {sale.nome}</TableCell>
-                                        <TableCell>{sale.total}</TableCell>
+                                        <TableCell>
+                                            {new Intl.NumberFormat('pt-BR', {
+                                                style: 'currency',
+                                                currency: 'BRL',
+                                            }).format(sale.total)}
+                                        </TableCell>
+
                                     </TableRow>
                                 ))}
                             </TableBody>

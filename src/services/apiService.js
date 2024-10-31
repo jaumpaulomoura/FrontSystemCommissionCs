@@ -629,7 +629,7 @@ export const getFilteredPedidosItemData = async (startDate, endDate) => {
       params.append('endDate', endDate);
     }
     if (user.funcao === 'Consultora') {
-      params.append('cupomvendedora', user.cupom);
+      params.append('cupom_vendedora', user.cupom);
     } else {
       params.append('time', user.time);
     }

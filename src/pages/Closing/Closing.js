@@ -422,6 +422,25 @@ const Closing = ({ toggleTheme }) => {
       }
     },
     {
+      field: 'vlr_taxa_conversao',
+      headerName: 'Taxa Conversão',
+      width: 150,
+      valueFormatter: (params) => {
+        if (!params) {
+          return 'R$ 0,00';
+        }
+        const numberValue = parseFloat(params.toString().replace(',', '.'));
+        if (isNaN(numberValue)) {
+          return 'R$ 0,00';
+        }
+        const formattedValue = numberValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+        return `R$ ${formattedValue}`;
+      }
+    },
+    {
       field: 'total_receber',
       headerName: 'Valor Total',
       width: 150,
@@ -551,6 +570,7 @@ const Closing = ({ toggleTheme }) => {
       startY: 25,
       head: [
         ['Função','Nome', 'Total Comissional', 'Meta', 'Porcentagem', 'Valor Comissão', 'Premiação Meta']
+          .concat(user?.time === "Venda Ativa" ? ['Taxa de conversão'] : [])
           .concat(user?.time === "Reconquista" ? ['Premiação Reconquista'] : [])
           .concat(['Valor Total']),
       ],
@@ -573,6 +593,9 @@ const Closing = ({ toggleTheme }) => {
           `${numberFormatter.format(parseFloat(row.porcentagem_meta || '0') * 100)}%`,
           `R$ ${numberFormatter.format(parseFloat(row.valor_comissao || '0'))}`,
           `R$ ${numberFormatter.format(parseFloat(row.premiacao_meta || '0'))}`,
+          ...(user?.time === "Venda Ativa"
+            ? [`R$ ${numberFormatter.format(row.vlr_taxa_conversao)}`]
+            : []),
           ...(user?.time === "Reconquista"
             ? [`R$ ${numberFormatter.format(premiacaoReconquista)}`]
             : []),
