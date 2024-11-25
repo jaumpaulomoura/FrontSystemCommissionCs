@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   META: `${API_BASE_URL}/meta`,
   ORDER: `${API_BASE_URL}/orders`,
   ORDERITENS: `${API_BASE_URL}/ordersItem`,
+  ORDERITENSVIGENCIA: `${API_BASE_URL}/ordersItemVigente`,
   ORDERITENSGROUP: `${API_BASE_URL}/ordersItemGroup`,  
   PEDIDOS_DIARIO: `${API_BASE_URL}/ordersByDay`,
   PEDIDOS_MENSAL: `${API_BASE_URL}/ordersByMonth`,

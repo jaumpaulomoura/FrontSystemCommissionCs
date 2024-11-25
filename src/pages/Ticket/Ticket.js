@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React,
+ { useEffect, useState, useCallback } from 'react';
 import { Box, Typography, Button, Paper, CircularProgress, Alert, TextField, Grid, FormControl, InputLabel, Select, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
 import { DataGrid } from '@mui/x-data-grid';
@@ -6,7 +7,7 @@ import NotesIcon from '@mui/icons-material/Notes';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import SidebarMenu from '../../components/SidebarMenu';
 import { useNavigate } from 'react-router-dom';
-import { getFilteredTicketData, updateTicket, updateTicketCupom } from '../../services/apiService';
+import { getFilteredTicketData, updateTicket, updateTicketCupom,updateTicketStatus } from '../../services/apiService';
 import { debounce } from 'lodash';
 import Cookies from 'js-cookie';
 import jsPDF from 'jspdf';
@@ -148,19 +149,27 @@ const Ticket = ({ toggleTheme }) => {
 
       if (updatedTicket) {
         if (status === 'Autorizado') {
-          if (updatedTicket.reason !== 'Status para Aprovado' && updatedTicket.reason !== 'Status para Cancelado') {
+          
+          if (updatedTicket.reason === 'Status para Aprovado') {
+            await updateTicketStatus(updatedTicket.orderId, 'APPROVED');
+          } else if (updatedTicket.reason === 'Status para Cancelado') {
+            await updateTicketStatus(updatedTicket.orderId, 'REMOVED');
+          } else if (updatedTicket.reason !== 'Status para Aprovado' && updatedTicket.reason !== 'Status para Cancelado') {
             await updateTicketCupom(updatedTicket.orderId, updatedTicket.cupomvendedora);
           }
         }
-
+      
+        
         setData(prevData =>
           prevData.map(ticket =>
             ticket.id === id ? { ...ticket, status } : ticket
           )
         );
-
+      
+        
         showToast(`Ticket ${status === 'Autorizado' ? 'autorizado' : 'não autorizado'} com sucesso!`, 'success');
       }
+      
     } catch (error) {
       showToast(`Erro ao ${status === 'Autorizado' ? 'autorizar' : 'não autorizar'} o ticket.`, 'error');
     }
@@ -327,7 +336,7 @@ const Ticket = ({ toggleTheme }) => {
     doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
     doc.setFontSize(12);
     doc.text('Relatório de Colaboradores', 18, 24);
-    // Define as colunas e os dados
+    
     const columns = [
       { header: 'Ticket', dataKey: 'id' },
       { header: 'Pedido', dataKey: 'orderId' },
@@ -355,7 +364,7 @@ const Ticket = ({ toggleTheme }) => {
       dateCreated: row.dateCreated,
     }));
 
-    // Adiciona a tabela ao PDF
+    
     autoTable(doc, {
       columns: columns,
       body: rows,
@@ -374,20 +383,20 @@ const Ticket = ({ toggleTheme }) => {
       },
     });
 
-    // Salva o PDF
+    
     doc.save('relatorio_ticket.pdf');
   };
-  if (error) {
-    toast.error(error);
-  }
+  
+  
+  
 
-  if (successMessage) {
-    toast.success(successMessage);
-  }
+  
+  
+  
 
-  if (errorMessage) {
-    toast.error(errorMessage);
-  }
+  
+  
+  
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarMenu open={sidebarOpen} onClose={handleSidebarToggle} />
@@ -397,9 +406,9 @@ const Ticket = ({ toggleTheme }) => {
           flexGrow: 1,
           bgcolor: 'background.default',
           p: 3,
-          maxWidth: '100%', // Ajuste conforme necessário
-          mx: 'auto', // Centraliza horizontalmente
-          overflow: 'auto' // Adiciona rolagem se necessário
+          maxWidth: '100%', 
+          mx: 'auto', 
+          overflow: 'auto' 
         }}
       >
 
@@ -419,8 +428,8 @@ const Ticket = ({ toggleTheme }) => {
           sx={{
             mt: 2,
             p: 2,
-            maxWidth: '100%', // Evita que o Paper ultrapasse o contêiner principal
-            overflow: 'auto', // Permite rolar se o conteúdo exceder o tamanho
+            maxWidth: '100%', 
+            overflow: 'auto', 
           }}
         >
           <Grid container spacing={2}>
@@ -524,7 +533,7 @@ const Ticket = ({ toggleTheme }) => {
         </Paper>
         <Grid item xs={12} sm={12} md={7} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
-            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            onClick={() => generatePDF(filteredData)} 
             sx={{
               mt: 1.5,
               backgroundColor: '#45a049',
@@ -533,7 +542,7 @@ const Ticket = ({ toggleTheme }) => {
                 backgroundColor: 'darkgreen',
               },
               height: '36px',
-              width: '11%', // Diminuir a largura do botão
+              width: '11%', 
             }}
           >
             Exportar PDF
@@ -588,3 +597,5 @@ const Ticket = ({ toggleTheme }) => {
 };
 
 export default Ticket;
+
+

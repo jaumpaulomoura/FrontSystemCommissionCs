@@ -177,27 +177,27 @@ const Order = ({ toggleTheme }) => {
     { field: 'envio', headerName: 'Envio', width: 120 },
     { field: 'idloja', headerName: 'ID Loja', width: 120 },
     { field: 'site', headerName: 'Site', width: 180 },
-    // { field: 'valor_bruto', headerName: 'Valor Bruto', width: 150, },
-    // { field: 'valor_desconto', headerName: 'Valor Desconto', width: 150 },
-    // { field: 'valor_frete', headerName: 'Valor Frete', width: 150 },
-    // { field: 'valor_pago', headerName: 'Valor Pago', width: 150 },
+    
+    
+    
+    
     {
       field: 'valor_bruto',
       headerName: 'Valor Bruto',
       width: 150,
       valueFormatter: (params) => {
-        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+        console.log('valor_bruto params:', params); 
 
-        // Replace comma with dot and convert to number
+        
         const numberValue = Number((params || '0').replace(',', '.'));
 
-        // Format the number as a currency in BRL
+        
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
 
-        // Return the formatted value with 'R$'
+        
         return `R$ ${formattedValue}`;
       }
     }
@@ -208,18 +208,18 @@ const Order = ({ toggleTheme }) => {
       headerName: 'Valor Desconto',
       width: 150,
       valueFormatter: (params) => {
-        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+        console.log('valor_bruto params:', params); 
 
-        // Replace comma with dot and convert to number
+        
         const numberValue = Number((params || '0').replace(',', '.'));
 
-        // Format the number as a currency in BRL
+        
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
 
-        // Return the formatted value with 'R$'
+        
         return `R$ ${formattedValue}`;
       }
     },
@@ -228,18 +228,18 @@ const Order = ({ toggleTheme }) => {
       headerName: 'Valor Frete',
       width: 150,
       valueFormatter: (params) => {
-        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+        console.log('valor_bruto params:', params); 
 
-        // Replace comma with dot and convert to number
+        
         const numberValue = Number((params || '0').replace(',', '.'));
 
-        // Format the number as a currency in BRL
+        
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
 
-        // Return the formatted value with 'R$'
+        
         return `R$ ${formattedValue}`;
       }
     },
@@ -248,18 +248,18 @@ const Order = ({ toggleTheme }) => {
       headerName: 'Valor Pago',
       width: 150,
       valueFormatter: (params) => {
-        console.log('valor_bruto params:', params); // Debugging line to see the actual value
+        console.log('valor_bruto params:', params); 
 
-        // Replace comma with dot and convert to number
+        
         const numberValue = Number((params || '0').replace(',', '.'));
 
-        // Format the number as a currency in BRL
+        
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
 
-        // Return the formatted value with 'R$'
+        
         return `R$ ${formattedValue}`;
       }
     }
@@ -270,28 +270,28 @@ const Order = ({ toggleTheme }) => {
       headerName: 'Valor Comissional',
       width: 150,
       valueFormatter: (params) => {
-        console.log('valor_comissional params:', params); // Linha de depuração para ver o valor real
+        console.log('valor_comissional params:', params); 
 
-        // Se o valor não estiver definido, retorna '0'
+        
         if (!params) {
           return 'R$ 0,00';
         }
 
-        // Substitui a vírgula por ponto e converte para número
+        
         const numberValue = parseFloat(params.toString().replace(',', '.'));
 
-        // Verifica se a conversão para número foi bem-sucedida
+        
         if (isNaN(numberValue)) {
-          return 'R$ 0,00'; // Retorna um valor padrão se a conversão falhar
+          return 'R$ 0,00'; 
         }
 
-        // Formata o número como moeda em BRL
+        
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
 
-        // Retorna o valor formatado com 'R$'
+        
         return `R$ ${formattedValue}`;
       }
     }
@@ -489,7 +489,7 @@ const Order = ({ toggleTheme }) => {
 
 
   const generateExcel = (data) => {
-      // Definindo as colunas
+      
       const columns = [
           'Pedido', 'Data', 'Hora', 'Status', 'Total Itens',
           'Envio', 'ID Loja', 'Site', 'Valor Bruto',
@@ -497,7 +497,7 @@ const Order = ({ toggleTheme }) => {
           'Cupom Vendedora', 'Método de Pagamento', 'Parcelas', 'Cliente'
       ];
   
-      // Formatando os dados
+      
       const formattedData = data.map(row => [
           row.pedido || 'N/A',
           row.data_submissao ? new Date(row.data_submissao).toLocaleDateString() : 'Data não disponível',
@@ -517,44 +517,44 @@ const Order = ({ toggleTheme }) => {
           row.id_cliente || 'N/A'
       ]);
   
-      // Criar uma nova planilha com os dados formatados
+      
       const worksheet = XLSX.utils.aoa_to_sheet([columns, ...formattedData]);
   
-      // Estilizar o cabeçalho
+      
       const headerCellStyle = {
-          fill: { fgColor: { rgb: '0066CC' } }, // Cor de fundo azul
-          font: { bold: true, color: { rgb: 'FFFFFF' } }, // Negrito e cor da fonte branca
-          alignment: { horizontal: 'center' } // Centralizar texto
+          fill: { fgColor: { rgb: '0066CC' } }, 
+          font: { bold: true, color: { rgb: 'FFFFFF' } }, 
+          alignment: { horizontal: 'center' } 
       };
   
-      // Aplicar estilo às células do cabeçalho
+      
       columns.forEach((col, index) => {
-          const cellAddress = XLSX.utils.encode_cell({ c: index, r: 0 }); // Endereço da célula (0 é a linha do cabeçalho)
-          worksheet[cellAddress].s = headerCellStyle; // Aplicar estilo
+          const cellAddress = XLSX.utils.encode_cell({ c: index, r: 0 }); 
+          worksheet[cellAddress].s = headerCellStyle; 
       });
   
-      // Criar um novo livro
+      
       const workbook = XLSX.utils.book_new();
   
-      // Adicionar a planilha ao livro
+      
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
   
-      // Gerar o arquivo Excel e forçar download
+      
       XLSX.writeFile(workbook, 'dados.xlsx');
   };
   
 
-  // Exemplo de chamada da função
+  
   const [exportFormat, setExportFormat] = React.useState('');
   const handleExportChange = (e) => {
     const selectedFormat = e.target.value;
-    setExportFormat(selectedFormat); // Atualiza o estado com o valor selecionado
+    setExportFormat(selectedFormat); 
 
-    // Chama a função correspondente com os dados filtrados
+    
     if (selectedFormat === 'excel') {
-      generateExcel(filteredData); // Chama a função para exportar como Excel
+      generateExcel(filteredData); 
     } else if (selectedFormat === 'pdf') {
-      generatePDF(filteredData); // Chama a função para exportar como PDF
+      generatePDF(filteredData); 
     }
   };
 
@@ -593,7 +593,7 @@ const Order = ({ toggleTheme }) => {
               overflow: 'auto',
             }}>
             <Grid container direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-              {/* Grid para os campos de Data Inicial, Data Final e Buscar */}
+             
               <Grid item container direction="row" xs={12} sm={8} md={8} spacing={2} alignItems="center">
                 <Grid item xs={12} sm={4} md={3}>
                   <TextField
@@ -638,7 +638,7 @@ const Order = ({ toggleTheme }) => {
                   <Select
                     labelId="export-select-label"
                     value={exportFormat}
-                    onChange={handleExportChange} // Atualiza o estado e chama a função de exportação
+                    onChange={handleExportChange} 
                     displayEmpty
                   >
                     <MenuItem value="" disabled>
@@ -647,8 +647,8 @@ const Order = ({ toggleTheme }) => {
                       </Box>
                     </MenuItem>
 
-                    <MenuItem value="excel">Excel</MenuItem>  {/* Opção para Excel */}
-                    <MenuItem value="pdf">PDF</MenuItem>        {/* Opção para PDF */}
+                    <MenuItem value="excel">Excel</MenuItem> 
+                    <MenuItem value="pdf">PDF</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -736,55 +736,7 @@ const Order = ({ toggleTheme }) => {
             display: 'flex', justifyContent: 'flex-end', height: '100%',
             width: '100%',
           }}>
-            {/* <Button
-              onClick={() => generatePDF(filteredData)}
-              sx={{
-                mt: 1.5,
-                backgroundColor: '#45a049',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'darkgreen',
-                },
-                height: '36px',
-                width: '10%',
-              }}>
-              Exportar PDF
-            </Button>
-            <Button
-              onClick={() => generateExcel(filteredData)}
-              sx={{
-                mt: 1.5,
-                backgroundColor: '#45a049',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'darkgreen',
-                },
-                height: '36px',
-                width: '10%',
-              }}>
-              Exportar Excel
-            </Button> */}
-
-            {/* <FormControl sx={{
-              mt: 1.5,
-             
-              height: '40px',
-              width: '10%',
-            }}>
-              <InputLabel id="export-select-label">Exportar</InputLabel>
-              <Select
-                labelId="export-select-label"
-                value={exportFormat}
-                onChange={handleExportChange} 
-                displayEmpty
-              >
-                <MenuItem value="" disabled>
-                  Exportar
-                </MenuItem>
-                <MenuItem value="excel">Excel</MenuItem>  
-                <MenuItem value="pdf">PDF</MenuItem>        
-              </Select>
-            </FormControl> */}
+            
           </Grid>
         </Box>
         <Grid container sx={{ mt: 2 }}>

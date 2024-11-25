@@ -4,9 +4,9 @@ import { DataGrid } from '@mui/x-data-grid';
 import SidebarMenu from '../components/SidebarMenu';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import SalesChart from '../components/Dashboard/SalesChart';
-import SalesChartItens from '../components/Dashboard/SalesChartItens';
+import VigenciaChart from '../components/Dashboard/VigenciaChart';
 import DataGridCat from '../components/Dashboard/DataGridCat';
-import { getFilteredPedidosDiaData, getFilteredPedidosmensalData, getFilteredMetaData, getFilteredPedidosItemDataGroup } from '../services/apiService';
+import { getFilteredPedidosDiaData, getFilteredPedidosmensalData, getFilteredMetaData, getFilteredPedidosItemDataGroup, getFilteredOrderItensVigenciaData } from '../services/apiService';
 import Cookies from 'js-cookie';
 import LoupeIcon from '@mui/icons-material/Loupe';
 
@@ -21,8 +21,10 @@ const Home = ({ onLogout, toggleTheme }) => {
     const [filteredRankingData, setFilteredRankingData] = useState([]);
     const [filteredMetasComProgresso, setFilteredMetasComProgresso] = useState([]);
     const [filteredPedidosItem, setFilteredPedidosItem] = useState([]);
+    const [filteredPedidosItemVigente, setFilteredPedidosItemVigente] = useState([]);
     const [pedidosItem, setPedidosItem] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
+    const [pedidosItemVigente, setPedidosItemVigente] = useState([]);
     const [totalDailySales, setTotalDailySales] = useState(0);
     const [totalMonthlySales, setTotalMonthlySales] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -30,7 +32,8 @@ const Home = ({ onLogout, toggleTheme }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [metaData, setMetaData] = useState([]);
     const [modalData, setModalData] = useState([]);
-    const [summedData, setSummedData] = useState([]); // Inicialização correta
+    const [summedData, setSummedData] = useState([]);
+    const [aggregatedData, setAggregatedData] = useState([]);
 
     const user = JSON.parse(Cookies.get('user'));
     const cupomVendedora = user ? user.cupom : '';
@@ -193,10 +196,10 @@ const Home = ({ onLogout, toggleTheme }) => {
         const order = ["Não atingiu a meta", "Meta", "Super meta", "Meta Desafio"];
         const orderMap = Object.fromEntries(order.map((item, index) => [item, index]));
 
-        // Adicione console.log para depurar
-        // console.log('Metas antes da ordenação:', metasComProgresso);
 
-        // Ordenar as metasComProgresso pela ordem desejada
+
+
+
         metasComProgresso.sort((a, b) => {
             const aOrder = orderMap[a.metaAtual] !== undefined ? orderMap[a.metaAtual] : Infinity;
             const bOrder = orderMap[b.metaAtual] !== undefined ? orderMap[b.metaAtual] : Infinity;
@@ -204,7 +207,7 @@ const Home = ({ onLogout, toggleTheme }) => {
             return aOrder - bOrder;
         });
 
-        // console.log('Metas após a ordenação:', metasComProgresso);
+
 
         const metasFiltradasComProgresso = selectedCupom
             ? metasComProgresso.filter(meta => meta.cupom === selectedCupom)
@@ -219,10 +222,10 @@ const Home = ({ onLogout, toggleTheme }) => {
 
 
 
-    // console.log(filteredMetasComProgresso)
+
 
     useEffect(() => {
-        // Fetch de dados
+
         const fetchDataItens = async () => {
             const [years, months] = selectedMonthYear.split('-');
             const startDate = new Date(years, months - 1, 1);
@@ -249,6 +252,43 @@ const Home = ({ onLogout, toggleTheme }) => {
             fetchDataItens();
         }
     }, [selectedMonthYear]);
+
+
+
+    useEffect(() => {
+
+        const fetchDataItensVigente = async () => {
+            const [years, months] = selectedMonthYear.split('-');
+            const startDate = new Date(years, months - 1, 1);
+            const endDate = new Date(years, months, 0);
+
+            const formattedStartDate = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+            const formattedEndDate = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+
+            try {
+                const pedidosItemVigente = await getFilteredOrderItensVigenciaData(
+                    formattedStartDate,
+                    formattedEndDate,
+                    funcao === 'Consultora' ? selectedCupom : ''
+                );
+                console.log("Pedidos Item:", pedidosItemVigente);
+                setPedidosItemVigente(pedidosItemVigente);
+                setFilteredPedidosItemVigente(pedidosItemVigente);
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+            }
+        };
+
+        if (selectedMonthYear) {
+            fetchDataItensVigente();
+        }
+    }, [selectedMonthYear]);
+
+
+
+
+
+
     useEffect(() => {
         const filterData = () => {
             console.log("Valor de funcao:", funcao);
@@ -257,16 +297,62 @@ const Home = ({ onLogout, toggleTheme }) => {
             if ((funcao === 'Consultora' || funcao === 'Lider') && selectedCupom) {
 
                 const filteredData = pedidosItem.filter(item => item.cupom_vendedora === selectedCupom);
-                console.log("Pedidos filtrados:", filteredData); // Log filtered data
+                console.log("Pedidos filtrados:", filteredData);
                 setFilteredPedidosItem(filteredData);
             } else {
                 console.log("Caindo no else, retornando todos os dados");
-                setFilteredPedidosItem(pedidosItem); // Return all data if no filter
+                setFilteredPedidosItem(pedidosItem);
             }
         };
 
         filterData();
     }, [selectedCupom, pedidosItem]);
+
+
+
+    useEffect(() => {
+        const processSummedData = () => {
+            if (filteredPedidosItemVigente.length === 0) return;
+            console.log("Pedidos filtrados antes da soma:", filteredPedidosItemVigente);
+            const aggregated = filteredPedidosItemVigente.reduce((acc, item) => {
+                const cupom = item.cupom_vendedora || "Indefinido";
+                const vigenciaStatus = item.vigencia_status ?? "Desconhecido";
+                const key = `${item.cupom_vendedora}-${item.vigencia_status || "Desconhecido"}`;
+
+
+                if (!acc[key]) {
+                    acc[key] = {
+                        cupom_vendedora: item.cupom_vendedora,
+                        vigencia_status: item.vigencia_status || "Desconhecido",
+                        total_itens: 0,
+                        valorDesc: 0,
+                        valorPago: 0,
+                        valor_bruto: 0,
+                        valor_desconto: 0,
+                        valor_frete: 0,
+                        valor_pago: 0
+                    };
+                }
+
+                acc[key].total_itens += item.total_itens || 0;
+                acc[key].valorDesc += item.valorDesc || 0;
+                acc[key].valorPago += item.valorPago || 0;
+                acc[key].valor_bruto += item.valor_bruto || 0;
+                acc[key].valor_desconto += item.valor_desconto || 0;
+                acc[key].valor_frete += item.valor_frete || 0;
+                acc[key].valor_pago += item.valor_pago || 0;
+
+
+                return acc;
+            }, {});
+
+            const resultArray = Object.values(aggregated);
+            setAggregatedData(resultArray);
+            console.log("Dados agregados:", resultArray);
+        };
+
+        processSummedData();
+    }, [filteredPedidosItemVigente]);
 
 
     useEffect(() => {
@@ -276,7 +362,7 @@ const Home = ({ onLogout, toggleTheme }) => {
             const aggregatedData = filteredPedidosItem.reduce((acc, item) => {
                 const { marca, catGestor_desc, classGestor_desc, quantidade, valorPago, valorDesconto } = item;
 
-                // Certifique-se de que valorPago e desconto sejam strings antes de usar replace
+
                 const valorPagoFloat = (typeof valorPago === 'string' ? parseFloat(valorPago.replace(',', '.')) : 0);
                 const descontoFloat = (typeof valorDesconto === 'string' ? parseFloat(valorDesconto.replace(',', '.')) : 0);
                 const valorPagobruto = (typeof valorPago === 'string' ? parseFloat(valorPago.replace(',', '.')) : 0) + (typeof valorDesconto === 'string' ? parseFloat(valorDesconto.replace(',', '.')) : 0)
@@ -292,47 +378,47 @@ const Home = ({ onLogout, toggleTheme }) => {
                         quantidadeTotal: 0,
                         valorTotalPago: 0,
                         valorTotalBruto: 0,
-                        valorDesconto: 0, // Inicializando o campo de desconto
-                        quantidadeDescontos: 0, // Para contar quantos descontos foram aplicados
+                        valorDesconto: 0,
+                        quantidadeDescontos: 0,
                     };
                 }
 
                 acc[key].quantidadeTotal += quantidade;
                 acc[key].valorTotalPago += valorPagoFloat;
                 acc[key].valorTotalBruto += valorPagobruto;
-                acc[key].valorDesconto += descontoFloat; // Somando desconto
-                acc[key].quantidadeDescontos += quantidade > 0 ? 1 : 0; // Incrementa se a quantidade for maior que zero
+                acc[key].valorDesconto += descontoFloat;
+                acc[key].quantidadeDescontos += quantidade > 0 ? 1 : 0;
 
                 return acc;
             }, {});
 
-            // Adicionar a média do desconto após a agregação
+
             const summedDataWithAverage = Object.values(aggregatedData).map(item => {
                 const mediaDesconto = item.quantidadeDescontos > 0 ? (item.valorDesconto / item.valorTotalBruto) : 0;
                 return {
                     ...item,
-                    mediaDesconto, // Adiciona a média do desconto ao item
+                    mediaDesconto,
                 };
             });
             console.log("Dados somados antes de atualizar o estado:", summedDataWithAverage);
-            setSummedData(summedDataWithAverage); // Atualiza o estado com os dados processados
+            setSummedData(summedDataWithAverage);
         };
 
-        processSummedData(); // Chame a função para processar os dados
+        processSummedData();
     }, [filteredPedidosItem]);
 
 
-    // Visualização do resultado processado
-    // console.log("Dados agregados por categoria:", summedData);
+
+
 
 
     const calculateTotals = () => {
-        // Filtra as vendas diárias apenas para o dia selecionado
+
         const dailyTotal = filteredData
             .filter(item => item.date === selectedDay.toString())
             .reduce((acc, item) => acc + item.total, 0);
 
-        // Soma o total das vendas mensais sem restrições adicionais
+
         const monthlyTotal = filteredRankingData.reduce((acc, item) => acc + item.valor_bruto, 0);
 
         setTotalDailySales(dailyTotal);
@@ -358,14 +444,14 @@ const Home = ({ onLogout, toggleTheme }) => {
     };
     const handleOpenModal = async () => {
         try {
-            // Convert selectedDay to a two-digit string
+
             const dayString = selectedDay.toString().padStart(2, '0');
 
-            // Filter the daily sales data for the selected day
+
             const filteredDetails = filteredData.filter(sale => sale.date === dayString);
 
-            // Log filtered details to verify and open the modal with the filtered data
-            // console.log('filteredDetails', filteredDetails);
+
+
             setModalData(filteredDetails);
             setIsModalOpen(true);
         } catch (error) {
@@ -373,41 +459,41 @@ const Home = ({ onLogout, toggleTheme }) => {
         }
     };
 
-    // console.log('modalData',modalData)
+
 
     const handleCloseModal = () => setIsModalOpen(false);
 
 
     const columns = [
         { field: 'nome', headerName: 'Nome', width: 150, },
-        // { field: 'cupom', headerName: 'Cupom', flex: 1 },
+
         {
             field: 'metaAtual',
             headerName: 'Meta Atual',
             width: 150,
-            // sortComparator: (v1, v2) => {
-            //     const order = ["Não atingiu a meta", "Meta", "Super meta", "Meta Desafio"];
-            //     const index1 = order.indexOf(v1);
-            //     const index2 = order.indexOf(v2);
 
-            //     // Logs para depuração
-            //     console.log(`Comparando: v1="${v1}" (index1=${index1}), v2="${v2}" (index2=${index2})`);
 
-            //     if (index1 !== -1 && index2 !== -1) return index1 - index2;
-            //     if (index1 !== -1) return -1;
-            //     if (index2 !== -1) return 1;
 
-            //     return v1.localeCompare(v2);
-            // }
+
+
+
+
+
+
+
+
+
+
+
         }
 
         ,
         {
             field: 'totalVendas', headerName: 'Total Vendas', width: 110, valueFormatter: (params) => {
-                // Convert the value to a number
+
                 const numberValue = Number(params || 0);
 
-                // Format with thousands separators and two decimal places
+
                 const formattedValue = numberValue.toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -425,10 +511,10 @@ const Home = ({ onLogout, toggleTheme }) => {
                 </div>
             ),
             valueFormatter: (params) => {
-                // Convert the value to a number
+
                 const numberValue = Number(params || 0);
 
-                // Format with thousands separators and two decimal places
+
                 const formattedValue = numberValue.toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -455,10 +541,10 @@ const Home = ({ onLogout, toggleTheme }) => {
                 </div>
             ),
             valueFormatter: (params) => {
-                // Convert the value to a number
+
                 const numberValue = Number(params || 0);
 
-                // Format with thousands separators and two decimal places
+
                 const formattedValue = numberValue.toLocaleString('pt-BR', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -473,9 +559,9 @@ const Home = ({ onLogout, toggleTheme }) => {
     const rows = filteredMetasComProgresso.length === 0
         ? []
         : filteredMetasComProgresso.map((item, index) => ({
-            id: index, // ou um id único, se disponível
+            id: index,
             nome: item.nome,
-            // cupom: item.cupom,
+
             metaAtual: item.metaAtual,
             totalVendas: item.totalVendas,
             proximaMeta: item.proximaMeta,
@@ -567,30 +653,30 @@ const Home = ({ onLogout, toggleTheme }) => {
                                 </Typography>
                             </Paper>
                         </Grid>
-                        
-                            {userRole === 'Consultora' ? (
-                                <>
-                                    {/* Coluna para o gráfico */}
-                                    <Grid item xs={12} sm={6}>
-                                     
-                                            <SalesChart
-                                                dailyData={filteredData}
-                                                isConsultant={true}
-                                                selectedCupom={selectedCupom}
-                                                style={{ height: '100%', width: '100%' }}
-                                            />
-                                    </Grid>
 
-                                    {/* Coluna para a tabela */}
-                                    <Grid item xs={12} sm={6}>
-                                        <Paper sx={{ p: 2, height: 430 }}> {/* Definindo uma altura fixa */}
-                                            <DataGridCat summedData={summedData} />
-                                        </Paper>
-                                    </Grid>
-                                </>
-                            ) : (
-                                // Renderiza SalesChart e DataGridCat para outros tipos de função
-                                <>
+                        {userRole === 'Consultora' ? (
+                            <>
+                                {/* Coluna para o gráfico */}
+                                <Grid item xs={12} sm={6}>
+
+                                    <SalesChart
+                                        dailyData={filteredData}
+                                        isConsultant={true}
+                                        selectedCupom={selectedCupom}
+                                        style={{ height: '100%', width: '100%' }}
+                                    />
+                                </Grid>
+
+                                {/* Coluna para a tabela */}
+                                <Grid item xs={12} sm={6}>
+                                    <Paper sx={{ p: 2, height: 430 }}> {/* Definindo uma altura fixa */}
+                                        <DataGridCat summedData={summedData} />
+                                    </Paper>
+                                </Grid>
+                            </>
+                        ) : (
+
+                            <>
                                 <Grid item xs={12} >
                                     <SalesChart
                                         dailyData={filteredData}
@@ -598,10 +684,10 @@ const Home = ({ onLogout, toggleTheme }) => {
                                         isConsultant={false}
                                         selectedCupom={selectedCupom}
                                     />
-</Grid>
-                                </>
-                            )}
-                        
+                                </Grid>
+                            </>
+                        )}
+
                     </Grid>
                 )}
 
@@ -626,8 +712,8 @@ const Home = ({ onLogout, toggleTheme }) => {
                                     sx={{
                                         width: '100%',
                                         marginTop: '10px',
-                                        // border: '1px solid #ccc',
-                                        // borderRadius: '8px',
+
+
                                         padding: '16px',
                                     }}
                                 >
@@ -666,6 +752,24 @@ const Home = ({ onLogout, toggleTheme }) => {
                                 >
                                     {/* <SalesChartItens summedData={summedData} /> */}
                                     <DataGridCat summedData={summedData} />
+                                </Paper>
+                            </Paper>
+                        )}
+
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        {funcao !== 'Consultora' && (
+                            <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Paper
+                                    sx={{
+                                        width: '100%',
+                                        marginTop: '10px',
+                                        padding: '16px',
+                                    }}
+                                >
+                                    {/* <SalesChartItens summedData={summedData} /> */}
+                                    <VigenciaChart orders={aggregatedData} />
+
                                 </Paper>
                             </Paper>
                         )}

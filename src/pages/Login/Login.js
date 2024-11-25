@@ -23,13 +23,13 @@ const Login = ({ toggleTheme }) => {
     try {
         const token = await getLogin(email, password);
 
-        // Check if a token is received
+        
         if (!token) {
             showToast('Senha incorreta ou email inválido', 'error');
-            return; // Exit if no token is returned
+            return; 
         }
 
-        // Store the token and email in cookies
+        
         Cookies.set('token', token, { expires: 7 });
         Cookies.set('email', email, { expires: 7 });
 
@@ -59,12 +59,12 @@ const Login = ({ toggleTheme }) => {
             showToast('Usuário não encontrado', 'error');
         }
     } catch (error) {
-        // Check if the error is due to incorrect credentials
+        
         if (error.response && error.response.status === 401) {
-            // Unauthorized error - invalid credentials
+            
             showToast('Senha incorreta ou email inválido', 'error');
         } else {
-            // Other errors
+            
             showToast('Erro ao fazer login. Tente novamente mais tarde', 'error');
         }
     } finally {

@@ -21,7 +21,7 @@ const CreateClosing = ({ toggleTheme }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [taxaConversao, setTaxaConversao] = useState(0);
-  // const [filteredColaboradores, setFilteredColaboradores] = useState([]);
+
   const navigate = useNavigate();
   const { mes_ano } = useParams();
 
@@ -32,25 +32,25 @@ const CreateClosing = ({ toggleTheme }) => {
   const userFuncao = user ? user.funcao : '';
 
   const handleTaxaChange = (event, row) => {
-    const newTaxa = parseFloat(event.target.value) || 0; // Captura o novo valor da taxa
+    const newTaxa = parseFloat(event.target.value) || 0; 
     console.log('New Taxa:', newTaxa);
     
-    // Exibe o ID da linha que está sendo editada
+    
     console.log('Editing Row ID:', row.id);
 
     const updatedRows = filteredData.map((item) => {
-        // Verifica se o ID do item é igual ao ID da linha editada
+        
         if (item.id === row.id) {
-            console.log('Matched ID:', item.id); // Log para quando os IDs coincidem
-            // Atualiza a taxaConversao e recalcula o valorTotal
-            const novoValorTotal = (item.valorTotal || 0) - (item.taxaConversao || 0) + newTaxa; // Subtrai a taxa antiga e adiciona a nova
-            return { ...item, taxaConversao: newTaxa, valorTotal: novoValorTotal }; // Atualiza a linha
+            console.log('Matched ID:', item.id); 
+            
+            const novoValorTotal = (item.valorTotal || 0) - (item.taxaConversao || 0) + newTaxa; 
+            return { ...item, taxaConversao: newTaxa, valorTotal: novoValorTotal }; 
         }
-        return item; // Retorna o item inalterado
+        return item; 
     });
 
     console.log('Updated Rows:', updatedRows);
-    setFilteredData(updatedRows); // Atualiza o estado com as linhas modificadas
+    setFilteredData(updatedRows); 
 };
 
   
@@ -80,8 +80,8 @@ const CreateClosing = ({ toggleTheme }) => {
   };
   const filterStartDate = getStartDate();
   const filterEndDate = getEndDate();
-  //   const filterStartDate = '2024-09-24'
-  // const filterEndDate = '2024-09-26'
+  
+  
 
 
   const getPreviousMonthYear = (currentMonth, currentYear) => {
@@ -238,12 +238,12 @@ const CreateClosing = ({ toggleTheme }) => {
     const total_valor_frete = resultWithIds.reduce((sum, item) => sum + item.total_valor_frete, 0);
     const total_valor_pago = resultWithIds.reduce((sum, item) => sum + item.total_valor_pago, 0);
   
-    // console.log('Total Comissional:', total_comissional);
-    // console.log('Total Valor Frete:', total_valor_frete);
-    // console.log('Total Valor Pago:', total_valor_pago);
+    
+    
+    
   
     const allMetas = await getFilteredMetaData(); 
-    // console.log('All Metas:', allMetas);
+    
     const managerRows = await Promise.all(filteredColaboradores.map(async (colaborador) => {
       const filteredMeta = allMetas.filter(meta => {
         return (
@@ -252,7 +252,7 @@ const CreateClosing = ({ toggleTheme }) => {
         );
       });
 
-      // console.log(`Filtered Metas for ${colaborador.cupom}:`, filteredMeta); 
+      
 
       let metaAtingida = 'Não tem meta cadastrada';
       let metaValor = 0; 
@@ -261,7 +261,7 @@ const CreateClosing = ({ toggleTheme }) => {
 
       if (filteredMeta.length > 0) {
         for (const meta of filteredMeta) {
-          // console.log(`Comparando total_comissional: ${total_comissional} com meta.valor: ${meta.valor}`); 
+          
           
           if (meta.valor > 0 && total_comissional >= meta.valor) { 
             if (total_comissional >= meta.valor) {
@@ -301,17 +301,17 @@ const CreateClosing = ({ toggleTheme }) => {
     };
   }));
   
-    // console.log('Manager Rows:', managerRows);
+   
   
     const finalData = [...resultWithIds, ...managerRows];
-    // console.log('finalData',finalData)
+    
     setData(finalData);
     setFilteredData(finalData);
-    // console.log('Final Data:', finalData);
+    
   };
   setTimeout(() => {
-    // console.log('Data após setData:', data);
-    // console.log('Filtered Data após setFilteredData:', filteredData);
+    
+    
 }, 0);
   
   const handleSidebarToggle = () => {
@@ -732,7 +732,6 @@ console.log(filteredData)
                 </Box>
               </MenuItem>
               <MenuItem value="excel">Excel</MenuItem>
-              {/* <MenuItem value="pdf">PDF</MenuItem> */}
             </Select>
           </FormControl>
         </Box>
@@ -752,7 +751,7 @@ console.log(filteredData)
              <div style={{ flexGrow: 1, overflowY: 'auto' }}>
             <DataGrid
               rows={filteredData}
-              columns={columns} // As colunas devem estar definidas em algum lugar no seu código
+              columns={columns} 
               initialState={{
                 pagination: {
                   paginationModel: {

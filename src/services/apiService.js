@@ -8,7 +8,7 @@ export const getLogin = async (email, password) => {
       email,
       password,
     });
-    // Extrai o token do campo access_token
+    
     return response.data.access_token;
   } catch (error) {
     console.error('Erro ao fazer login:', error);
@@ -32,20 +32,20 @@ export const updatePassword = async (email, data) => {
     return response.data;
   } catch (error) {
     if (error.response) {
-      // Erro com resposta do servidor
+      
       if (error.response.status === 401) {
         console.error('Senha Incorreta');
-        throw new Error(error.response.data.message || 'Senha Incorreta'); // Mensagem personalizada
+        throw new Error(error.response.data.message || 'Senha Incorreta'); 
       } else {
         console.error('Erro ao atualizar senha:', error.response.data.message);
         throw new Error(error.response.data.message || 'Erro desconhecido');
       }
     } else if (error.request) {
-      // Erro na requisição (sem resposta)
+      
       console.error('Erro na requisição:', error.request);
       throw new Error('Erro na requisição');
     } else {
-      // Erro na configuração da requisição
+      
       console.error('Erro na configuração:', error.message);
       throw new Error('Erro na configuração da requisição');
     }
@@ -89,13 +89,13 @@ export const resetPassword = async (data, token) => {
 
 export const getColaboradorData = async () => {
   try {
-    // Obtém o token do localStorage (ou outro armazenamento onde você salvou o token)
+    
     const token = Cookies.get('token');
     
-    // Faz a requisição com o token no cabeçalho Authorization
+    
     const response = await axios.get(API_ENDPOINTS.COLABORADOR, {
       headers: {
-        Authorization: `Bearer ${token}`,  // Envia o token no cabeçalho
+        Authorization: `Bearer ${token}`,  
       },
     });
 
@@ -107,13 +107,13 @@ export const getColaboradorData = async () => {
 };
 export const getColaboradorDataChb = async () => {
   try {
-    // Obtém o token do localStorage (ou outro armazenamento onde você salvou o token)
+    
     const token = Cookies.get('token');
     
-    // Faz a requisição com o token no cabeçalho Authorization
+    
     const response = await axios.get(API_ENDPOINTS.COLABORADORCHB, {
       headers: {
-        Authorization: `Bearer ${token}`,  // Envia o token no cabeçalho
+        Authorization: `Bearer ${token}`,  
       },
     });
 
@@ -125,7 +125,7 @@ export const getColaboradorDataChb = async () => {
 };
 
 
-// Função para criar um colaborador
+
 export const createColaborador = async (data) => {
   try {
     const token = Cookies.get('token');
@@ -142,7 +142,7 @@ export const createColaborador = async (data) => {
   }
 };
 
-// Função para excluir um colaborador
+
 export const deleteColaborador = async (params) => {
   try {
     const token = Cookies.get('token');
@@ -160,7 +160,7 @@ export const deleteColaborador = async (params) => {
   }
 };
 
-// Função para atualizar um colaborador
+
 export const updateColaborador = async (cupom, data) => {
   try {
     const token = Cookies.get('token');
@@ -177,7 +177,7 @@ export const updateColaborador = async (cupom, data) => {
   }
 };
 
-// Função para obter dados de meta
+
 export const getMetaData = async () => {
   try {
     const token = Cookies.get('token');
@@ -193,7 +193,7 @@ export const getMetaData = async () => {
     throw error;
   }
 };
-// Função para obter dados de meta
+
 export const getFilteredMetaData = async () => {
   try {
     const token = Cookies.get('token');
@@ -222,7 +222,7 @@ export const getFilteredMetaData = async () => {
   }
 };
 
-// Função para criar uma meta
+
 export const createMeta = async (data) => {
   try {
     const token = Cookies.get('token');
@@ -239,7 +239,7 @@ export const createMeta = async (data) => {
   }
 };
 
-// Função para excluir uma meta
+
 export const deleteMeta = async (params) => {
   try {
     const token = Cookies.get('token');
@@ -252,7 +252,7 @@ export const deleteMeta = async (params) => {
   }
 };
 
-// Função para atualizar uma meta
+
 export const updateMeta = async (cupom, data) => {
   try {
     const token = Cookies.get('token');
@@ -313,7 +313,7 @@ export const getFilteredPremiacaoMetaData = async () => {
 
 
 
-// Função para criar um PremiacaoMeta
+
 export const createPremiacaoMeta = async (data) => {
   try {
     const token = Cookies.get('token');
@@ -330,13 +330,13 @@ export const createPremiacaoMeta = async (data) => {
   }
 };
 
-// Função para excluir um PremiacaoMeta
+
 export const deletePremiacaoMeta = async (params) => {
   try {
     const token = Cookies.get('token');
     const { descricao, time, valor } = params;
 
-    // Log dos parâmetros que serão enviados
+    
     console.log("Parâmetros a serem enviados:", { descricao, time, valor });
 
     const response = await axios.delete(`${API_ENDPOINTS.PREMIACAO_META}`, {
@@ -350,7 +350,7 @@ export const deletePremiacaoMeta = async (params) => {
       },
     });
 
-    console.log("Resposta do servidor:", response.data); // Log da resposta do servidor
+    console.log("Resposta do servidor:", response.data); 
     return response.data;
   } catch (error) {
     console.error('Erro ao excluir PremiacaoMeta:', error);
@@ -360,7 +360,7 @@ export const deletePremiacaoMeta = async (params) => {
 
 
 
-// Função para atualizar um PremiacaoMeta
+
 export const updatePremiacaoMeta = async (descricao, data) => {
   try {
     const token = Cookies.get('token');
@@ -431,7 +431,7 @@ export const getFilteredPremiacaoReconquistaData = async () => {
 
 
 
-// Função para criar um PremiacaoReconquista
+
 export const createPremiacaoReconquista = async (data) => {
   try {
     const token = Cookies.get('token');
@@ -448,15 +448,15 @@ export const createPremiacaoReconquista = async (data) => {
   }
 };
 
-// Função para excluir um PremiacaoReconquista
+
 export const deletePremiacaoReconquista = async (params) => {
   try {
     const token = Cookies.get('token');
-    const { descricao, time, valor } = params; // Usando 'params' em vez de 'premiacaoReconquista'
+    const { descricao, time, valor } = params; 
     
     const response = await axios.delete(`${API_ENDPOINTS.PREMIACAO_RECONQUISTA}`, {
       params: {
-        descricao: descricao,  // ou outro identificador único
+        descricao: descricao,  
         time: time,
         valor: valor
       },
@@ -472,7 +472,7 @@ export const deletePremiacaoReconquista = async (params) => {
 };
 
 
-// Função para atualizar um PremiacaoReconquista
+
 export const updatePremiacaoReconquista = async (descricao, data) => {
   try {
     const token = Cookies.get('token');
@@ -517,7 +517,7 @@ export const getFilteredPedidosDiaData = async (year, month, day) => {
     const token = Cookies.get('token');
 
     
-    // Verifique se o token está presente
+    
     if (!token) {
       throw new Error('Token não encontrado nos cookies');
     }
@@ -538,7 +538,7 @@ export const getFilteredPedidosDiaData = async (year, month, day) => {
     params.append('year', year);
     params.append('month', month);
     params.append('day', day);
-    // console.log('params', params.toString());
+    
     
     const response = await axios.get(API_ENDPOINTS.PEDIDOS_DIARIO, {
       params: {
@@ -555,7 +555,7 @@ export const getFilteredPedidosDiaData = async (year, month, day) => {
     
 
     return response.data;
-    // console.log('Response:', response.data);
+    
   } catch (error) {
     console.error('Error:', error.response ? error.response.data : error.message);
     throw error;
@@ -656,7 +656,7 @@ export const getFilteredPedidosItemData = async (startDate, endDate) => {
 export const getPedidosMensalData = async (cupomVendedora, year, month) => {
   try {
     const token = Cookies.get('token');
-    // console.log('Token from cookies:', token);
+    
     if (!cupomVendedora || !year || !month) {
       throw new Error('Cupom da vendedora, ano e mês são necessários');
     }
@@ -677,7 +677,7 @@ export const getPedidosMensalData = async (cupomVendedora, year, month) => {
 export const getFilteredPedidosmensalData = async (year, month) => {
   try {
     const token = Cookies.get('token');
-    // console.log('Token from cookies:', token);
+    
     const userCookie = Cookies.get('user');
     const user = userCookie ? JSON.parse(userCookie) : null;
     
@@ -696,9 +696,9 @@ export const getFilteredPedidosmensalData = async (year, month) => {
     params.append('month', month);
 
     const response = await axios.get(API_ENDPOINTS.PEDIDOS_MENSAL, {
-      params: params,  // Passa o objeto params corretamente
+      params: params,  
       headers: {
-        Authorization: `Bearer ${token}`  // Passa o cabeçalho Authorization corretamente
+        Authorization: `Bearer ${token}`  
       }
     });
     
@@ -728,7 +728,7 @@ export const getTicketData = async () => {
 };
 
 
-// Função para obter dados de ticket filtrados pelo cupomvendedora do usuário logado
+
 export const getFilteredTicketData = async () => {
   try {
     const token = Cookies.get('token');
@@ -759,7 +759,7 @@ export const getFilteredTicketData = async () => {
 };
 
 
-// Função para criar um ticket
+
 export const createTicket = async (data) => {
   try {
     const token = Cookies.get('token');
@@ -776,7 +776,7 @@ export const createTicket = async (data) => {
   }
 };
 
-// Função para excluir um ticket
+
 export const deleteTicket = async ({ id }) => {
   try {
     const token = Cookies.get('token');
@@ -794,7 +794,7 @@ export const deleteTicket = async ({ id }) => {
 };
 
 
-// Função para atualizar um ticket
+
 export const updateTicket = async (id, data) => {
   try {
     const token = Cookies.get('token');
@@ -814,7 +814,7 @@ export const updateTicket = async (id, data) => {
 
 
 
-// Função para atualizar um ticket
+
 export const updateTicketCupom = async (orderId, novoCupom) => {
   try {
     const token = Cookies.get('token');
@@ -835,7 +835,7 @@ export const updateTicketCupom = async (orderId, novoCupom) => {
 
 
 
-// Função para atualizar um ticket
+
 export const updateTicketStatus = async (orderId, novoStatus) => {
   try {
     const token = Cookies.get('token');
@@ -853,7 +853,7 @@ export const updateTicketStatus = async (orderId, novoStatus) => {
   }
 };
 
-// Função para obter dados de ticket
+
 export const getOrderData = async () => {
   try {
     const token = Cookies.get('token');
@@ -948,6 +948,45 @@ export const getFilteredOrderItensData = async (startDate, endDate) => {
     throw error;
   }
 };
+
+
+export const getFilteredOrderItensVigenciaData = async (startDate, endDate) => {
+  try {
+    const token = Cookies.get('token');
+    const user = JSON.parse(Cookies.get('user'));
+    if (!user) {
+      throw new Error('Usuário não encontrado no localStorage');
+    }
+
+    const params = new URLSearchParams();
+
+   
+    if (startDate) {
+      params.append('startDate', startDate);
+    }
+    if (endDate) {
+      params.append('endDate', endDate);
+    }
+    if (user.funcao === 'Consultora') {
+      params.append('cupomvendedora', user.cupom);
+    } else {
+      params.append('time', user.time);
+    }
+
+ 
+    const response = await axios.get(`${API_ENDPOINTS.ORDERITENSVIGENCIA}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,  
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao obter e filtrar dados de tickets:', error);
+    throw error;
+  }
+};
+
 
 
 
@@ -1161,7 +1200,7 @@ export const getFilteredClosingsData = async (mesAno) => {
   }
 };
 
-// Função para criar um ticket
+
 export const createClosing = async (data) => {
   try {
     const token = Cookies.get('token');

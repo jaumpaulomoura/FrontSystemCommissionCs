@@ -19,9 +19,9 @@ const DataGridCat = ({ summedData }) => {
     useEffect(() => {
         setUserRole(funcao);
     }, [funcao]);
-    // Calcular os totais gerais e os máximos
+    
     useEffect(() => {
-        // console.log("Dados de entrada:", summedData);
+        
         if (Array.isArray(summedData) && summedData.length > 0) {
             const totalQuant = summedData.reduce((acc, item) => acc + item.quantidadeTotal, 0);
             const totalVal = summedData.reduce((acc, item) => acc + item.valorTotalPago, 0);
@@ -29,7 +29,7 @@ const DataGridCat = ({ summedData }) => {
             const maxQuant = Math.max(...summedData.map(item => item.quantidadeTotal));
             const maxVal = Math.max(...summedData.map(item => item.valorTotalPago));
             const maxValDesc = Math.max(...summedData.map(item => item.mediaDesconto));
-            // Filtra itens para evitar divisões por zero antes de calcular o preço médio
+            
             const averagePrices = summedData
                 .filter(item => item.quantidadeTotal > 0)
                 .map(item => item.valorTotalPago / item.quantidadeTotal);
@@ -49,19 +49,19 @@ const DataGridCat = ({ summedData }) => {
     }, [summedData]);
   
 
-    // Ordenar os dados pelo quantidadeTotal (maior para menor)
+    
     const sortedData = [...summedData].sort((a, b) => b.valorTotalPago - a.valorTotalPago);
 
-    // Componente auxiliar para renderizar a célula com barra de progresso
+    
     const ProgressBarCell = ({ value, maxValue, color, formattedValue }) => {
         const proportion = maxValue > 0 ? (value / maxValue) * 100 : 0;
-        const width = Math.max(proportion, 5); // Largura mínima de 5%
+        const width = Math.max(proportion, 5); 
 
         return (
             <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', marginTop: '5px', position: 'relative' }}>
                 <Box
                     sx={{
-                        // marginTop: '2px',
+                        
                         height: '18px',
                         width: `${width}%`,
                         backgroundColor: color,
@@ -82,13 +82,13 @@ const DataGridCat = ({ summedData }) => {
         );
     };
 
-    // Definição das colunas do DataGrid
+    
     const columns = [
         { field: 'marca', headerName: 'Marca', width: 65, 
             headerClassName: 'custom-header',
             cellClassName: 'custom-cell',  
-            headerClassName: 'center-header', // Classe para centralizar o cabeçalho
-            cellClassName: 'center-cell',       // Classe para centralizar as células
+            headerClassName: 'center-header', 
+            cellClassName: 'center-cell',       
             renderCell: (params) => (
                 <Typography sx={{ fontSize: 12, textAlign: 'center', width: '100%', marginTop:'5px'}}>
                     {params.value}
@@ -183,10 +183,10 @@ const DataGridCat = ({ summedData }) => {
             },
         },
         {
-            field: 'mediaDesconto',  // Nome do campo que contém a média de desconto
+            field: 'mediaDesconto',  
             headerName: 'Média de Desconto',
             width: 120,
-            field: 'mediaDesconto',  // Nome do campo que contém a média de desconto
+            field: 'mediaDesconto',  
             headerName: 'Média de Desconto',
             width: 130,
             renderHeader: () => (
@@ -196,17 +196,17 @@ const DataGridCat = ({ summedData }) => {
                 </div>
             ),
             renderCell: (params) => {
-                const mediaDesconto = params.row.mediaDesconto; // Assumindo que você já está passando esse valor no `summedData`
+                const mediaDesconto = params.row.mediaDesconto; 
                 
-                // Formata a média de desconto como porcentagem
+                
                 const percentageValue = mediaDesconto * 100; 
                 const formattedAverageDiscount = `${percentageValue.toFixed(2)}%`; 
                 return (
                     <ProgressBarCell
-                        value={mediaDesconto}  // Valor da média de desconto (deve ser um valor entre 0 e 100)
-                        maxValue={maxMediaDesc}  // Valor máximo que você deseja para a barra (por exemplo, 100)
-                        color="warning.main"  // Escolha a cor desejada para a barra
-                        formattedValue={formattedAverageDiscount}  // Valor formatado para exibição
+                        value={mediaDesconto}  
+                        maxValue={maxMediaDesc}  
+                        color="warning.main"  
+                        formattedValue={formattedAverageDiscount}  
                     />
                 );
             },
@@ -216,7 +216,7 @@ const DataGridCat = ({ summedData }) => {
 
     return (
         <DataGrid
-    rows={sortedData} // Use a lista ordenada
+    rows={sortedData} 
     columns={columns}
     getRowId={(row) => `${row.marca}-${row.catGestor_desc}-${row.classGestor_desc}`}
     disableSelectionOnClick

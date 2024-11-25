@@ -21,16 +21,16 @@ const CreatePremiacaoMeta = ({ toggleTheme }) => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
-    // Check if the input field is for a currency or numeric value
+    
     if (name === 'valor') {
-        // Remove non-numeric characters, except for commas and periods
-        let inputValue = value.replace(/[^\d]/g, ''); // Remove everything that's not a number
+        
+        let inputValue = value.replace(/[^\d]/g, ''); 
         let formattedValue = '';
 
-        // Avoid leading zeros
+        
         const trimmedValue = inputValue.replace(/^0+/, '');
 
-        // Check if the value is empty
+        
         if (trimmedValue.length === 0) {
             setFormData({
                 ...formData,
@@ -39,30 +39,30 @@ const CreatePremiacaoMeta = ({ toggleTheme }) => {
             return;
         }
 
-        // Add correct formatting
-        const integerPart = trimmedValue.slice(0, -2); // Integer part
-        const decimalPart = trimmedValue.slice(-2); // Decimal part
+        
+        const integerPart = trimmedValue.slice(0, -2); 
+        const decimalPart = trimmedValue.slice(-2); 
 
-        // Format the integer part with dots
+        
         if (integerPart) {
             formattedValue = 'R$ ' + integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
-        // Add the decimal part, ensuring two decimal places
+        
         if (decimalPart) {
             formattedValue += ',' + decimalPart.padStart(2, '0');
         }
 
-        // Update state with the formatted value
+        
         setFormData({
             ...formData,
             [name]: formattedValue,
         });
     } else {
-        // For other fields like "Descrição" or "Time"
+        
         setFormData({
             ...formData,
-            [name]: value, // Set the value directly for non-numeric fields
+            [name]: value, 
         });
     }
 };
@@ -75,7 +75,7 @@ const validateForm = () => {
   const errorMessages = [];
   const warningMessages = [];
 
-  // Check for required fields
+  
   if (!formData.descricao) {
       errorMessages.push('Descrição');
       isValid = false;
@@ -90,13 +90,13 @@ const validateForm = () => {
       errorMessages.push('Valor');
       isValid = false;
   } else {
-      // Remove currency formatting and convert to a float
+      
       const valor = formData.valor
-          .replace('R$ ', '')          // Remove currency symbol
-          .replace(/\./g, '')         // Remove thousands separators
-          .replace(',', '.');          // Replace comma with decimal point
+          .replace('R$ ', '')          
+          .replace(/\./g, '')         
+          .replace(',', '.');          
 
-      // Check if the transformed value is a number
+      
       if (isNaN(valor)) {
           warningMessages.push(`Valor inválido: ${formData.valor}!`);
           isValid = false;
@@ -105,13 +105,13 @@ const validateForm = () => {
       }
   }
 
-  // Show error messages if there are any
+  
   if (errorMessages.length > 0) {
       const message = `${errorMessages.join(', ')} é obrigatório!`;
       showToast(message, 'error');
   }
 
-  // Show warning messages if there are any
+  
   if (warningMessages.length > 0) {
       const warningMessage = warningMessages.join(', ');
       showToast(warningMessage, 'warning');
@@ -134,21 +134,21 @@ const validateForm = () => {
   const handleConfirmSave = async () => {
     closeSalvarDialog();
     try {
-        // Process the valor before sending it to the API
+        
         const processedValor = formData.valor
-            .replace('R$ ', '')          // Remove currency symbol
-            .replace(/\./g, '')         // Remove thousands separators
-            .replace(',', '.');          // Replace comma with decimal point
+            .replace('R$ ', '')          
+            .replace(/\./g, '')         
+            .replace(',', '.');          
 
-        // Prepare the data to send to the API
+        
         const dataToSend = {
             ...formData,
-            valor: processedValor,      // Use the processed valor
+            valor: processedValor,      
         };
 
         const response = await createPremiacaoMeta(dataToSend);
 
-        // Reset form data after successful submission
+        
         setFormData({
             descricao: '',
             time: '',
@@ -189,9 +189,9 @@ const validateForm = () => {
     const isValid = validateForm();  
     if (isValid) {
       
-      openSalvarDialog(); // Abre o modal de confirmação se o formulário for válido
+      openSalvarDialog(); 
     } else {
-      console.log('Formulário inválido. Não abrindo o modal.'); // Log se a validação falhar
+      console.log('Formulário inválido. Não abrindo o modal.'); 
     }
   };
   
@@ -213,8 +213,8 @@ const validateForm = () => {
   fullWidth
   margin="normal"
   variant="filled"
-  error={!formData.descricao && error.includes('Descrição')} // Add error prop
-  helperText={!formData.descricao && error.includes('Descrição') ? 'Descrição é obrigatória!' : ''} // Conditional helper text
+  error={!formData.descricao && error.includes('Descrição')} 
+  helperText={!formData.descricao && error.includes('Descrição') ? 'Descrição é obrigatória!' : ''} 
   sx={{
     width: '400px',
     height: '56px',
@@ -238,7 +238,7 @@ const validateForm = () => {
             >
               <MenuItem value="Venda Ativa">Venda Ativa</MenuItem>
               <MenuItem value="Reconquista">Reconquista</MenuItem>
-              {/* <MenuItem value="Todos">Todos</MenuItem> */}
+             
             </TextField>
 
 
@@ -246,12 +246,12 @@ const validateForm = () => {
   label="Valor"
   name="valor"
   value={formData.valor}
-  onChange={(e) => handleInputChange(e)} // Passando apenas o evento
+  onChange={(e) => handleInputChange(e)} 
   margin="normal"
   variant="filled"
-  type="text" // Permite formatação do valor
+  type="text" 
   inputProps={{
-    step: "0.01", // Embora seja um input de texto, você ainda pode manter esse passo, se necessário
+    step: "0.01", 
   }}
   sx={{
     width: '400px',
@@ -311,7 +311,7 @@ const validateForm = () => {
           </Box>
           <Box>
             <Button
-              onClick={handleConfirmSave} // Chama a função para salvar
+              onClick={handleConfirmSave} 
               sx={{
                 backgroundColor: '#45a049',
                 color: '#fff',

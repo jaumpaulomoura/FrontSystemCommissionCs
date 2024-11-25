@@ -10,13 +10,13 @@ const MaskedInput = () => {
 
     return (
         <InputMask
-            mask="999-99-9999" // Example mask (for SSN)
-            value={value} // Pass the value prop
-            onChange={handleChange} // Handle change to update state
+            mask="999-99-9999" 
+            value={value} 
+            onChange={handleChange} 
         >
             {(inputProps) => (
                 <input
-                    {...inputProps} // Spread the input props (includes onChange, onFocus, etc.)
+                    {...inputProps} 
                     placeholder="Enter SSN"
                     required
                 />

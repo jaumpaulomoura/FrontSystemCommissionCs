@@ -89,7 +89,7 @@ const CreateTicket = ({ toggleTheme }) => {
         let isValid = true;
         const errors = [];
 
-        // Verificação dos campos obrigatórios
+        
         if (!formData.orderId) {
             errors.push('Número do Pedido');
             isValid = false;
@@ -103,7 +103,7 @@ const CreateTicket = ({ toggleTheme }) => {
             isValid = false;
         }
 
-        // Se houver mensagens de erro, concatene-as e exiba o toast
+        
         if (!isValid) {
             const message = `${errors.join(', ')} é obrigatório!`;
             showToast(message, 'error');
@@ -113,34 +113,34 @@ const CreateTicket = ({ toggleTheme }) => {
     };
 
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault(); // Previne o comportamento padrão do formulário
+    
+    
 
-    //     if (!validateForm()) return; // Se não for válido, exibe os toasts e retorna
+    
 
-    //     try {
-    //         const response = await createTicket(formData); // Cria o ticket
-    //         setFormData({
-    //             id: '',
-    //             orderId: '',
-    //             octadeskId: '',
-    //             reason: '',
-    //             notes: '',
-    //             status: 'Aberto',
-    //             cupomvendedora: JSON.parse(Cookies.get('user'))?.name || '',
-    //             dateCreate: '',
-    //             dateUpdated: '',
-    //         });
-    //         showToast('Ticket criado com sucesso!', 'success'); // Toast de sucesso após criação
-    //         navigate('/ticket'); // Navega para a página de tickets
-    //     } catch (error) {
-    //         console.error('Erro ao criar ticket:', error);
-    //         showToast('Erro ao criar ticket. Verifique o console para mais detalhes.', 'error'); // Toast de erro
-    //     }
-    // };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 
-    // useEffect para preencher cupom baseado na função do usuário
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -150,12 +150,12 @@ const CreateTicket = ({ toggleTheme }) => {
 
                 if (user) {
                     if (user.funcao === "Consultora") {
-                        // Se Consultora, preenche com seu próprio cupom e nome
+                        
                         setSelectedName(user.nome);
                         setSelectedCupom(user.cupom);
                         setFormData({ ...formData, cupomvendedora: user.cupom });
                     } else {
-                        // Caso contrário, filtra por time ou exibe todos
+                        
                         const filteredColaboradores = user.time
                             ? data.filter(colaborador => colaborador.time === user.time)
                             : data;
@@ -174,7 +174,7 @@ const CreateTicket = ({ toggleTheme }) => {
         fetchData();
     }, []);
 
-    // Modifica handleNameChange para permitir seleção de outros cupons se não for Consultora
+    
     const handleNameChange = (event, newValue) => {
         const nomeDigitado = newValue || '';
         setSelectedName(nomeDigitado);
@@ -205,14 +205,14 @@ const CreateTicket = ({ toggleTheme }) => {
         }
     };
 
-    // handleSubmit para tratar criação de ticket com base na função
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('Dados do formulário antes da validação:', formData);
         if (!validateForm()) return;
 
         try {
-            // Garante que Consultora usa seu próprio cupom, enquanto outros podem escolher
+            
             const user = JSON.parse(Cookies.get('user'));
             const cupomVendedora = user.funcao === 'Consultora' ? user.cupom : formData.cupomvendedora;
 

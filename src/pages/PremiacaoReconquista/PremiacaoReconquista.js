@@ -90,11 +90,11 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
     setEditingPremiacaoReconquista(null);
   };
   const handleSaveClick = () => {
-    setOpenConfirmDialog(true); // Abrir modal de confirmação
+    setOpenConfirmDialog(true); 
   };
   const handleConfirmSave = async () => {
     if (editingPremiacaoReconquista) {
-      // Validation logic
+      
       if (!editingPremiacaoReconquista.descricao ||
         !editingPremiacaoReconquista.time ||
         editingPremiacaoReconquista.valor < 0 ||
@@ -102,7 +102,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
         editingPremiacaoReconquista.maximo < 0) {
         showToast('Por favor, preencha todos os campos corretamente.', 'error');
 
-        return; // Exit the function if validation fails
+        return; 
       }
 
       try {
@@ -135,17 +135,17 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
     }
   };
   const handleCancelConfirm = () => {
-    setOpenConfirmDialog(false); // Fecha o modal de confirmação
+    setOpenConfirmDialog(false); 
   };
 
 
   const handleDelete = async () => {
     if (!itemToDelete) {
-      console.log("Nenhum item para deletar."); // Log se não houver item para deletar
+      console.log("Nenhum item para deletar."); 
       return;
     }
 
-    console.log("Item a ser deletado:", itemToDelete); // Log do item a ser deletado
+    console.log("Item a ser deletado:", itemToDelete); 
 
     try {
       const { descricao, time, valor } = itemToDelete;
@@ -174,10 +174,10 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
       headerName: 'Valor',
       width: 200,
       valueFormatter: (params) => {
-        // Convert the value to a number
+        
         const numberValue = Number(params || 0);
     
-        // Format with thousands separators and two decimal places
+        
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
@@ -249,7 +249,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 backgroundColor: '#d32f2f',
               }
             }}
-            // onClick={() => handleDelete(params.row)}
+            
             onClick={() => openDeleteDialog(params.row)}
           >
             <FaTrashAlt style={{ fontSize: '1rem', marginRight: 4 }} />
@@ -273,7 +273,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
     doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
     doc.setFontSize(12);
     doc.text('Relatório de Premiação Reconquista', 18, 24);
-    // Define as colunas e os dados
+    
     const columns = [
       { header: 'Descrição', dataKey: 'descricao' },
       { header: 'Time', dataKey: 'time' },
@@ -300,15 +300,15 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
       maximumFractionDigits: 2,
     });
 
-    // Adiciona a tabela ao PDF
+    
     const formattedRows = rows.map((row) => ({
       ...row,
-      valor: numberFormatter.format(row.valor), // Format 'valor' field
+      valor: numberFormatter.format(row.valor), 
     }));
 
     autoTable(doc, {
       columns: columns,
-      body: formattedRows, // Use formatted rows here
+      body: formattedRows, 
       columnStyles: columnStyles,
       startY: 30,
       headStyles: {
@@ -324,18 +324,18 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
       },
     });
 
-    // Salva o PDF
+    
     doc.save('relatorio_premiacao_reconquista.pdf');
   };
 
   const openDeleteDialog = (premiacaoReconquista) => {
-    setItemToDelete(premiacaoReconquista); // Armazena o item selecionado
+    setItemToDelete(premiacaoReconquista); 
     setDeleteDialogOpen(true);
   };
 
   const closeDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setItemToDelete(null); // Reseta o item selecionado ao fechar o diálogo
+    setItemToDelete(null); 
   };
   return (
     <Box sx={{ display: 'flex' }}>
@@ -393,7 +393,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
         </Paper>
         <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
-            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            onClick={() => generatePDF(filteredData)} 
             sx={{
               mt: 1.5,
               backgroundColor: '#45a049',
@@ -402,7 +402,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 backgroundColor: 'darkgreen',
               },
               height: '36px',
-              width: '10%', // Diminuir a largura do botãoF
+              width: '10%', 
             }}
           >
             Exportar PDF
@@ -509,10 +509,10 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 fullWidth
                 margin="normal"
                 variant="filled"
-                type="number" // Adicionando o tipo number
+                type="number" 
                 inputProps={{
-                  min: 0, // Opcional: define o valor mínimo como 0
-                  step: 1, // Apenas números inteiros
+                  min: 0, 
+                  step: 1, 
                 }}
                 sx={{
                   width: '400px',
@@ -529,10 +529,10 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 fullWidth
                 margin="normal"
                 variant="filled"
-                type="number" // Adicionando o tipo number
+                type="number" 
                 inputProps={{
-                  min: 0, // Opcional: define o valor mínimo como 0
-                  step: 1, // Apenas números inteiros
+                  min: 0, 
+                  step: 1, 
                 }}
                 sx={{
                   width: '400px',
@@ -547,16 +547,16 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 value={editingPremiacaoReconquista.valor}
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Utiliza expressão regular para permitir apenas números e até duas casas decimais
+                  
                   if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
-                    setEditingPremiacaoReconquista({ ...editingPremiacaoReconquista, valor: value }); // Atualiza com o valor válido
+                    setEditingPremiacaoReconquista({ ...editingPremiacaoReconquista, valor: value }); 
                   }
                 }}
                 margin="normal"
                 variant="filled"
-                type="number" // Permite a entrada de números
+                type="number" 
                 inputProps={{
-                  step: "0.01", // Permite valores decimais
+                  step: "0.01", 
                 }}
                 sx={{
                   width: '400px',
@@ -613,7 +613,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 backgroundColor: 'red',
                 color: '#fff',
                 '&:hover': {
-                  backgroundColor: '#d32f2f', // Um tom mais escuro de vermelho
+                  backgroundColor: '#d32f2f', 
                 }
               }}
             >
@@ -627,7 +627,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
                 backgroundColor: '#45a049',
                 color: '#fff',
                 '&:hover': {
-                  backgroundColor: '#388e3c', // Um tom mais escuro de verde
+                  backgroundColor: '#388e3c', 
                 }
               }}
             >
@@ -664,7 +664,7 @@ const PremiacaoReconquista = ({ toggleTheme }) => {
             Cancelar
           </Button>
           <Button
-            onClick={handleConfirmSave} // Realiza a ação de salvar
+            onClick={handleConfirmSave} 
             sx={{
               backgroundColor: '#45a049',
               color: '#fff',

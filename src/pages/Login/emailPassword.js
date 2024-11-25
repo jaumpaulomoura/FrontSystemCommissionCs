@@ -215,7 +215,7 @@ const EmailPassword = ({ toggleTheme }) => {
                             variant="contained"
                             color="primary"
                             sx={{ borderRadius: '8px' }}
-                            disabled={loading}  // Desabilita o botão enquanto a requisição está em andamento
+                            disabled={loading} 
                         >
                             Alterar Senha
                         </Button>

@@ -152,36 +152,36 @@ const Closing = ({ toggleTheme }) => {
         const hasDate = !!params.row.dt_insert;
         const handleClick = async () => {
           try {
-            const filteredData = await getFilteredTicketData(); // Aguarda a resolução da Promise
+            const filteredData = await getFilteredTicketData(); 
 
-            // Log para ver o que está sendo retornado por getFilteredTicketData
+            
             console.log('Dados retornados de getFilteredTicketData:', filteredData);
 
-            // Verifica se o retorno é um array para poder filtrar os resultados
+            
             if (Array.isArray(filteredData)) {
-              // Log para ver params.row.mes_ano
+              
               console.log('Mês/Ano do params.row:', params.row.mes_ano);
 
-              // Filtra os dados para encontrar qualquer item que corresponda ao mês, ano e status 'Aberto'
+              
               const foundItems = filteredData.filter(item => {
-                // Certifique-se de que dateCreated seja um objeto Date
+                
                 const dateCreated = new Date(item.dateCreated);
-                const createdMesAno = `${dateCreated.getFullYear()}-${String(dateCreated.getMonth() + 1).padStart(2, '0')}`.trim(); // Formato YYYY-MM
+                const createdMesAno = `${dateCreated.getFullYear()}-${String(dateCreated.getMonth() + 1).padStart(2, '0')}`.trim(); 
 
-                // Converte rowMesAno de MM-YYYY para YYYY-MM
+                
                 const [mes, ano] = params.row.mes_ano.split('-');
-                const rowMesAno = `${ano.trim()}-${mes.trim()}`; // Formato YYYY-MM
+                const rowMesAno = `${ano.trim()}-${mes.trim()}`; 
 
-                // Log para verificar a comparação
+                
                 console.log('Mês/Ano do dateCreated:', createdMesAno);
                 console.log('Mês/Ano do params.row (ajustado):', rowMesAno);
                 console.log('Status do item:', item.status);
 
-                // Verifica se o mês/ano coincide e se o status é 'Aberto' (insensível a maiúsculas)
+                
                 return createdMesAno === rowMesAno && item.status.toLowerCase() === 'aberto';
               });
 
-              // Log os itens encontrados
+              
               console.log('Itens encontrados com fechamento aberto:', foundItems);
 
               if (foundItems.length > 0) {
@@ -315,12 +315,12 @@ const Closing = ({ toggleTheme }) => {
     { field: 'meta_atingida', headerName: 'Meta', width: 80 },
     {
       field: 'porcentagem_meta', headerName: 'Porcentagem', width: 80, valueFormatter: (params) => {
-        // Verifica se o valor está definido
+        
         if (params !== undefined && params !== null) {
-          // Multiplica por 100 e formata como percentual
+          
           return `${(params * 100).toLocaleString('pt-BR')}%`;
         }
-        return ''; // Retorna uma string vazia se o valor não estiver definido
+        return ''; 
       }
     },
     {
@@ -552,11 +552,11 @@ const Closing = ({ toggleTheme }) => {
 
     const sortedModalData = [...modalData]
     .sort((a, b) => {
-      // Primeiro, compara por função
+      
       const funcaoCompare = (a.funcao || '').localeCompare(b.funcao || '');
       if (funcaoCompare !== 0) return funcaoCompare;
   
-      // Se as funções forem iguais, compara por nome
+      
       return (a.nome || '').localeCompare(b.nome || '');
     });
   
@@ -575,7 +575,7 @@ const Closing = ({ toggleTheme }) => {
           .concat(['Valor Total']),
       ],
       body: sortedModalData.map((row) => {
-        // Cálculo da Premiação Reconquista (caso aplicável)
+        
         const premiacaoReconquista = parseFloat(row.vlr_total_recon_mes_ant || '0') +
           parseFloat(row.vlr_total_reco || '0');
 

@@ -8,7 +8,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Cookies from 'js-cookie';
-import { updatePassword } from '../../services/apiService'; // Ajuste o caminho conforme necessário
+import { updatePassword } from '../../services/apiService'; 
 
 const ResetPassword = ({ toggleTheme }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -64,7 +64,6 @@ const ResetPassword = ({ toggleTheme }) => {
   
       await updatePassword(formData.email, data);
   
-      // Limpa o formulário e navega para a página desejada após sucesso
       setFormData({
         email: '',
         password: '',
@@ -73,10 +72,9 @@ const ResetPassword = ({ toggleTheme }) => {
       });
       navigate('/home');  
     } catch (error) {
-      // Ajuste para acessar a mensagem de erro corretamente
       const errorMessage = error.response ? error.response.data.message : 'Erro ao atualizar senha. Por favor, tente novamente.';
       console.error('Erro ao atualizar senha:', errorMessage);
-      setPasswordError(errorMessage); // Exibe a mensagem de erro no estado
+      setPasswordError(errorMessage); 
     } finally {
       setLoading(false);
     }
@@ -197,7 +195,7 @@ const ResetPassword = ({ toggleTheme }) => {
                 variant="contained"
                 color="primary"
                 sx={{ borderRadius: '8px' }}
-                disabled={loading}  // Desabilita o botão enquanto a requisição está em andamento
+                disabled={loading}  
               >
                 {loading ? 'Redefinindo...' : 'Redefinir Senha'}
               </Button>

@@ -2,18 +2,15 @@ import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import { useEffect, useState } from 'react';
 
-// Registre os elementos necessários do Chart.js
 Chart.register(ArcElement, Tooltip, Legend);
 const SalesChartItens = ({ summedData }) => {
     const [chartData, setChartData] = useState(null);
 
     useEffect(() => {
         if (summedData) {
-            // Extraindo rótulos e valores para o gráfico
             const labels = Object.keys(summedData);
-            const data = labels.map(label => parseFloat(summedData[label].valorTotal).toFixed(2)); // Formata o valor com duas casas decimais
+            const data = labels.map(label => parseFloat(summedData[label].valorTotal).toFixed(2)); 
 
-            // Configurando os dados do gráfico
             setChartData({
                 labels,
                 datasets: [
@@ -29,7 +26,7 @@ const SalesChartItens = ({ summedData }) => {
         }
     }, [summedData]);
 
-    if (!chartData) return null; // Se ainda não houver dados, retorne null
+    if (!chartData) return null; 
 
     return (
         <div>

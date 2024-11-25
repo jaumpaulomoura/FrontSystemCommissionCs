@@ -106,7 +106,7 @@ const Colaborador = ({ toggleTheme }) => {
       try {
         const updatedData = {
           nome: editingColaborador.nome,
-          // sobrenome: editingColaborador.sobrenome,
+          
           funcao: editingColaborador.funcao,
           time: editingColaborador.time,
           email: editingColaborador.email,
@@ -152,7 +152,7 @@ const Colaborador = ({ toggleTheme }) => {
   const columns = [
     { field: 'cupom', headerName: 'Cupom', width: 150 },
     { field: 'nome', headerName: 'Nome', width: 250 },
-    // { field: 'sobrenome', headerName: 'Sobrenome', width: 150 },
+    
 
     { field: 'funcao', headerName: 'Função', width: 200 },
     { field: 'time', headerName: 'Time', width: 150 },
@@ -162,7 +162,7 @@ const Colaborador = ({ toggleTheme }) => {
       headerName: 'Data Admissão',
       width: 150,
       valueFormatter: (params) => {
-        if (!params) return ''; // Retorna vazio se não houver data
+        if (!params) return ''; 
         const date = new Date(params);
         return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
       },
@@ -176,7 +176,7 @@ const Colaborador = ({ toggleTheme }) => {
       headerName: 'Data Demissão',
       width: 150,
       valueFormatter: (params) => {
-        if (!params) return ''; // Retorna vazio se não houver data
+        if (!params) return ''; 
         const date = new Date(params);
         return date.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
       },
@@ -264,11 +264,11 @@ const Colaborador = ({ toggleTheme }) => {
     doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
     doc.setFontSize(12);
     doc.text('Relatório de Colaboradores', 18, 24);
-    // Define as colunas e os dados
+    
     const columns = [
       { header: 'Cupom', dataKey: 'cupom' },
       { header: 'Nome', dataKey: 'nome' },
-      // { header: 'Sobrenome', dataKey: 'sobrenome' },
+      
       { header: 'Função', dataKey: 'funcao' },
       { header: 'Time', dataKey: 'time' },
       { header: 'Email', dataKey: 'email' }
@@ -279,14 +279,14 @@ const Colaborador = ({ toggleTheme }) => {
     const rows = data.map(row => ({
       cupom: row.cupom ? row.cupom : '',
       nome: row.nome,
-      // sobrenome: row.sobrenome,
+      
       funcao: row.funcao,
       time: row.time,
       email: row.email,
 
     }));
 
-    // Adiciona a tabela ao PDF
+    
     autoTable(doc, {
       columns: columns,
       body: rows,
@@ -305,22 +305,22 @@ const Colaborador = ({ toggleTheme }) => {
       },
     });
 
-    // Salva o PDF
+    
     doc.save('relatorio_colaborador.pdf');
   };
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString.trim());
-    if (isNaN(date.getTime())) return ''; // Retorna string vazia se a data for inválida
+    if (isNaN(date.getTime())) return ''; 
     return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
   const convertDateFormat = (dateString) => {
     const parts = dateString.split('/');
-    if (parts.length !== 3) return ''; // return empty string if format is incorrect
+    if (parts.length !== 3) return ''; 
     const day = parts[0];
     const month = parts[1];
     const year = parts[2];
-    return `${year}-${month}-${day}`; // returns yyyy-mm-dd format
+    return `${year}-${month}-${day}`; 
 };
   return (
     <Box sx={{ display: 'flex' }}>
@@ -397,7 +397,7 @@ const Colaborador = ({ toggleTheme }) => {
         </Paper>
         <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
-            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            onClick={() => generatePDF(filteredData)} 
             sx={{
               mt: 1.5,
               backgroundColor: '#45a049',
@@ -406,7 +406,7 @@ const Colaborador = ({ toggleTheme }) => {
                 backgroundColor: 'darkgreen',
               },
               height: '36px',
-              width: '10%', // Diminuir a largura do botão
+              width: '10%', 
             }}
           >
             Exportar PDF
@@ -464,13 +464,7 @@ const Colaborador = ({ toggleTheme }) => {
                 onChange={(e) => setEditingColaborador({ ...editingColaborador, nome: e.target.value })}
                 fullWidth
               />
-              {/* <TextField
-                label="SobreNome"
-                variant="outlined"
-                value={editingColaborador.sobrenome}
-                onChange={(e) => setEditingColaborador({ ...editingColaborador, sobrenome: e.target.value })}
-                fullWidth
-              /> */}
+            
               <TextField
                 label="Função"
                 variant="outlined"
@@ -496,7 +490,7 @@ const Colaborador = ({ toggleTheme }) => {
     <Grid item xs={12} sm={6} md={2}>        
         <TextField
             label="Data Admissão"
-            //  type="date"
+            
             variant="outlined"
             value={formatDate(editingColaborador.dtadmissao)}
             disabled
@@ -537,7 +531,7 @@ const Colaborador = ({ toggleTheme }) => {
                 setEditingColaborador({ ...editingColaborador, dtdemissao: selectedDate });
             }}
             fullWidth
-            // size="mediu"
+            
             InputLabelProps={{ shrink: true }}
             sx={{
                 minWidth: 269,

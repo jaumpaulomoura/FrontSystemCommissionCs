@@ -21,7 +21,7 @@ const CreateColaborador = ({ toggleTheme }) => {
   const [formData, setFormData] = useState({
     cupom: '',
     nome: '',
-    // sobrenome: '',  
+    
     funcao: '',
     time: '',
     email: '',
@@ -60,21 +60,21 @@ const CreateColaborador = ({ toggleTheme }) => {
   };
 
   const handleNameChange = (event, newValue) => {
-    // Update the selected name for the Autocomplete input
+    
     setSelectedName(newValue);
     const formattedName = formatText(newValue);
-    // Find the selected collaborator based on the formatted name
+    
     const colaboradorSelecionado = colaboradoresChb.find(colab => formatText(colab.fp02nom) === formattedName);
 
     if (colaboradorSelecionado) {
       setFormData({
         ...formData,
-        nome: formattedName, // Ensure you're setting the correct name
-        dtadmissao: colaboradorSelecionado.fp02dtadmi || '', // Adjust as needed
-        dtdemissao: colaboradorSelecionado.dt_demissao || '', // Adjust as needed
+        nome: formattedName, 
+        dtadmissao: colaboradorSelecionado.fp02dtadmi || '', 
+        dtdemissao: colaboradorSelecionado.dt_demissao || '', 
       });
     } else {
-      // If no valid collaborator is selected, clear admission and dismissal dates
+      
       setFormData({
         ...formData,
         nome: formattedName,
@@ -94,7 +94,7 @@ const CreateColaborador = ({ toggleTheme }) => {
     try {
       const response = await createColaborador({
         ...formData,
-        nome: formatText(formData.nome.trim()), // exemplo de sanitização simples
+        nome: formatText(formData.nome.trim()), 
       });
       setFormData({
         cupom: '',
@@ -123,14 +123,14 @@ const CreateColaborador = ({ toggleTheme }) => {
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-  // Função para evitar que a tecla Enter seja pressionada
+  
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString.trim());
-    if (isNaN(date.getTime())) return ''; // Retorna string vazia se a data for inválida
+    if (isNaN(date.getTime())) return ''; 
     return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
   };
   return (
@@ -256,23 +256,23 @@ const CreateColaborador = ({ toggleTheme }) => {
           <TextField
   label="Data de Admissão"
   name="dtadmissao"
-  value={formatDate(formData.dtadmissao)} // Formata a data aqui
+  value={formatDate(formData.dtadmissao)} 
   onChange={handleInputChange}
   fullWidth
   margin="normal"
   variant="filled"
-  InputProps={{ readOnly: true }} // Definido como somente leitura
+  InputProps={{ readOnly: true }} 
   sx={{ width: '400px', height: '56px', borderRadius: '8px' }}
 />
 <TextField
   label="Data de Demissão"
   name="dtdemissao"
-  value={formatDate(formData.dtdemissao)} // Formata a data aqui
+  value={formatDate(formData.dtdemissao)} 
   onChange={handleInputChange}
   fullWidth
   margin="normal"
   variant="filled"
-  InputProps={{ readOnly: true }} // Definido como somente leitura
+  InputProps={{ readOnly: true }} 
   sx={{ width: '400px', height: '56px', borderRadius: '8px' }}
 />
 

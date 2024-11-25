@@ -3,7 +3,7 @@ import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 
-import { emailPassword } from '../../services/apiService'; // Ajuste o caminho conforme necessário
+import { emailPassword } from '../../services/apiService';
 
 const ForgotPassword = ({ toggleTheme }) => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -25,7 +25,7 @@ const ForgotPassword = ({ toggleTheme }) => {
     };
 
 
-    const [passwordError, setPasswordError] = useState('');  // Adicione isso para gerenciar erros
+    const [passwordError, setPasswordError] = useState('');  
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -39,7 +39,7 @@ const ForgotPassword = ({ toggleTheme }) => {
         } catch (error) {
             const errorMessage = error.message || 'Erro ao atualizar senha. Por favor, tente novamente.';
             console.error('Erro ao atualizar senha:', errorMessage);
-            setPasswordError(errorMessage);  // Exibe a mensagem de erro no estado
+            setPasswordError(errorMessage);  
         } finally {
             setLoading(false);
         }
@@ -139,7 +139,7 @@ const ForgotPassword = ({ toggleTheme }) => {
                         placeholder="Digite seu email"
                         autoComplete="off"
                         sx={{ width: '400px', height: '56px', borderRadius: '8px' }}
-                        onChange={handleInputChange}  // Adicione isso para que o valor do input seja atualizado
+                        onChange={handleInputChange} 
                     />
 
                     <Box sx={{ mt: 3, display: 'flex',justifyContent:'center', gap: 2 }}>
@@ -148,7 +148,7 @@ const ForgotPassword = ({ toggleTheme }) => {
                             variant="contained"
                             color="primary"
                             sx={{ borderRadius: '8px' }}
-                            disabled={loading}  // Desabilita o botão enquanto a requisição está em andamento
+                            disabled={loading} 
                         >
                             Enviar email
                         </Button>

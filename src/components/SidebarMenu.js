@@ -69,7 +69,7 @@ const SidebarMenu = ({ open, onClose }) => {
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                 component="nav"
               >
-                {/* Item com avatar e nome */}
+               
                 <ListItemButton onClick={handleClick}>
                   <ListItemIcon>
                     <Avatar alt={user.nome} src={user.avatar} />
@@ -78,7 +78,6 @@ const SidebarMenu = ({ open, onClose }) => {
                   {opens ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
 
-                {/* Submenu para redefinir senha */}
                 <Collapse in={opens} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     <ListItemButton sx={{ pl: 4 }} onClick={() => handleNavigation('/resetPassword')}>
@@ -195,9 +194,7 @@ const SidebarMenu = ({ open, onClose }) => {
       >
         <DialogTitle> Tem certeza de que deseja sair?</DialogTitle>
         <DialogContent>
-          {/* <DialogContentText>
-            Tem certeza de que deseja sair?
-          </DialogContentText> */}
+          
         </DialogContent>
         <DialogActions sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
         <Button onClick={closeLogoutDialog} sx={{ color: '#fff', backgroundColor: '#4caf50', '&:hover': { backgroundColor: '#388e3c' } }}>

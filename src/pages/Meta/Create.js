@@ -49,14 +49,14 @@ const CreateMeta = ({ toggleTheme }) => {
   const [selectedCupom, setSelectedCupom] = useState('');
   const { showToast } = useToast();
   const [salvarDialogOpen, setSalvarDialogOpen] = useState(false);
-  const [funcao, setFuncao] = useState('Consultora'); // Valor padrão
+  const [funcao, setFuncao] = useState('Consultora'); 
   const navigate = useNavigate();
 
   const handleNivelChange = (event) => {
     const selectedNivel = event.target.value;
     setFuncao(selectedNivel);
 
-    // Usando if para alterar os dados
+    
     if (selectedNivel === 'Lider') {
       setMetaData(metaDataLider);
     } else if (selectedNivel === 'Supervisora') {
@@ -98,12 +98,12 @@ const CreateMeta = ({ toggleTheme }) => {
 
   const handleInputChange = (event, index) => {
     const { name } = event.target;
-    let inputValue = event.target.value.replace(/[^\d]/g, ''); // Remove caracteres não numéricos
+    let inputValue = event.target.value.replace(/[^\d]/g, ''); 
 
-    // Evitar zeros à esquerda
+    
     const trimmedValue = inputValue.replace(/^0+/, '');
 
-    // Verifica se o valor está vazio
+    
     if (trimmedValue.length === 0) {
       const updatedMetaData = metaData.map((item, i) =>
         i === index ? { ...item, [name]: '' } : item
@@ -112,22 +112,22 @@ const CreateMeta = ({ toggleTheme }) => {
       return;
     }
 
-    // Adiciona a formatação correta
+    
     let formattedValue = '';
-    const integerPart = trimmedValue.slice(0, -2); // Parte inteira
-    const decimalPart = trimmedValue.slice(-2); // Parte decimal
+    const integerPart = trimmedValue.slice(0, -2); 
+    const decimalPart = trimmedValue.slice(-2); 
 
-    // Formata a parte inteira com pontos
+    
     if (integerPart) {
       formattedValue = 'R$ ' + integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
-    // Adiciona a parte decimal, garantindo que tenha duas casas
+    
     if (decimalPart) {
       formattedValue += ',' + decimalPart.padStart(2, '0');
     }
 
-    // Atualiza o valor formatado no estado
+    
     const updatedMetaData = metaData.map((item, i) =>
       i === index ? { ...item, [name]: formattedValue } : item
     );
@@ -148,19 +148,19 @@ const CreateMeta = ({ toggleTheme }) => {
     }
 
     metaData.forEach((item) => {
-      // Remover formatação do valor
+      
       const valorStr = item.valor.replace(/[R$ .]/g, '').replace(',', '.');
       const porcentagem = item.porcentagem.replace(',', '.');
 
-      // Validação do Valor
-      const valor = parseFloat(valorStr); // Converter a string limpa para float
+      
+      const valor = parseFloat(valorStr); 
       if (isNaN(valor)) {
         errors.push(`Valor inválido para a meta "${item.meta}"!`);
       } else if (valor < 0) {
         warnings.push(`O valor para a meta "${item.meta}" não pode ser negativo.`);
       }
 
-      // Validação da Porcentagem
+      
       if (!porcentagem || isNaN(porcentagem)) {
         errors.push(`Porcentagem inválida para a meta "${item.meta}"!`);
       } else if (parseFloat(porcentagem) < 0) {
@@ -168,19 +168,19 @@ const CreateMeta = ({ toggleTheme }) => {
       }
     });
     metaData.forEach((item) => {
-      // Remover formatação do valor
+      
       const valorStr = item.valor.replace(/[R$ .]/g, '').replace(',', '.');
       const porcentagem = item.porcentagem.replace(',', '.');
 
-      // Validação do Valor
-      const valor = parseFloat(valorStr); // Converter a string limpa para float
+      
+      const valor = parseFloat(valorStr); 
       if (isNaN(valor)) {
         errors.push(`Valor inválido para a meta "${item.meta}"!`);
       } else if (valor < 0) {
         warnings.push(`O valor para a meta "${item.meta}" não pode ser negativo.`);
       }
 
-      // Validação da Porcentagem
+      
       if (!porcentagem || isNaN(porcentagem)) {
         errors.push(`Porcentagem inválida para a meta "${item.meta}"!`);
       } else if (parseFloat(porcentagem) < 0) {
@@ -189,18 +189,18 @@ const CreateMeta = ({ toggleTheme }) => {
     });
 
     console.log('metaData', metaData)
-    // Mostrar mensagens de erro
+    
     if (errors.length > 0) {
-      showToast(errors.join(' '), 'error'); // Mensagens de erro
+      showToast(errors.join(' '), 'error'); 
       return false;
     }
 
-    // Mostrar mensagens de alerta (warning)
+    
     if (warnings.length > 0) {
       warnings.forEach(warning => showToast(warning, 'warning'));
     }
 
-    // showToast('Formulário válido!', 'success'); // Mensagem de sucesso
+    
     return true;
   };
   const handleSubmit = (e) => {
@@ -208,7 +208,7 @@ const CreateMeta = ({ toggleTheme }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // Abre o modal de confirmação
+    
     openSalvarDialog();
   };
 
@@ -219,9 +219,9 @@ const CreateMeta = ({ toggleTheme }) => {
     const formattedDate = dayjs(selectedDate).format('MM-YYYY');
 
     const metaDataArray = metaData.map(item => {
-      // Remove caracteres não numéricos e substitui vírgula por ponto
+      
       const valor = item.valor.replace(/[R$ .]/g, '').replace(',', '.');
-      const porcentagem = item.porcentagem.replace(',', '.'); // Supondo que a porcentagem já não tenha formatação
+      const porcentagem = item.porcentagem.replace(',', '.'); 
 
       return {
         cupom: formData.cupom,
@@ -233,7 +233,7 @@ const CreateMeta = ({ toggleTheme }) => {
       };
     });
 
-    console.log('metaDataArray', metaDataArray); // Corrigido para exibir o array no console
+    console.log('metaDataArray', metaDataArray); 
     try {
       const response = await createMeta(metaDataArray);
       const responseData = response || {};
@@ -275,7 +275,7 @@ const CreateMeta = ({ toggleTheme }) => {
 
 
   const handleNameChange = (event, newValue) => {
-    const nomeDigitado = newValue || ''; // Caso newValue seja null ou undefined
+    const nomeDigitado = newValue || ''; 
     setSelectedName(nomeDigitado);
   
     const colaborador = colaboradores.find(
@@ -285,15 +285,15 @@ const CreateMeta = ({ toggleTheme }) => {
     if (colaborador) {
       setSelectedCupom(colaborador.cupom);
       setFormData({ ...formData, cupom: colaborador.cupom, nome: colaborador.nome });
-      setFuncao(colaborador.funcao); // Atualiza a função do colaborador
+      setFuncao(colaborador.funcao); 
       setError('');
   
-      // Chama handleNivelChange passando o valor da função
+      
       handleNivelChange({ target: { value: colaborador.funcao } });
     } else {
       setSelectedCupom('');
       setFormData({ ...formData, cupom: '' });
-      setFuncao(''); // Limpa a função se o colaborador não for encontrado
+      setFuncao(''); 
       setError('Colaborador não encontrado.');
     }
   };
@@ -310,49 +310,49 @@ const CreateMeta = ({ toggleTheme }) => {
     if (colaborador) {
       setSelectedName(colaborador.nome);
       setFormData({ ...formData, nome: colaborador.nome });
-      setFuncao(colaborador.funcao); // Atualiza a função do colaborador
+      setFuncao(colaborador.funcao); 
       setError('');
   
-      // Chama handleNivelChange passando o valor da função
+      
       handleNivelChange({ target: { value: colaborador.funcao } });
     } else {
       setSelectedName('');
       setFormData({ ...formData, cupom: '' });
-      setFuncao(''); // Limpa a função se o colaborador não for encontrado
+      setFuncao(''); 
       setError('Cupom não encontrado.');
     }
   };
   
 
   const openSalvarDialog = () => {
-    console.log('openSalvarDialog foi chamado'); // Adiciona log para depuração
+    console.log('openSalvarDialog foi chamado'); 
     setSalvarDialogOpen(true);
   };
   const closeSalvarDialog = () => {
     setSalvarDialogOpen(false);
   };
   const handleSaveClick = (e) => {
-    e.preventDefault(); // Previne o envio padrão do formulário
+    e.preventDefault(); 
 
 
 
-    const isValid = validateForm(); // Chama a função de validação
+    const isValid = validateForm(); 
 
 
     if (isValid) {
 
-      openSalvarDialog(); // Abre o modal de confirmação se o formulário for válido
+      openSalvarDialog(); 
     } else {
-      console.log('Formulário inválido. Não abrindo o modal.'); // Log se a validação falhar
+      console.log('Formulário inválido. Não abrindo o modal.'); 
     }
   };
 
 
   const formatCurrency = (value) => {
-    // Remove caracteres não numéricos
+    
     const numericValue = value.replace(/\D/g, '');
 
-    // Adiciona pontos e vírgula na formatação
+    
     return (Number(numericValue) / 100).toLocaleString('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -365,28 +365,28 @@ const CreateMeta = ({ toggleTheme }) => {
   const [value, setValue] = useState('');
 
   const handleChange = (event) => {
-    const inputValue = event.target.value.replace(/[^\d]/g, ''); // Remove caracteres não numéricos
+    const inputValue = event.target.value.replace(/[^\d]/g, ''); 
 
-    // Evitar zeros à esquerda
+    
     const trimmedValue = inputValue.replace(/^0+/, '');
 
-    // Verifica se o valor está vazio
+    
     if (trimmedValue.length === 0) {
       setValue('');
       return;
     }
 
-    // Adiciona a formatação correta
+    
     let formattedValue = '';
-    const integerPart = trimmedValue.slice(0, -2); // Parte inteira
-    const decimalPart = trimmedValue.slice(-2); // Parte decimal
+    const integerPart = trimmedValue.slice(0, -2); 
+    const decimalPart = trimmedValue.slice(-2); 
 
-    // Formata a parte inteira com pontos
+    
     if (integerPart) {
       formattedValue = 'R$ ' + integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
-    // Adiciona a parte decimal, garantindo que tenha duas casas
+    
     if (decimalPart) {
       formattedValue += ',' + decimalPart.padStart(2, '0');
     }
@@ -438,11 +438,11 @@ const CreateMeta = ({ toggleTheme }) => {
                 <Grid item xs={2.5}>
   <TextField
     label="Função"
-    value={funcao} // Valor da função do colaborador
+    value={funcao} 
     fullWidth
     required
     InputProps={{
-      readOnly: true, // Campo somente leitura
+      readOnly: true, 
     }}
   />
 </Grid>
@@ -453,7 +453,7 @@ const CreateMeta = ({ toggleTheme }) => {
                       views={['year', 'month']}
                       value={selectedDate}
                       onChange={(newValue) => setSelectedDate(newValue)}
-                      format="MM/YYYY" // Força o formato numérico
+                      format="MM/YYYY" 
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
@@ -507,9 +507,9 @@ const CreateMeta = ({ toggleTheme }) => {
                       <TextField
                         label={`Valor ${item.meta}`}
                         variant="outlined"
-                        name="valor" // Ou outro nome para cada campo
-                        value={item.valor} // Certifique-se de que o valor está pegando do índice certo
-                        onChange={(e) => handleInputChange(e, index)} // Passa o índice corretamente
+                        name="valor" 
+                        value={item.valor} 
+                        onChange={(e) => handleInputChange(e, index)} 
                       />
 
 
@@ -579,7 +579,7 @@ const CreateMeta = ({ toggleTheme }) => {
           </Box>
           <Box>
             <Button
-              onClick={handleConfirmSave} // Chama a função para salvar
+              onClick={handleConfirmSave} 
               sx={{
                 backgroundColor: '#45a049',
                 color: '#fff',

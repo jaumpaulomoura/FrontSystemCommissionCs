@@ -39,7 +39,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         setData(result);
         setFilteredData(result);
       } catch (error) {
-        showToast('Erro ao buscar dados de premiacaoMeta.','error');
+        showToast('Erro ao buscar dados de premiacaoMeta.', 'error');
       } finally {
         setLoading(false);
       }
@@ -82,7 +82,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
 
   const handleEditClick = (premiacaoMeta) => {
     setEditingPremiacaoMeta(premiacaoMeta);
-    setOpenModal(true); // Adicione esta linha
+    setOpenModal(true);
   };
 
   const handleCloseModal = () => {
@@ -90,7 +90,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
     setEditingPremiacaoMeta(null);
   };
   const handleSaveClick = () => {
-    setOpenConfirmDialog(true); // Abrir modal de confirmação
+    setOpenConfirmDialog(true);
   };
 
   const handleConfirmSave = async () => {
@@ -103,7 +103,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         };
 
         await updatePremiacaoMeta(editingPremiacaoMeta.descricao, updatedData);
-        showToast('PremiacaoMeta atualizado com sucesso.','success');
+        showToast('PremiacaoMeta atualizado com sucesso.', 'success');
 
         const updatedPremiacaoMetaes = data.map((item) =>
           item.descricao === editingPremiacaoMeta.descricao ? { ...item, ...updatedData } : item
@@ -112,17 +112,17 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         setData(updatedPremiacaoMetaes);
         setFilteredData(updatedPremiacaoMetaes);
       } catch (error) {
-        showToast('Erro ao atualizar premiacaoMeta.','error');
-       
+        showToast('Erro ao atualizar premiacaoMeta.', 'error');
+
       } finally {
-        setOpenConfirmDialog(false); // Fecha o modal de confirmação
-        handleCloseModal(); // Fecha o modal de edição
+        setOpenConfirmDialog(false);
+        handleCloseModal();
       }
     }
   };
 
   const handleCancelConfirm = () => {
-    setOpenConfirmDialog(false); // Fecha o modal de confirmação
+    setOpenConfirmDialog(false);
   };
 
   const handleDelete = async () => {
@@ -130,16 +130,16 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       console.log("Nenhum item para deletar.");
       return;
     }
-  
-    // Extraia os valores de itemToDelete
+
+
     const { descricao, time, valor } = itemToDelete;
-  
-    // Adicione logs para verificar os parâmetros
+
+
     console.log("Parâmetros a serem enviados para exclusão:", { descricao, time, valor });
-  
+
     try {
-      // Passando os parâmetros como um objeto
-      await deletePremiacaoMeta({ descricao, time, valor }); // Certifique-se de passar um objeto
+
+      await deletePremiacaoMeta({ descricao, time, valor });
       const updatedData = data.filter((premiacaoMeta) => premiacaoMeta.id !== itemToDelete.id);
       setData(updatedData);
       setFilteredData(updatedData);
@@ -150,9 +150,9 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       closeDeleteDialog();
     }
   };
-  
-  
-  
+
+
+
   const columns = [
     { field: 'descricao', headerName: 'Descricao', width: 150 },
     { field: 'time', headerName: 'Time', width: 150 },
@@ -161,15 +161,15 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       headerName: 'Valor',
       width: 200,
       valueFormatter: (params) => {
-        // Convert the value to a number
+
         const numberValue = Number(params || 0);
-    
-        // Format with thousands separators and two decimal places
+
+
         const formattedValue = numberValue.toLocaleString('pt-BR', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         });
-    
+
         return `R$ ${formattedValue}`;
       }
     },
@@ -256,7 +256,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
     doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
     doc.setFontSize(12);
     doc.text('Relatório de Premiação Metas', 18, 24);
-    // Define as colunas e os dados
+
     const columns = [
       { header: 'Descrição', dataKey: 'descricao' },
       { header: 'Time', dataKey: 'time' },
@@ -277,15 +277,15 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       maximumFractionDigits: 2,
     });
 
-    // Adiciona a tabela ao PDF
+
     const formattedRows = rows.map((row) => ({
       ...row,
-      valor: numberFormatter.format(row.valor), // Format 'valor' field
+      valor: numberFormatter.format(row.valor),
     }));
 
     autoTable(doc, {
       columns: columns,
-      body: formattedRows, // Use formatted rows here
+      body: formattedRows,
       columnStyles: columnStyles,
       startY: 30,
       headStyles: {
@@ -301,18 +301,18 @@ const PremiacaoMeta = ({ toggleTheme }) => {
       },
     });
 
-    // Salva o PDF
+
     doc.save('relatorio_colaborador.pdf');
   };
   const openDeleteDialog = (premiacaoMeta) => {
-    console.log("Abrindo diálogo de exclusão para:", premiacaoMeta); // Exibe o item no console
-    setItemToDelete(premiacaoMeta); // Armazena o item selecionado
-    setDeleteDialogOpen(true); // Abre o diálogo de exclusão
+    console.log("Abrindo diálogo de exclusão para:", premiacaoMeta);
+    setItemToDelete(premiacaoMeta);
+    setDeleteDialogOpen(true);
   };
-  
+
   const closeDeleteDialog = () => {
-    setDeleteDialogOpen(false); // Fecha o diálogo de exclusão
-    setItemToDelete(null); // Limpa o item armazenado
+    setDeleteDialogOpen(false);
+    setItemToDelete(null);
   };
   return (
     <Box sx={{ display: 'flex' }}>
@@ -369,7 +369,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
         </Paper>
         <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
-            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            onClick={() => generatePDF(filteredData)}
             sx={{
               mt: 1.5,
               backgroundColor: '#45a049',
@@ -378,22 +378,22 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 backgroundColor: 'darkgreen',
               },
               height: '36px',
-              width: '10%', // Diminuir a largura do botão
+              width: '10%',
             }}
           >
             Exportar PDF
           </Button>
         </Grid>
         {loading ? (
-        <CircularProgress sx={{ mt: 3 }} />
-      ) : error ? (
-        // Aqui a mensagem de erro será gerenciada pelo toast, então você pode remover o Alert
-        <div>{/* Algum outro fallback opcional */}</div>
-      ) : (
-        <div style={{ height: 400, width: '100%', marginTop: 16 }}>
-          <DataGrid rows={filteredData} columns={columns} pageSize={5} />
-        </div>
-      )}
+          <CircularProgress sx={{ mt: 3 }} />
+        ) : error ? (
+
+          <div></div>
+        ) : (
+          <div style={{ height: 400, width: '100%', marginTop: 16 }}>
+            <DataGrid rows={filteredData} columns={columns} pageSize={5} />
+          </div>
+        )}
       </Box>
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>Editar PremiacaoMeta</DialogTitle>
@@ -407,13 +407,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 disabled
                 fullWidth
               />
-              {/* <TextField
-          label="Time"
-          variant="outlined"
-          value={editingPremiacaoMeta.time}
-          onChange={(e) => setEditingPremiacaoMeta({ ...editingPremiacaoMeta, time: e.target.value })}
-          fullWidth
-        /> */}
+
               <TextField
                 select
                 label="Time"
@@ -430,35 +424,34 @@ const PremiacaoMeta = ({ toggleTheme }) => {
               >
                 <MenuItem value="Venda Ativa">Venda Ativa</MenuItem>
                 <MenuItem value="Reconquista">Reconquista</MenuItem>
-                {/* <MenuItem value="Todos">Todos</MenuItem> */}
               </TextField>
 
 
 
-            
-  <TextField
-              label="Valor"
-              name="valor"
-              value={editingPremiacaoMeta.valor}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Utiliza expressão regular para permitir apenas números e até duas casas decimais
-                if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
-                  setEditingPremiacaoMeta({ ...editingPremiacaoMeta, valor: value }); // Atualiza com o valor válido
-                }
-              }}
-              margin="normal"
-              variant="filled"
-              type="number" // Permite a entrada de números
-              inputProps={{
-                step: "0.01", // Permite valores decimais
-              }}
-              sx={{
-                width: '400px',
-                height: '56px',
-                borderRadius: '8px',
-              }}
-            />
+
+              <TextField
+                label="Valor"
+                name="valor"
+                value={editingPremiacaoMeta.valor}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  if (/^\d*\.?\d{0,2}$/.test(value) || value === '') {
+                    setEditingPremiacaoMeta({ ...editingPremiacaoMeta, valor: value });
+                  }
+                }}
+                margin="normal"
+                variant="filled"
+                type="number"
+                inputProps={{
+                  step: "0.01",
+                }}
+                sx={{
+                  width: '400px',
+                  height: '56px',
+                  borderRadius: '8px',
+                }}
+              />
 
 
 
@@ -481,7 +474,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
             Cancelar
           </Button>
           <Button
-            onClick={handleSaveClick} // Abre o modal de confirmação
+            onClick={handleSaveClick}
             sx={{
               backgroundColor: '#45a049',
               color: '#fff',
@@ -514,7 +507,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 backgroundColor: 'red',
                 color: '#fff',
                 '&:hover': {
-                  backgroundColor: '#d32f2f', // Um tom mais escuro de vermelho
+                  backgroundColor: '#d32f2f',
                 }
               }}
             >
@@ -528,7 +521,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
                 backgroundColor: '#45a049',
                 color: '#fff',
                 '&:hover': {
-                  backgroundColor: '#388e3c', // Um tom mais escuro de verde
+                  backgroundColor: '#388e3c',
                 }
               }}
             >
@@ -562,7 +555,7 @@ const PremiacaoMeta = ({ toggleTheme }) => {
             Cancelar
           </Button>
           <Button
-            onClick={handleConfirmSave} // Realiza a ação de salvar
+            onClick={handleConfirmSave}
             sx={{
               backgroundColor: '#45a049',
               color: '#fff',

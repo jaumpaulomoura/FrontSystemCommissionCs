@@ -187,7 +187,7 @@ const Reconquest = ({ toggleTheme }) => {
     doc.text(`Data: ${formattedDate}`, doc.internal.pageSize.width - 10, 7, { align: 'right' });
     doc.text(`Hora: ${formattedTime}`, doc.internal.pageSize.width - 10, 10, { align: 'right' });
     doc.text('Relatório de Reconquista', 14, 22);
-    // Define as colunas e os dados
+ 
     const columns = [
       { header: 'Nome', dataKey: 'nome' },
       { header: 'Cupom', dataKey: 'cupom_vendedora' },
@@ -216,7 +216,6 @@ const Reconquest = ({ toggleTheme }) => {
       dias_mes_anterior: row.dias_mes_anterior,
     }));
 
-    // Adiciona a tabela ao PDF
     autoTable(doc, {
       columns: columns,
       body: rows,
@@ -235,7 +234,6 @@ const Reconquest = ({ toggleTheme }) => {
       },
     });
 
-    // Salva o PDF
     doc.save('relatorio_reconquista.pdf');
   };
 
@@ -251,9 +249,9 @@ const Reconquest = ({ toggleTheme }) => {
           flexGrow: 1,
           bgcolor: 'background.default',
           p: 3,
-          maxWidth: '100%', // Ajuste conforme necessário
-          mx: 'auto', // Centraliza horizontalmente
-          overflow: 'auto' // Adiciona rolagem se necessário
+          maxWidth: '100%', 
+          mx: 'auto', 
+          overflow: 'auto' 
            }}>
         <Box position="absolute" top={16} right={16}>
           <ThemeToggleButton toggleTheme={toggleTheme} />
@@ -334,7 +332,7 @@ const Reconquest = ({ toggleTheme }) => {
         </Paper>
         <Grid item xs={12} sm={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button
-            onClick={() => generatePDF(filteredData)} // Passe os dados filtrados para a função
+            onClick={() => generatePDF(filteredData)} 
             sx={{
               mt: 1.5,
               backgroundColor: '#45a049',
@@ -343,7 +341,7 @@ const Reconquest = ({ toggleTheme }) => {
                 backgroundColor: 'darkgreen',
               },
               height: '36px',
-              width: '10%', // Diminuir a largura do botão
+              width: '10%', 
             }}
           >
             Exportar PDF

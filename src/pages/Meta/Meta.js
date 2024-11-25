@@ -89,14 +89,12 @@ const Meta = ({ toggleTheme }) => {
 
 console.log('filtereds',filtereds)
   const dadosGroup = filtereds.reduce((acc, item) => {
-    // Verifica se já existe um registro para o cupom, nome e mês/ano
     let existente = acc.find(entry =>
       entry.nome === item.nome && 
       entry.cupom === item.cupom && 
       entry.mes_ano === item.mes_ano
     );
   console.log('existente',existente)
-    // Se não existir, cria um novo registro
     if (!existente) {
       existente = {
         nome: item.nome,
@@ -104,17 +102,16 @@ console.log('filtereds',filtereds)
         mes_ano: item.mes_ano,
         metas: []
       };
-      acc.push(existente); // Adiciona o novo registro ao acumulador
+      acc.push(existente); 
     }
   
-    // Adiciona a meta ao registro existente
     existente.metas.push({
       meta: item.meta,
       valor: item.valor,
       porcentagem: item.porcentagem
     });
   
-    return acc; // Retorna o acumulador para a próxima iteração
+    return acc; 
   }, []);
 
   console.log(dadosGroup);

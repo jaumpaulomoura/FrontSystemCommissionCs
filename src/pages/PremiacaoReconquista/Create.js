@@ -24,62 +24,62 @@ const CreatePremiacaoReconquista = ({ toggleTheme }) => {
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
-    // Check if the input field is for a currency or numeric value
+
     if (name === 'valor') {
-        // Remove non-numeric characters, except for commas and periods
-        let inputValue = value.replace(/[^\d]/g, ''); // Remove everything that's not a number
-        let formattedValue = '';
 
-        // Avoid leading zeros
-        const trimmedValue = inputValue.replace(/^0+/, '');
+      let inputValue = value.replace(/[^\d]/g, '');
+      let formattedValue = '';
 
-        // Check if the value is empty
-        if (trimmedValue.length === 0) {
-            setFormData({
-                ...formData,
-                [name]: '',
-            });
-            return;
-        }
 
-        // Add correct formatting
-        const integerPart = trimmedValue.slice(0, -2); // Integer part
-        const decimalPart = trimmedValue.slice(-2); // Decimal part
+      const trimmedValue = inputValue.replace(/^0+/, '');
 
-        // Format the integer part with dots
-        if (integerPart) {
-            formattedValue = 'R$ ' + integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
 
-        // Add the decimal part, ensuring two decimal places
-        if (decimalPart) {
-            formattedValue += ',' + decimalPart.padStart(2, '0');
-        }
-
-        // Update state with the formatted value
+      if (trimmedValue.length === 0) {
         setFormData({
-            ...formData,
-            [name]: formattedValue,
+          ...formData,
+          [name]: '',
         });
+        return;
+      }
+
+
+      const integerPart = trimmedValue.slice(0, -2);
+      const decimalPart = trimmedValue.slice(-2);
+
+
+      if (integerPart) {
+        formattedValue = 'R$ ' + integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      }
+
+
+      if (decimalPart) {
+        formattedValue += ',' + decimalPart.padStart(2, '0');
+      }
+
+
+      setFormData({
+        ...formData,
+        [name]: formattedValue,
+      });
     } else {
-        // For other fields like "Descrição" or "Time"
-        setFormData({
-            ...formData,
-            [name]: value, // Set the value directly for non-numeric fields
-        });
+
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
-};
+  };
   const validateForm = () => {
     let isValid = true;
     const errorMessages = [];
     const warningMessages = [];
 
-    // Verificação dos campos obrigatórios
+
     if (!formData.descricao) {
       errorMessages.push('Descrição');
       isValid = false;
     }
- 
+
     if (!formData.minimo) {
       errorMessages.push('Minimo');
       isValid = false;
@@ -91,32 +91,32 @@ const CreatePremiacaoReconquista = ({ toggleTheme }) => {
     if (!formData.valor) {
       errorMessages.push('Valor');
       isValid = false;
-  } else {
-      // Remove currency formatting and convert to a float
+    } else {
+
       const valor = formData.valor
-          .replace('R$ ', '')          // Remove currency symbol
-          .replace(/\./g, '')         // Remove thousands separators
-          .replace(',', '.');          // Replace comma with decimal point
+        .replace('R$ ', '')
+        .replace(/\./g, '')
+        .replace(',', '.');
 
-      // Check if the transformed value is a number
+
       if (isNaN(valor)) {
-          warningMessages.push(`Valor inválido: ${formData.valor}!`);
-          isValid = false;
+        warningMessages.push(`Valor inválido: ${formData.valor}!`);
+        isValid = false;
       } else if (parseFloat(valor) < 0) {
-          warningMessages.push('O valor não pode ser negativo.');
+        warningMessages.push('O valor não pode ser negativo.');
       }
-  }
+    }
 
-    // Se houver mensagens de erro, concatene-as e exiba o toast
+
     if (errorMessages.length > 0) {
       const message = `${errorMessages.join(', ')} é obrigatório!`;
       showToast(message, 'error');
     }
 
-    // Se houver mensagens de aviso, exiba-as
+
     if (warningMessages.length > 0) {
       const warningMessage = warningMessages.join(', ');
-      showToast(warningMessage, 'warning'); // Exibir toast para avisos
+      showToast(warningMessage, 'warning');
     }
 
     return isValid;
@@ -127,27 +127,27 @@ const CreatePremiacaoReconquista = ({ toggleTheme }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // Abre o modal de confirmação
+
     openSalvarDialog();
   };
 
   const handleConfirmSave = async () => {
-    closeSalvarDialog(); // Fecha o modal
+    closeSalvarDialog();
 
     try {
       const processedValor = formData.valor
-      .replace('R$ ', '')          // Remove currency symbol
-      .replace(/\./g, '')         // Remove thousands separators
-      .replace(',', '.');          // Replace comma with decimal point
+        .replace('R$ ', '')
+        .replace(/\./g, '')
+        .replace(',', '.');
 
-  // Prepare the data to send to the API
-  const dataToSend = {
-      ...formData,
-      valor: processedValor,      // Use the processed valor
-  };
-console.log(formData)
+
+      const dataToSend = {
+        ...formData,
+        valor: processedValor,
+      };
+      console.log(formData)
       const response = await createPremiacaoReconquista(dataToSend);
-      // Resetar todos os campos do formData
+
       setFormData({
         descricao: '',
         time: '',
@@ -183,18 +183,18 @@ console.log(formData)
   };
 
   const handleSaveClick = (e) => {
-    e.preventDefault(); // Previne o envio padrão do formulário
-  
-    
-  
-    const isValid = validateForm(); // Chama a função de validação
-    
-  
+    e.preventDefault();
+
+
+
+    const isValid = validateForm();
+
+
     if (isValid) {
-      
-      openSalvarDialog(); // Abre o modal de confirmação se o formulário for válido
+
+      openSalvarDialog();
     } else {
-      console.log('Formulário inválido. Não abrindo o modal.'); // Log se a validação falhar
+      console.log('Formulário inválido. Não abrindo o modal.');
     }
   };
   return (
@@ -224,11 +224,11 @@ console.log(formData)
             <TextField
               label="Time"
               name="time"
-              value="Reconquista" // Definindo o valor fixo
+              value="Reconquista"
               margin="normal"
               variant="filled"
               InputProps={{
-                readOnly: true, // Define como somente leitura
+                readOnly: true,
               }}
               sx={{
                 width: '400px',
@@ -245,10 +245,10 @@ console.log(formData)
               fullWidth
               margin="normal"
               variant="filled"
-              type="number" // Adicionando o tipo number
+              type="number"
               inputProps={{
-                min: 0, // Opcional: define o valor mínimo como 0
-                step: 1, // Apenas números inteiros
+                min: 0,
+                step: 1,
               }}
               sx={{
                 width: '400px',
@@ -264,10 +264,10 @@ console.log(formData)
               fullWidth
               margin="normal"
               variant="filled"
-              type="number" // Adicionando o tipo number
+              type="number"
               inputProps={{
-                min: 0, // Opcional: define o valor mínimo como 0
-                step: 1, // Apenas números inteiros
+                min: 0,
+                step: 1,
               }}
               sx={{
                 width: '400px',
@@ -276,31 +276,31 @@ console.log(formData)
               }}
             />
 
-<TextField
-  label="Valor"
-  name="valor"
-  value={formData.valor}
-  onChange={(e) => handleInputChange(e)} // Passando apenas o evento
-  margin="normal"
-  variant="filled"
-  type="text" // Permite formatação do valor
-  inputProps={{
-    step: "0.01", // Embora seja um input de texto, você ainda pode manter esse passo, se necessário
-  }}
-  sx={{
-    width: '400px',
-    height: '56px',
-    borderRadius: '8px',
-  }}
-/>
+            <TextField
+              label="Valor"
+              name="valor"
+              value={formData.valor}
+              onChange={(e) => handleInputChange(e)}
+              margin="normal"
+              variant="filled"
+              type="text"
+              inputProps={{
+                step: "0.01",
+              }}
+              sx={{
+                width: '400px',
+                height: '56px',
+                borderRadius: '8px',
+              }}
+            />
 
             {error && <Typography color="error">{error}</Typography>}
             <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-            <Button
+              <Button
                 type="button"
                 variant="contained"
                 sx={{ backgroundColor: '#388e3c', color: '#fff', '&:hover': { backgroundColor: '#45a049' } }}
-                onClick={handleSaveClick} 
+                onClick={handleSaveClick}
               >
                 Salvar
               </Button>
@@ -344,7 +344,7 @@ console.log(formData)
           </Box>
           <Box>
             <Button
-              onClick={handleConfirmSave} // Chama a função para salvar
+              onClick={handleConfirmSave}
               sx={{
                 backgroundColor: '#45a049',
                 color: '#fff',
